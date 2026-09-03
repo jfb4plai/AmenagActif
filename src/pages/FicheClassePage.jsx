@@ -41,12 +41,28 @@ export default function FicheClassePage({ picker }) {
 
 function FicheClasseContenu({ classeId }) {
   const { data: vm, isLoading, error } = useFicheClasse(classeId);
+
+  async function copierLien() {
+    const { supabase } = await import('../lib/supabase.js');
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch('/api/fiche-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token ?? ''}` },
+      body: JSON.stringify({ classeId }),
+    });
+    if (!res.ok) { alert('Impossible de générer le lien.'); return; }
+    const { url } = await res.json();
+    await navigator.clipboard.writeText(url);
+    alert('Lien enseignant copié dans le presse-papier.');
+  }
+
   if (isLoading) return <div className="plai-section">Chargement…</div>;
   if (error) return <div className="plai-section"><p className="plai-error">{error.message}</p></div>;
   return (
     <div className="plai-section space-y-3">
       <div className="flex gap-3">
         <button className="plai-btn" onClick={() => telechargerPdf('classe', classeId)}>Télécharger le PDF</button>
+        <button className="plai-btn" onClick={copierLien}>Copier le lien enseignant</button>
       </div>
       <FicheClasseView vm={vm} />
     </div>
