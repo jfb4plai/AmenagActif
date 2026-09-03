@@ -1,0 +1,57 @@
+/** @param {{ vm: import('../../domain/types.js').FicheClasseVM }} props */
+export default function FicheClasseView({ vm }) {
+  const date = vm.dateMaj ? new Date(vm.dateMaj).toLocaleDateString('fr-BE') : '…';
+  return (
+    <article className="fiche max-w-3xl mx-auto bg-white p-8 text-[15px] leading-relaxed" style={{ fontFamily: 'Arial, sans-serif' }}>
+      <header className="flex justify-between items-start mb-4">
+        <img src="/plai-logo.jpg" alt="PLAI" style={{ height: 40, width: 'auto' }} />
+        <span>Date de mise à jour : {date}</span>
+      </header>
+      <h1 className="text-center bg-gray-200 py-2 font-bold text-lg mb-4">Aménagements raisonnables — {vm.classeNom}</h1>
+      <p className="text-sm text-gray-600 mb-4">{vm.ecoleNom} · {vm.anneeLibelle}</p>
+
+      <table className="w-full border border-black mb-4 text-sm">
+        <thead><tr>
+          <th className="border border-black p-1">Intégrations (référent·e PIA)</th>
+          <th className="border border-black p-1">PAR (Direction)</th>
+        </tr></thead>
+        <tbody><tr>
+          <td className="border border-black p-2 align-top">{vm.tableauReferents.pia.join(', ') || '—'}</td>
+          <td className="border border-black p-2 align-top">{vm.tableauReferents.par.join(', ') || '—'}</td>
+        </tr></tbody>
+      </table>
+
+      <h2 className="font-bold underline mb-1">Pour tous :</h2>
+      <ul className="list-disc pl-6 mb-4">
+        {vm.pourTous.length === 0 && <li className="list-none text-gray-500">Aucun aménagement universel retenu pour la classe.</li>}
+        {vm.pourTous.map((x, i) => (
+          <li key={i} className={x.surligne ? 'bg-yellow-200' : ''}>{x.libelle}</li>
+        ))}
+      </ul>
+
+      <h2 className="font-bold underline mb-1">AR spécifiques à un élève :</h2>
+      <table className="w-full border border-black mb-4 text-sm">
+        <tbody>
+          {vm.parEleve.length === 0 && <tr><td className="border border-black p-2 text-gray-500">Aucun.</td></tr>}
+          {vm.parEleve.map((row) => (
+            <tr key={row.eleve}>
+              <td className="border border-black p-2 align-top w-32 font-medium">
+                {row.eleveId ? <a className="text-teal underline" href={`/eleve/${row.eleveId}/fiche`}>{row.eleve}</a> : row.eleve}
+              </td>
+              <td className="border border-black p-2">
+                <ul className="list-disc pl-5">{row.amenagements.map((a, i) => <li key={i}>{a}</li>)}</ul>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <table className="border border-black text-sm">
+        <tbody><tr>
+          <td className="border border-black p-2">Nombre de cours à imprimer en recto</td>
+          <td className="border border-black p-2 text-center w-16">{vm.nbRecto}</td>
+        </tr></tbody>
+      </table>
+    </article>
+  );
+}
