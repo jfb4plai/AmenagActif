@@ -1,0 +1,734 @@
+[
+  {
+    "ordre": 1,
+    "titre": "1. SUPPORTS ET DOCUMENTS ÉCRITS, MISE EN PAGE & CONSIGNES",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AU",
+        "libelle": "Mise en page"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Doubler les espaces de réponse"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Ne pas utiliser de carte mentale"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Utiliser des cartes mentales"
+      },
+      {
+        "ordre": 5,
+        "type": "AU",
+        "libelle": "Mettre à disposition un cours et JDC témoins (formats numérique et/ou papier)"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Noter au tableau tout ce qui est à écrire dans le cours et le JDC"
+      },
+      {
+        "ordre": 7,
+        "type": "AR",
+        "libelle": "Laisser l’élève prendre des photos du tableau pour compléter le cours"
+      },
+      {
+        "ordre": 8,
+        "type": "AR",
+        "libelle": "Rédiger des consignes, sans élément distracteur, comprenant uniquement les éléments essentiels à sa résolution (verbes d’actions)"
+      },
+      {
+        "ordre": 9,
+        "type": "AU",
+        "libelle": "Mettre les consignes en évidence"
+      },
+      {
+        "ordre": 10,
+        "type": "AR",
+        "libelle": "Séquencer les consignes (une consigne = une action = un verbe d’action)"
+      },
+      {
+        "ordre": 11,
+        "type": "AR",
+        "libelle": "Donner la consigne AVANT de distribuer le support"
+      },
+      {
+        "ordre": 12,
+        "type": "AU",
+        "libelle": "Vérifier la compréhension des consignes par questionnements et/ou reformulations de l’élève"
+      },
+      {
+        "ordre": 13,
+        "type": "AU",
+        "libelle": "Reformuler et clarifier les consignes ; proposer des exemples concrets"
+      },
+      {
+        "ordre": 14,
+        "type": "AR",
+        "libelle": "Fournir le cours en A3"
+      },
+      {
+        "ordre": 15,
+        "type": "AR",
+        "libelle": "Colorer une ligne sur deux dans les tableaux"
+      },
+      {
+        "ordre": 16,
+        "type": "AR",
+        "libelle": "Utiliser des annotations et vignettes dans le dictionnaire"
+      },
+      {
+        "ordre": 17,
+        "type": "AU",
+        "libelle": "Utiliser ses outils (aide-mémoire, abaques, fiches outils, lexiques, procéduriers, canvas, méthode de comptage de compensation, ...) pendant le cours et les évaluations. Ces fiches doivent être validées par un membre de l'équipe éducative préalablement"
+      },
+      {
+        "ordre": 18,
+        "type": "AR",
+        "libelle": "Fournir une liste de matériel nécessaire pour chaque cours"
+      },
+      {
+        "ordre": 19,
+        "type": "AR",
+        "libelle": "Cours uniquement en recto"
+      }
+    ]
+  },
+  {
+    "ordre": 2,
+    "titre": "2. COMMUNICATION ORALE",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Parler face à l’élève"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Diminuer le débit de la parole (aussi pour les audios)"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Augmenter le volume de sa voix lorsqu'on parle à l'élève"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Parler sans se déplacer"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Parler dans le silence (au moins lors des moments forts du cours)"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Laisser un temps de traitement de l'information"
+      },
+      {
+        "ordre": 7,
+        "type": "AR",
+        "libelle": "Garantir un cadre calme dans la classe"
+      },
+      {
+        "ordre": 8,
+        "type": "AR",
+        "libelle": "S'assurer d'avoir l'attention de l'élève avant de lui parler"
+      },
+      {
+        "ordre": 9,
+        "type": "AR",
+        "libelle": "Accompagner son discours de gestes/d’images/de pictogrammes pour soutenir la compréhension"
+      },
+      {
+        "ordre": 10,
+        "type": "AR",
+        "libelle": "Augmenter le nombre de pauses dans les compréhensions à l'audition et laisser le temps à l'élève d'écrire ses réponses"
+      },
+      {
+        "ordre": 11,
+        "type": "AR",
+        "libelle": "Lire oralement les consignes, les textes (si la lecture n'est pas la compétence évaluée)"
+      },
+      {
+        "ordre": 12,
+        "type": "AR",
+        "libelle": "Enrichir les explications orales en utilisant le canal visuel (démonstrations, vidéos, sous–titres, photos, pictogrammes, ...)"
+      },
+      {
+        "ordre": 13,
+        "type": "AU",
+        "libelle": "Soutenir les explications orales avec un support (multiplier les canaux de diffusion : oral et visuel)"
+      },
+      {
+        "ordre": 14,
+        "type": "AR",
+        "libelle": "En compréhension à l’audition, l'accompagnateur.ice répète à un rythme adapté à l'élève ce qu'il vient d'entendre"
+      },
+      {
+        "ordre": 15,
+        "type": "AR",
+        "libelle": "Dissocier les temps d’écoute / compréhension et de copie, pour éviter la double tâche"
+      }
+    ]
+  },
+  {
+    "ordre": 3,
+    "titre": "3. ORGANISATION SPATIALE ET TEMPORELLE",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AU",
+        "libelle": "S'assurer de la bonne visibilité du tableau"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Placer l'élève à l’avant de la classe, proche du tableau"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Placer l'élève face au tableau"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Placer l’élève proche d'un autre élève « tuteur »"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Placer l’élève loin des fenêtres"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Placer l'élève proche du prof"
+      },
+      {
+        "ordre": 7,
+        "type": "AR",
+        "libelle": "Placer l'élève seul sur un banc"
+      },
+      {
+        "ordre": 8,
+        "type": "AR",
+        "libelle": "Placer l’élève à proximité d’une prise, avec l’accès au Wifi"
+      },
+      {
+        "ordre": 9,
+        "type": "AR",
+        "libelle": "Placer l’élève toujours à la même place"
+      },
+      {
+        "ordre": 10,
+        "type": "AR",
+        "libelle": "Laisser uniquement le matériel nécessaire à la leçon sur le banc"
+      },
+      {
+        "ordre": 11,
+        "type": "AR",
+        "libelle": "Délimiter l'espace de travail (set de table, marquage au sol, ...)"
+      },
+      {
+        "ordre": 12,
+        "type": "AR",
+        "libelle": "Utiliser un paravent individuel"
+      },
+      {
+        "ordre": 13,
+        "type": "AR",
+        "libelle": "Laisser un positionnement approprié à l’élève (debout, assis sur ballon, ...)"
+      },
+      {
+        "ordre": 14,
+        "type": "AR",
+        "libelle": "Vérifier que l’élève range ses feuilles au bon endroit"
+      },
+      {
+        "ordre": 15,
+        "type": "AR",
+        "libelle": "Ne pas réaliser d’exercice chronométré"
+      },
+      {
+        "ordre": 16,
+        "type": "AR",
+        "libelle": "Matérialiser le temps des activités (timer visible)"
+      },
+      {
+        "ordre": 17,
+        "type": "AR",
+        "libelle": "Informer des objectifs et des compétences de la leçon, en les affichant par écrit, à chaque début de cours"
+      },
+      {
+        "ordre": 18,
+        "type": "AR",
+        "libelle": "Etablir une routine"
+      },
+      {
+        "ordre": 19,
+        "type": "AR",
+        "libelle": "Respecter la routine établie"
+      },
+      {
+        "ordre": 20,
+        "type": "AR",
+        "libelle": "Planifier au minimum 2 semaines à l'avance les travaux et évaluations"
+      },
+      {
+        "ordre": 21,
+        "type": "AR",
+        "libelle": "Fournir un échéancier visuel pour les projets"
+      },
+      {
+        "ordre": 22,
+        "type": "AR",
+        "libelle": "Faire des rappels réguliers des échéances (évaluations, travaux, ...)"
+      },
+      {
+        "ordre": 23,
+        "type": "AR",
+        "libelle": "Créer un espace de rangement personnel organisé"
+      },
+      {
+        "ordre": 24,
+        "type": "AR",
+        "libelle": "Laisser l’accès à un espace calme pour se recentrer (coin dans la classe, couloir, local dédié, ...). Lieu, moment et temps à préciser."
+      },
+      {
+        "ordre": 25,
+        "type": "AR",
+        "libelle": "Autoriser les arrivées tardives"
+      }
+    ]
+  },
+  {
+    "ordre": 4,
+    "titre": "4. ATTENTION ET CONCENTRATION",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Faire des relances attentionnelles régulières"
+      },
+      {
+        "ordre": 2,
+        "type": "AU",
+        "libelle": "Utiliser le casque anti-bruit / boules quies / écouteurs sans musique"
+      },
+      {
+        "ordre": 3,
+        "type": "AU",
+        "libelle": "Utiliser les écouteurs avec musique"
+      },
+      {
+        "ordre": 4,
+        "type": "AU",
+        "libelle": "Utiliser les fidgets"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Dessiner, griffonner"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Bouger en classe (coussin dynamique, balle de stress, table haute, élastique sous la chaise, ...) ou en dehors (couloir, local dédié, extérieurs, toilettes ...)"
+      },
+      {
+        "ordre": 7,
+        "type": "AR",
+        "libelle": "Faire une pause en restant à sa place, temps à préciser"
+      },
+      {
+        "ordre": 8,
+        "type": "AR",
+        "libelle": "Avoir des courtes pauses motrices (distribution de documents, effacer le tableau, ...)"
+      }
+    ]
+  },
+  {
+    "ordre": 5,
+    "titre": "5. LECTURE",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Utiliser les livres audio pour la lecture"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Utiliser un stylo de lecture"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Préparer les textes longs, à domicile, avant la leçon"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Utiliser un cache ou une latte de lecture"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Utiliser un chuchoteur"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Lire à voix haute"
+      },
+      {
+        "ordre": 7,
+        "type": "AR",
+        "libelle": "Fluorer les lignes pour les distinguer"
+      },
+      {
+        "ordre": 8,
+        "type": "AR",
+        "libelle": "Ne pas faire lire l'élève à voix haute, devant toute la classe, sans préparation"
+      },
+      {
+        "ordre": 9,
+        "type": "AR",
+        "libelle": "Ne jamais faire lire l’élève à voix haute"
+      },
+      {
+        "ordre": 10,
+        "type": "AR",
+        "libelle": "Numéroter les lignes dans les textes"
+      },
+      {
+        "ordre": 11,
+        "type": "AR",
+        "libelle": "Utiliser une loupe"
+      },
+      {
+        "ordre": 12,
+        "type": "AR",
+        "libelle": "Utiliser du fluo pour mettre en évidence les éléments essentiels, les consignes et les mots clés"
+      },
+      {
+        "ordre": 13,
+        "type": "AR",
+        "libelle": "Ne pas utiliser de fluo"
+      }
+    ]
+  },
+  {
+    "ordre": 6,
+    "titre": "6. ÉCRITURE ET PRODUCTION ÉCRITE",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Utiliser un correcteur orthographique"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Utiliser un prédicteur de mots"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Utiliser un dictionnaire en ligne"
+      },
+      {
+        "ordre": 4,
+        "type": "AU",
+        "libelle": "Laisser le libre choix de l'instrument scripteur"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Utiliser un alphabet"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Utiliser une dictée vocale"
+      },
+      {
+        "ordre": 7,
+        "type": "AR",
+        "libelle": "Utiliser une synthèse vocale (Google Lens, personne disponible, ...)"
+      },
+      {
+        "ordre": 8,
+        "type": "AR",
+        "libelle": "L'élève utilise des outils ergonomiques (grip, stylos adaptés, guide doigts, plan incliné, page up, ...)"
+      },
+      {
+        "ordre": 9,
+        "type": "AR",
+        "libelle": "Accepter différents formats de présentation (à l’oral, en audio, en visio, en vidéo montée, ...)"
+      },
+      {
+        "ordre": 10,
+        "type": "AR",
+        "libelle": "Ne pas présenter un travail devant toute la classe"
+      },
+      {
+        "ordre": 11,
+        "type": "AR",
+        "libelle": "Ne pas pénaliser la présentation si le contenu est adéquat"
+      },
+      {
+        "ordre": 12,
+        "type": "AR",
+        "libelle": "Ne pas pénaliser l'orthographe si ce n'est pas l'objet de l'évaluation"
+      },
+      {
+        "ordre": 13,
+        "type": "AR",
+        "libelle": "Ne pas pénaliser l'écriture, la graphie et le soin si ce n'est pas l'objet de l'évaluation"
+      },
+      {
+        "ordre": 14,
+        "type": "AR",
+        "libelle": "Ecrire ses réponses sur une feuille annexe"
+      },
+      {
+        "ordre": 15,
+        "type": "AR",
+        "libelle": "L’accompagnateur.ice prend note/ trace à la place de l'élève"
+      }
+    ]
+  },
+  {
+    "ordre": 7,
+    "titre": "7. NOTIONS SCIENTIFIQUES",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Utiliser la calculatrice, quand ce n’est pas la compétence visée"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Effectuer les calculs en colonnes (et non en ligne)"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Utiliser des outils adaptés en géométrie (équerre/latte avec encoche, compas à roulette, tamographe, support et latte aimantés, Géogebra, ...)"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Ne pas évaluer les tracés géométriques, quand ce n’est pas la compétence visée"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Tâches “problèmes” : pas d’élément distracteur, le problème doit comprendre uniquement les éléments essentiels (si ce n’est pas la compétence visée)"
+      }
+    ]
+  },
+  {
+    "ordre": 8,
+    "titre": "8. ÉVALUATIONS",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Ne pas faire d’interrogation surprise"
+      },
+      {
+        "ordre": 2,
+        "type": "AU",
+        "libelle": "Indiquer clairement la répartition de la cotation des évaluations et travaux"
+      },
+      {
+        "ordre": 3,
+        "type": "AU",
+        "libelle": "Présenter les critères d'évaluation avant l'épreuve"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Proposer un horaire adapté pour les examens, en concertation avec tous les acteurs (par exemple, si le tiers-temps supplémentaire entraine des journées trop intenses pour l’élève)"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Inclure en majorité des QCM, des questions vrai/faux ou des textes à trous lors des évaluations"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Pas de cotation négative --> autorisé ? Est-ce un aménagement RAISONNABLE?"
+      },
+      {
+        "ordre": 7,
+        "type": "AR",
+        "libelle": "Évaluer à l’écrit à la place de l'oral"
+      },
+      {
+        "ordre": 8,
+        "type": "AR",
+        "libelle": "Évaluer à l’oral (en complément ou en alternative)"
+      },
+      {
+        "ordre": 9,
+        "type": "AR",
+        "libelle": "Cibler les tâches (questions, exercices, ...) essentielles qui suffisent pour évaluer les compétences visées (-20/25% de la quantité initiale) tant pour le travail en classe, pour les interrogations que pour le travail à domicile"
+      },
+      {
+        "ordre": 10,
+        "type": "AR",
+        "libelle": "Quand il n’est pas possible de réduire le nombre de questions, garantir le tiers-temps supplémentaire lors des interrogations"
+      },
+      {
+        "ordre": 11,
+        "type": "AR",
+        "libelle": "Passer les compréhensions à l'audition dans un local à part, au calme"
+      },
+      {
+        "ordre": 12,
+        "type": "AR",
+        "libelle": "Dispenser l’élève des évaluations à l'audition (compréhensions à l’audition et expressions orales avec interactions)"
+      }
+    ]
+  },
+  {
+    "ordre": 9,
+    "titre": "9. OUTILS NUMERIQUES",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Utiliser un dictionnaire imagé"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Laisser l’élève filmer les manipulations OU fournir des tutoriels visuels (vidéos, démo, ...)"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Utiliser un outil informatisé (tablette, ordi, ...)"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Fournir le cours numérisé, au préalable, en format PDF, si l’élève utilise un PC ou une tablette"
+      }
+    ]
+  },
+  {
+    "ordre": 10,
+    "titre": "10. MOTIVATION, RENFORCEMENT & AUTONOMIE",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Valoriser les efforts, les comportements positifs de l'élève"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Rappeler de vérifier les productions avant de les rendre"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Faire des feedbacks à l'élève fréquents, spécifiques et immédiats"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Fournir des check-lists personnalisées (matériel, étapes de travail)"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Utiliser un code visuel pour signaler les besoins (geste discret, feu tricolore, tétraèdre)"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "S'assurer que le cours et/ou le JDC soient convenablement complétés par l'élève"
+      }
+    ]
+  },
+  {
+    "ordre": 11,
+    "titre": "11. MÉMORISATION",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Proposer des moyens mnémotechniques, s’ils existent"
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Réactiver régulièrement les connaissances antérieures"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Cibler clairement les contenus essentiels à mémoriser"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Fournir un lexique simplifié des termes techniques"
+      }
+    ]
+  },
+  {
+    "ordre": 12,
+    "titre": "12. INTERACTIONS SOCIALES, COMMUNICATION & GESTION DES COMPORTEMENTS",
+    "items": [
+      {
+        "ordre": 1,
+        "type": "AR",
+        "libelle": "Expliciter le second degré, les blagues, ..."
+      },
+      {
+        "ordre": 2,
+        "type": "AR",
+        "libelle": "Travailler individuellement si le groupe est source d'anxiété"
+      },
+      {
+        "ordre": 3,
+        "type": "AR",
+        "libelle": "Utiliser des supports visuels pour les émotions (échelle, pictogrammes)"
+      },
+      {
+        "ordre": 4,
+        "type": "AR",
+        "libelle": "Établir à l’écrit des attentes comportementales claires et positives (tics, tocs, ...)"
+      },
+      {
+        "ordre": 5,
+        "type": "AR",
+        "libelle": "Ignorer stratégiquement les comportements inadaptés mineurs"
+      },
+      {
+        "ordre": 6,
+        "type": "AR",
+        "libelle": "Permettre des stratégies d'autorégulation (respiration, ...)"
+      }
+    ]
+  }
+]
