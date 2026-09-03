@@ -13,7 +13,7 @@ export default function Nav() {
         <span className="font-serif text-lg">AménagActif</span>
       </Link>
       <nav className="flex gap-4 text-sm">
-        <NavLink to="/saisie" className={lien}>Saisie</NavLink>
+        {role === 'plai' && <NavLink to="/saisie" className={lien}>Saisie</NavLink>}
         <NavLink to="/fiches" className={lien}>Fiches</NavLink>
       </nav>
       <div className="ml-auto text-sm flex items-center gap-3">
