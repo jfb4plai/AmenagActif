@@ -3,16 +3,97 @@ import {
   useAnnees, useEcoles, useReferents, useAdminMutations,
   useCatalogueAdmin, useCatalogueMutations,
 } from '../hooks/useAdmin.js';
+import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 
 export default function Administration() {
   return (
     <div className="plai-section space-y-8 max-w-4xl px-4">
       <h1 className="text-xl font-semibold">Administration</h1>
+      <SectionMembres />
       <SectionAnnees />
       <SectionEcoles />
       <SectionReferents />
       <SectionCatalogue />
     </div>
+  );
+}
+
+/* ─────────────── Membres & accès ─────────────── */
+function SectionMembres() {
+  const { data: membres = [], isLoading, error } = useMembres();
+  const { data: ecoles = [] } = useEcoles();
+  const { inviter, changerRole, retirer } = useMembresMutations();
+  const [f, setF] = useState({ email: '', role: 'direction', ecoleId: '' });
+  const nomEcole = (id) => ecoles.find((e) => e.id === id)?.nom ?? '—';
+
+  return (
+    <section className="space-y-3">
+      <h2 className="font-semibold">Membres &amp; accès</h2>
+      <p className="text-sm text-[color:var(--text3)]">
+        <strong>Référent PLAI</strong> : accès complet (saisie, fiches, administration). <strong>Direction</strong> : lecture seule des fiches de son école.
+        Inviter envoie un e-mail avec un lien pour définir le mot de passe.
+      </p>
+
+      <form
+        className="plai-card p-3 flex flex-wrap gap-3 items-end"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!f.email.trim()) return;
+          if (f.role === 'direction' && !f.ecoleId) return;
+          inviter.mutate({ email: f.email.trim(), role: f.role, ecoleId: f.ecoleId || null }, { onSuccess: () => setF({ email: '', role: 'direction', ecoleId: '' }) });
+        }}
+      >
+        <label className="text-sm">Adresse e-mail
+          <input className="plai-input block" type="email" placeholder="prenom.nom@ecole.be" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+        </label>
+        <label className="text-sm">Rôle
+          <select className="plai-input block" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>
+            <option value="direction">Direction</option>
+            <option value="plai">Référent PLAI</option>
+          </select>
+        </label>
+        {f.role === 'direction' && (
+          <label className="text-sm">École
+            <select className="plai-input block" value={f.ecoleId} onChange={(e) => setF({ ...f, ecoleId: e.target.value })}>
+              <option value="">— choisir —</option>
+              {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+            </select>
+          </label>
+        )}
+        <button className="plai-btn" type="submit" disabled={inviter.isPending}>{inviter.isPending ? 'Envoi…' : 'Inviter'}</button>
+      </form>
+      {inviter.isError && <p className="plai-error">{inviter.error.message}</p>}
+      {inviter.isSuccess && <p className="plai-success">Invitation envoyée.</p>}
+
+      {isLoading ? (
+        <p>Chargement…</p>
+      ) : error ? (
+        <p className="plai-error">{error.message}</p>
+      ) : (
+        <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
+          {membres.map((m) => (
+            <li key={m.userId} className="px-3 py-2 flex flex-wrap items-center gap-3">
+              <span className="flex-1 min-w-[12rem]">{m.email}</span>
+              <select className="plai-input !w-auto !py-1 text-sm" value={m.role}
+                onChange={(e) => changerRole.mutate({ userId: m.userId, role: e.target.value, ecoleId: e.target.value === 'direction' ? (m.ecoleId || ecoles[0]?.id) : null })}>
+                <option value="plai">Référent PLAI</option>
+                <option value="direction">Direction</option>
+              </select>
+              {m.role === 'direction' && (
+                <select className="plai-input !w-auto !py-1 text-sm" value={m.ecoleId ?? ''}
+                  onChange={(e) => changerRole.mutate({ userId: m.userId, role: 'direction', ecoleId: e.target.value })}>
+                  <option value="">— école —</option>
+                  {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+                </select>
+              )}
+              {m.role === 'direction' && <span className="text-xs text-[color:var(--text3)]">{nomEcole(m.ecoleId)}</span>}
+              <button className="text-sm underline" onClick={() => { if (confirm(`Retirer l'accès de ${m.email} ?`)) retirer.mutate(m.userId); }}>retirer</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {(changerRole.isError || retirer.isError) && <p className="plai-error">{(changerRole.error || retirer.error)?.message}</p>}
+    </section>
   );
 }
 

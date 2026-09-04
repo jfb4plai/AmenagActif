@@ -8,6 +8,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [mdp, setMdp] = useState('');
   const [erreur, setErreur] = useState(null);
+  const [info, setInfo] = useState(null);
   const [envoi, setEnvoi] = useState(false);
 
   if (ready && session) return <Navigate to="/" replace />;
@@ -16,9 +17,21 @@ export default function Login() {
     e.preventDefault();
     setEnvoi(true);
     setErreur(null);
+    setInfo(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password: mdp });
     setEnvoi(false);
     if (error) setErreur("Connexion impossible. Vérifiez l'adresse et le mot de passe.");
+  }
+
+  async function motDePasseOublie() {
+    setErreur(null);
+    setInfo(null);
+    if (!email) { setErreur("Entrez d'abord votre adresse e-mail ci-dessus."); return; }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/nouveau-mot-de-passe`,
+    });
+    if (error) setErreur("Envoi impossible. Réessayez plus tard.");
+    else setInfo("Si un compte existe pour cette adresse, un e-mail vient d'être envoyé.");
   }
 
   return (
@@ -38,8 +51,12 @@ export default function Login() {
             value={mdp} onChange={(e) => setMdp(e.target.value)} />
         </div>
         {erreur && <p className="plai-error">{erreur}</p>}
+        {info && <p className="plai-success">{info}</p>}
         <button type="submit" className="plai-btn" disabled={envoi}>
           {envoi ? 'Connexion…' : 'Se connecter'}
+        </button>
+        <button type="button" className="block text-sm underline text-teal" onClick={motDePasseOublie}>
+          Mot de passe oublié ?
         </button>
       </form>
     </div>

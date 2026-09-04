@@ -10,6 +10,7 @@ import SaisieEcole from './pages/SaisieEcole.jsx';
 import FicheClassePage from './pages/FicheClassePage.jsx';
 import FicheElevePage from './pages/FicheElevePage.jsx';
 import FichePublique from './pages/FichePublique.jsx';
+import NouveauMotDePasse from './pages/NouveauMotDePasse.jsx';
 import Administration from './pages/Administration.jsx';
 import NotFound from './pages/NotFound.jsx';
 
@@ -35,6 +36,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/connexion" element={<Login />} />
+      <Route path="/nouveau-mot-de-passe" element={<NouveauMotDePasse />} />
       <Route path="/fiche/:token" element={<FichePublique />} />
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />
       <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={['plai']}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />
