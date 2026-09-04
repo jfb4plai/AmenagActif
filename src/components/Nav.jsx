@@ -15,6 +15,7 @@ export default function Nav() {
       <nav className="flex gap-4 text-sm">
         {role === 'plai' && <NavLink to="/saisie" className={lien}>Saisie</NavLink>}
         <NavLink to="/fiches" className={lien}>Fiches</NavLink>
+        {role === 'plai' && <NavLink to="/administration" className={lien}>Administration</NavLink>}
       </nav>
       <div className="ml-auto text-sm flex items-center gap-3">
         {role && <span className="text-[color:var(--text3)]">{role === 'plai' ? 'Référent PLAI' : 'Direction'}</span>}
