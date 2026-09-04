@@ -72,9 +72,14 @@ export function computeFicheClasse(input) {
   const pia = [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))];
   const par = referents.filter((r) => r.fonction === 'direction' || r.fonction === 'referent_ecole').map((r) => r.nom);
 
+  // Date de mise à jour : dernier changement d'aménagement ; à défaut, la
+  // création de la classe / des élèves (= « première mise à jour »).
   const dates = [
     ...selectionsAR.map((s) => s.cree_le),
     ...auClasse.map((x) => x.cree_le),
+    ...libres.map((l) => l.cree_le),
+    input.classe?.created_at,
+    ...eleves.map((e) => e.created_at),
   ].filter(Boolean).sort();
   const dateMaj = dates.length ? dates[dates.length - 1] : null;
 

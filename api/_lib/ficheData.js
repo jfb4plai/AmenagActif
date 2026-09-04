@@ -9,14 +9,14 @@ export async function loadClasseData(classeId) {
 
   const { data: classe, error: ec } = await db
     .from('ar_classes')
-    .select('id, nom, ecole_id, annee_id, ar_ecoles(nom), ar_annees(libelle)')
+    .select('id, nom, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
     .eq('id', classeId)
     .single();
   if (ec) throw ec;
 
   const { data: eleves, error: ee } = await db
     .from('ar_eleves')
-    .select('id, classe_id, prenom, initiale_nom, referent_plai_nom')
+    .select('id, classe_id, prenom, initiale_nom, referent_plai_nom, created_at')
     .eq('classe_id', classeId)
     .order('prenom');
   if (ee) throw ee;
@@ -30,7 +30,7 @@ export async function loadClasseData(classeId) {
       ? db.from('ar_selections').select('eleve_id, amenagement_id, cree_le').in('eleve_id', eleveIds)
       : Promise.resolve({ data: [] }),
     eleveIds.length
-      ? db.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte').in('eleve_id', eleveIds)
+      ? db.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte, cree_le').in('eleve_id', eleveIds)
       : Promise.resolve({ data: [] }),
     db.from('ar_referents_ecole').select('nom, fonction').eq('ecole_id', classe.ecole_id).eq('annee_id', classe.annee_id),
   ]);

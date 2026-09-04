@@ -58,11 +58,16 @@ describe('computeFicheClasse', () => {
     expect(vm.dateMaj).toBe('2026-09-03T08:00:00Z');
   });
 
-  it('classe vide → pourTous et parEleve vides, nbRecto 0', () => {
+  it('classe vide → pourTous et parEleve vides, nbRecto 0, dateMaj = création de la classe', () => {
     const vm = computeFicheClasse({ ...args(), eleves: [], selectionsAR: [], auClasse: [], libres: [] });
     expect(vm.pourTous).toEqual([]);
     expect(vm.parEleve).toEqual([]);
     expect(vm.nbRecto).toBe(0);
+    expect(vm.dateMaj).toBe('2026-08-20T08:00:00Z');
+  });
+
+  it('sans aucune donnée → dateMaj null', () => {
+    const vm = computeFicheClasse({ ...args(), classe: { nom: '5LA' }, eleves: [], selectionsAR: [], auClasse: [], libres: [] });
     expect(vm.dateMaj).toBeNull();
   });
 });
