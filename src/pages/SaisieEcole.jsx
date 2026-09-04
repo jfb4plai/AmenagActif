@@ -50,14 +50,18 @@ export default function SaisieEcole() {
         <p className="plai-empty">Aucune classe. Ajouter un élève créera sa classe.</p>
       ) : (
         <>
-          <BarreSaut chapitres={chapitres} />
+          <BandeauAU classesAvecEleves={classesAvecEleves} auCatalogue={auCat} chapitres={chapitres}
+            auClasse={grid.auClasse} onToggle={(v) => mut.toggleAU.mutate(v)} />
+
+          <div>
+            <h2 className="font-semibold mb-1">Aménagements raisonnables — par élève</h2>
+            <BarreSaut chapitres={chapitres} />
+          </div>
           <div className="overflow-x-auto border border-[color:var(--border)] rounded">
             <table className="border-collapse text-sm">
               <EnTeteEleves classesAvecEleves={classesAvecEleves}
                 onSaveEleve={(v) => mut.upsertEleve.mutate(v)} />
               <tbody>
-                <BandeauAU classesAvecEleves={classesAvecEleves} auCatalogue={auCat}
-                  auClasse={grid.auClasse} onToggle={(v) => mut.toggleAU.mutate(v)} />
                 {chapitres.map((ch) => (
                   <ChapitreAR key={ch.id} chapitre={ch}
                     amenagements={(cat.amenagements ?? []).filter((a) => a.chapitre_id === ch.id && a.type === 'AR')}
