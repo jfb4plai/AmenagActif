@@ -1,8 +1,16 @@
+import { useEffect } from 'react';
 import { useEcoles, useAnnees } from '../../hooks/useEcoleGrid.js';
 
 export default function SelecteurContexte({ ecoleId, anneeId, onChange }) {
   const { data: ecoles = [] } = useEcoles();
   const { data: annees = [] } = useAnnees();
+
+  // Présélectionne l'année active tant qu'aucune année n'est choisie.
+  useEffect(() => {
+    if (anneeId) return;
+    const active = annees.find((a) => a.active);
+    if (active) onChange({ ecoleId, anneeId: active.id });
+  }, [annees, anneeId, ecoleId, onChange]);
 
   return (
     <div className="flex flex-wrap gap-4 items-end">

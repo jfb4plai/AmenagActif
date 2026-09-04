@@ -1,15 +1,21 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFicheClasse } from '../hooks/useFicheClasse.js';
 import { useEcoles, useAnnees, useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
-import { telechargerPdf } from '../lib/telechargerPdf.js';
+import { imprimerFiche } from '../lib/imprimerFiche.js';
 
 function Picker() {
   const { data: ecoles = [] } = useEcoles();
   const { data: annees = [] } = useAnnees();
   const [ecoleId, setEcoleId] = useState('');
   const [anneeId, setAnneeId] = useState('');
+  useEffect(() => {
+    if (!anneeId && annees.length) {
+      const active = annees.find((a) => a.active);
+      if (active) setAnneeId(active.id);
+    }
+  }, [annees, anneeId]);
   const { data: grid } = useEcoleGrid(ecoleId || null, anneeId || null);
   return (
     <div className="plai-section space-y-3">
@@ -60,8 +66,8 @@ function FicheClasseContenu({ classeId }) {
   if (error) return <div className="plai-section"><p className="plai-error">{error.message}</p></div>;
   return (
     <div className="plai-section space-y-3">
-      <div className="flex gap-3">
-        <button className="plai-btn" onClick={() => telechargerPdf('classe', classeId)}>Télécharger le PDF</button>
+      <div className="flex gap-3 no-print">
+        <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
         <button className="plai-btn" onClick={copierLien}>Copier le lien enseignant</button>
       </div>
       <FicheClasseView vm={vm} />

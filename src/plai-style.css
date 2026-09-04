@@ -162,3 +162,18 @@ textarea.plai-input { resize: vertical; }
   color: var(--teal); border-radius: var(--radius-sm);
   padding: 0.6rem 0.9rem; font-size: 13px; margin-bottom: 0.75rem;
 }
+
+/* ── IMPRESSION / EXPORT PDF (window.print) ── */
+@media print {
+  .plai-nav, .plai-footer, .no-print { display: none !important; }
+  body { background: #fff; }
+  main, .plai-section { padding: 0 !important; margin: 0 !important; }
+  .fiche {
+    max-width: none !important; box-shadow: none !important;
+    padding: 0 !important; margin: 0 !important;
+    font-size: 12pt; color: #000;
+  }
+  .fiche table { page-break-inside: auto; }
+  .fiche tr { page-break-inside: avoid; }
+  @page { size: A4; margin: 14mm; }
+}
