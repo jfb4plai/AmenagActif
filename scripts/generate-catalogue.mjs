@@ -1,5 +1,9 @@
 // Génère supabase/seed/catalogue.json + seed_catalogue.sql depuis le classeur source.
 // Usage : node scripts/generate-catalogue.mjs
+//
+// ⚠️ Bootstrap unique. Une fois le catalogue en base, il se gère dans l'écran
+// Administration (type AU/AR, libellé, chapitre, actif). Ne PAS réexécuter le seed
+// ensuite : il écraserait les ajustements faits via l'app.
 import ExcelJS from 'exceljs';
 import { writeFileSync, mkdirSync } from 'fs';
 

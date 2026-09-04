@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useAnnees, useEcoles, useReferents, useAdminMutations } from '../hooks/useAdmin.js';
+import {
+  useAnnees, useEcoles, useReferents, useAdminMutations,
+  useCatalogueAdmin, useCatalogueMutations,
+} from '../hooks/useAdmin.js';
 
 export default function Administration() {
   return (
@@ -8,7 +11,89 @@ export default function Administration() {
       <SectionAnnees />
       <SectionEcoles />
       <SectionReferents />
+      <SectionCatalogue />
     </div>
+  );
+}
+
+/* ─────────────── Catalogue des aménagements ─────────────── */
+function SectionCatalogue() {
+  const { data } = useCatalogueAdmin();
+  const { majAmenagement, ajouterAmenagement } = useCatalogueMutations();
+  const [ouvert, setOuvert] = useState(null);
+  const chapitres = data?.chapitres ?? [];
+  const amenagements = data?.amenagements ?? [];
+
+  return (
+    <section className="space-y-3">
+      <h2 className="font-semibold">Catalogue des aménagements</h2>
+      <p className="text-sm text-[color:var(--text3)]">
+        Repris du classeur source. <strong>AU</strong> = universel (coché par classe, bloc « Pour tous »). <strong>AR</strong> = raisonnable (coché par élève).
+        Changer un type ne touche pas aux cases déjà cochées, mais celles-ci peuvent devenir sans effet sur la fiche — vérifiez ensuite les classes concernées.
+        Désactiver retire l'aménagement des écrans sans le supprimer.
+      </p>
+      <div className="border border-[color:var(--border)] rounded divide-y divide-[color:var(--border)]">
+        {chapitres.map((ch) => {
+          const items = amenagements.filter((a) => a.chapitre_id === ch.id);
+          const estOuvert = ouvert === ch.id;
+          return (
+            <div key={ch.id}>
+              <button className="w-full text-left px-3 py-2 flex items-center gap-2 font-medium"
+                onClick={() => setOuvert(estOuvert ? null : ch.id)}>
+                <span>{estOuvert ? '▼' : '▶'}</span>
+                <span>{ch.titre}</span>
+                <span className="text-sm text-[color:var(--text3)]">
+                  ({items.filter((i) => i.type === 'AU').length} AU · {items.filter((i) => i.type === 'AR').length} AR)
+                </span>
+              </button>
+              {estOuvert && (
+                <div className="px-3 pb-3 space-y-1">
+                  {items.map((a) => (
+                    <div key={a.id} className="flex items-start gap-2 py-1">
+                      <select className="plai-input text-xs w-16" value={a.type}
+                        onChange={(e) => majAmenagement.mutate({ id: a.id, type: e.target.value })}>
+                        <option value="AU">AU</option>
+                        <option value="AR">AR</option>
+                      </select>
+                      <textarea className="plai-input flex-1 text-sm" rows={1} defaultValue={a.libelle}
+                        onBlur={(e) => { if (e.target.value.trim() && e.target.value !== a.libelle) majAmenagement.mutate({ id: a.id, libelle: e.target.value }); }} />
+                      <select className="plai-input text-xs w-28" value={a.chapitre_id}
+                        title="Déplacer vers un autre chapitre"
+                        onChange={(e) => majAmenagement.mutate({ id: a.id, chapitreId: e.target.value })}>
+                        {chapitres.map((c) => <option key={c.id} value={c.id}>{c.ordre}</option>)}
+                      </select>
+                      <label className="text-xs flex items-center gap-1 pt-1 whitespace-nowrap">
+                        <input type="checkbox" checked={a.actif}
+                          onChange={(e) => majAmenagement.mutate({ id: a.id, actif: e.target.checked })} />
+                        actif
+                      </label>
+                    </div>
+                  ))}
+                  <AjoutAmenagement chapitreId={ch.id} onAdd={ajouterAmenagement.mutate} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {(majAmenagement.isError || ajouterAmenagement.isError) && <p className="plai-error">Action impossible, réessayez.</p>}
+    </section>
+  );
+}
+
+function AjoutAmenagement({ chapitreId, onAdd }) {
+  const [libelle, setLibelle] = useState('');
+  const [type, setType] = useState('AR');
+  return (
+    <form className="flex gap-2 items-start pt-2"
+      onSubmit={(e) => { e.preventDefault(); if (libelle.trim()) { onAdd({ chapitreId, libelle, type }); setLibelle(''); setType('AR'); } }}>
+      <select className="plai-input text-xs w-16" value={type} onChange={(e) => setType(e.target.value)}>
+        <option value="AU">AU</option>
+        <option value="AR">AR</option>
+      </select>
+      <input className="plai-input flex-1 text-sm" placeholder="Nouvel aménagement pour ce chapitre" value={libelle} onChange={(e) => setLibelle(e.target.value)} />
+      <button className="plai-btn" type="submit" disabled={!libelle.trim()}>Ajouter</button>
+    </form>
   );
 }
 

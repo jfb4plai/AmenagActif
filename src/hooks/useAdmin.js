@@ -77,6 +77,66 @@ export function useAdminMutations() {
   return { ajouterAnnee, activerAnnee, ajouterEcole, majEcole, ajouterReferent, supprimerReferent };
 }
 
+/** Catalogue complet, y compris aménagements désactivés (pour l'admin). */
+export function useCatalogueAdmin() {
+  return useQuery({
+    queryKey: ['catalogue-admin'],
+    queryFn: async () => {
+      const [{ data: chapitres, error: e1 }, { data: amenagements, error: e2 }] = await Promise.all([
+        supabase.from('ar_chapitres').select('id, ordre, titre').order('ordre'),
+        supabase.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type, actif').order('ordre'),
+      ]);
+      if (e1) throw e1;
+      if (e2) throw e2;
+      return { chapitres, amenagements };
+    },
+  });
+}
+
+export function useCatalogueMutations() {
+  const qc = useQueryClient();
+  const inval = () => {
+    qc.invalidateQueries({ queryKey: ['catalogue'] });
+    qc.invalidateQueries({ queryKey: ['catalogue-admin'] });
+  };
+
+  const prochainOrdre = async (chapitreId) => {
+    const { data } = await supabase
+      .from('ar_amenagements').select('ordre').eq('chapitre_id', chapitreId)
+      .order('ordre', { ascending: false }).limit(1);
+    return (data?.[0]?.ordre ?? 0) + 1;
+  };
+
+  const majAmenagement = useMutation({
+    mutationFn: async ({ id, libelle, type, actif, chapitreId }) => {
+      const patch = {};
+      if (libelle !== undefined) patch.libelle = libelle.trim();
+      if (type !== undefined) patch.type = type;
+      if (actif !== undefined) patch.actif = actif;
+      if (chapitreId !== undefined) {
+        patch.chapitre_id = chapitreId;
+        patch.ordre = await prochainOrdre(chapitreId);
+      }
+      const { error } = await supabase.from('ar_amenagements').update(patch).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: inval,
+  });
+
+  const ajouterAmenagement = useMutation({
+    mutationFn: async ({ chapitreId, libelle, type }) => {
+      const ordre = await prochainOrdre(chapitreId);
+      const { error } = await supabase.from('ar_amenagements').insert({
+        chapitre_id: chapitreId, ordre, libelle: libelle.trim(), type, actif: true,
+      });
+      if (error) throw error;
+    },
+    onSuccess: inval,
+  });
+
+  return { majAmenagement, ajouterAmenagement };
+}
+
 export function useReferents(ecoleId, anneeId) {
   return useQuery({
     queryKey: ['referents', ecoleId, anneeId],
