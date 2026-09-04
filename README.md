@@ -34,7 +34,20 @@ Supabase : projet partagé `dfoaumjleqtxjeaplnna`, toutes les tables préfixées
 - `supabase/seed/seed_catalogue.sql` — 12 chapitres, 132 aménagements (généré).
 - `supabase/seed/seed_ecoles.sql` — implantations + année active (à adapter aux 11 implantations réelles).
 
-Rôles (`ar_profils_acces`) : `plai` (sans `ecole_id` → accès global, saisie + fiches + liens) ; `direction` (`ecole_id` → lecture seule des fiches de son école). Les enseignants n'ont pas de compte : ils reçoivent un lien `/fiche/<token>` en lecture seule.
+Rôles (`ar_profils_acces`) : `plai` (sans `ecole_id` → accès global, saisie + fiches + liens + administration) ; `direction` (`ecole_id` → lecture seule des fiches de son école). Les enseignants n'ont pas de compte : ils reçoivent un lien `/fiche/<token>` en lecture seule.
+
+Gestion des comptes : écran **Administration → Membres & accès** (référent PLAI). Invitation par e-mail, changement de rôle, retrait d'accès. « Mot de passe oublié » sur la page de connexion. Ces flux passent par `api/membres.js` (clé service role) et la page `/nouveau-mot-de-passe`.
+
+**Config Supabase Auth requise** (Authentication → URL Configuration) :
+- *Site URL* : `https://amenag-actif.vercel.app`
+- *Redirect URLs* : ajouter `https://amenag-actif.vercel.app/nouveau-mot-de-passe` et `http://localhost:5173/nouveau-mot-de-passe`
+Sans ça, les liens d'invitation et de réinitialisation ne ramènent pas dans l'app. Les e-mails partent via le SMTP par défaut de Supabase (quota bas sur le projet partagé — quelques envois/heure ; configurer un SMTP dédié si besoin de volume).
+
+Ajout d'un compte déjà existant dans le projet partagé (une personne qui utilise déjà une autre app PLAI) : l'invitation échoue (« already registered ») → l'ajouter via SQL :
+```sql
+insert into ar_profils_acces (user_id, role) values ('<UUID>', 'plai')
+on conflict (user_id) do update set role = 'plai', ecole_id = null;
+```
 
 ## Architecture
 
