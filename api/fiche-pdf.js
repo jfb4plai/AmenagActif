@@ -4,7 +4,7 @@ import { loadClasseData } from './_lib/ficheData.js';
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { computeFicheClasse } from '../src/domain/projections/ficheClasse.js';
 import { computeFicheEleve } from '../src/domain/projections/ficheEleve.js';
-import { FicheClassePdf, FicheElevePdf } from './_lib/pdf/FichePdf.jsx';
+import { FicheClassePdf, FicheElevePdf } from './_lib/pdf/FichePdf.js';
 
 export default async function handler(req, res) {
   try {
