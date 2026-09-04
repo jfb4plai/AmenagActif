@@ -15,7 +15,7 @@ export default function ChapitreAR({ chapitre, amenagements, classesAvecEleves, 
     <>
       <tr id={`chap-${chapitre.ordre}`}>
         <td colSpan={totalCols + 1} className="p-0">
-          <button className="w-full text-left px-2 py-2 bg-white border-y border-[color:var(--border)] sticky top-20 z-10 flex items-center gap-2"
+          <button className="w-full text-left px-2 py-2 bg-white border-y border-[color:var(--border)] flex items-center gap-2"
             aria-expanded={ouvert} onClick={() => setOuvert((v) => !v)}>
             <span>{ouvert ? '▼' : '▶'}</span>
             <span className="font-semibold">{chapitre.titre}</span>

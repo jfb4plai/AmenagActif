@@ -5,7 +5,7 @@ export default function EnTeteEleves({ classesAvecEleves, onSaveEleve }) {
   const [editId, setEditId] = useState(null);
 
   return (
-    <thead className="sticky top-10 z-20 bg-[color:var(--bg)]">
+    <thead className="sticky top-0 z-20 bg-[color:var(--bg)]">
       <tr>
         <th className="text-left align-bottom p-1 min-w-[16rem]"></th>
         {classesAvecEleves.map(({ classe, eleves }) =>
