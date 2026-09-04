@@ -15,7 +15,6 @@ export function useAdminMutations() {
   const inval = () => {
     qc.invalidateQueries({ queryKey: ['annees'] });
     qc.invalidateQueries({ queryKey: ['ecoles'] });
-    qc.invalidateQueries({ queryKey: ['referents'] });
   };
 
   const ajouterAnnee = useMutation({
@@ -56,25 +55,25 @@ export function useAdminMutations() {
     onSuccess: inval,
   });
 
-  const ajouterReferent = useMutation({
-    mutationFn: async ({ ecoleId, anneeId, nom, fonction }) => {
-      const { error } = await supabase.from('ar_referents_ecole').insert({
-        ecole_id: ecoleId, annee_id: anneeId, nom: nom.trim(), fonction,
-      });
-      if (error) throw error;
-    },
-    onSuccess: inval,
-  });
+  return { ajouterAnnee, activerAnnee, ajouterEcole, majEcole };
+}
 
-  const supprimerReferent = useMutation({
-    mutationFn: async (id) => {
-      const { error } = await supabase.from('ar_referents_ecole').delete().eq('id', id);
+/** Équipe d'une implantation : comptes référent PLAI + direction (lecture, via RLS). */
+export function useEquipeEcole(ecoleId) {
+  return useQuery({
+    queryKey: ['equipe-ecole', ecoleId],
+    enabled: !!ecoleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ar_profils_acces')
+        .select('user_id, nom, role')
+        .eq('ecole_id', ecoleId)
+        .in('role', ['referent_plai', 'direction'])
+        .order('role');
       if (error) throw error;
+      return data;
     },
-    onSuccess: inval,
   });
-
-  return { ajouterAnnee, activerAnnee, ajouterEcole, majEcole, ajouterReferent, supprimerReferent };
 }
 
 /** Catalogue complet, y compris aménagements désactivés (pour l'admin). */
@@ -135,23 +134,6 @@ export function useCatalogueMutations() {
   });
 
   return { majAmenagement, ajouterAmenagement };
-}
-
-export function useReferents(ecoleId, anneeId) {
-  return useQuery({
-    queryKey: ['referents', ecoleId, anneeId],
-    enabled: !!ecoleId && !!anneeId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('ar_referents_ecole')
-        .select('id, nom, fonction')
-        .eq('ecole_id', ecoleId)
-        .eq('annee_id', anneeId)
-        .order('fonction');
-      if (error) throw error;
-      return data;
-    },
-  });
 }
 
 /**

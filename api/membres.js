@@ -24,12 +24,12 @@ export default async function handler(req, res) {
     const origin = req.headers.origin || `https://${req.headers.host || ''}`;
 
     if (req.method === 'GET') {
-      const { data: rows, error } = await db.from('ar_profils_acces').select('user_id, role, ecole_id');
+      const { data: rows, error } = await db.from('ar_profils_acces').select('user_id, nom, role, ecole_id');
       if (error) throw error;
       const membres = await Promise.all(
         rows.map(async (r) => {
           const { data } = await db.auth.admin.getUserById(r.user_id);
-          return { userId: r.user_id, email: data?.user?.email ?? '(compte inconnu)', role: r.role, ecoleId: r.ecole_id };
+          return { userId: r.user_id, email: data?.user?.email ?? '(compte inconnu)', nom: r.nom ?? '', role: r.role, ecoleId: r.ecole_id };
         })
       );
       membres.sort((a, b) => a.email.localeCompare(b.email));
@@ -38,9 +38,9 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { action, email, userId, role, ecoleId } = req.body || {};
+      const { action, email, userId, nom, role, ecoleId } = req.body || {};
       const scoped = ROLE_SCOPE.includes(role);
-      const ecolePatch = () => (scoped ? ecoleId || null : null);
+      const ecolePour = () => (scoped ? ecoleId || null : null);
 
       if (action === 'invite') {
         if (!email || !ROLES.includes(role)) { res.status(400).json({ error: 'Email et rôle valides requis.' }); return; }
@@ -54,17 +54,26 @@ export default async function handler(req, res) {
           throw error;
         }
         const { error: e2 } = await db.from('ar_profils_acces')
-          .upsert({ user_id: data.user.id, role, ecole_id: ecolePatch() }, { onConflict: 'user_id' });
+          .upsert({ user_id: data.user.id, nom: (nom || '').trim(), role, ecole_id: ecolePour() }, { onConflict: 'user_id' });
         if (e2) throw e2;
         res.status(200).json({ ok: true });
         return;
       }
 
-      if (action === 'setRole') {
-        if (!userId || !ROLES.includes(role)) { res.status(400).json({ error: 'userId et rôle valides requis.' }); return; }
-        if (scoped && !ecoleId) { res.status(400).json({ error: 'Ce rôle doit être rattaché à une école.' }); return; }
-        const { error } = await db.from('ar_profils_acces')
-          .upsert({ user_id: userId, role, ecole_id: ecolePatch() }, { onConflict: 'user_id' });
+      if (action === 'setProfil') {
+        if (!userId) { res.status(400).json({ error: 'userId requis.' }); return; }
+        const patch = {};
+        if (role !== undefined) {
+          if (!ROLES.includes(role)) { res.status(400).json({ error: 'Rôle invalide.' }); return; }
+          patch.role = role;
+          patch.ecole_id = ROLE_SCOPE.includes(role) ? (ecoleId || null) : null;
+          if (ROLE_SCOPE.includes(role) && !patch.ecole_id) { res.status(400).json({ error: 'Ce rôle doit être rattaché à une école.' }); return; }
+        } else if (ecoleId !== undefined) {
+          patch.ecole_id = ecoleId || null;
+        }
+        if (nom !== undefined) patch.nom = (nom || '').trim();
+        if (Object.keys(patch).length === 0) { res.status(400).json({ error: 'Rien à modifier.' }); return; }
+        const { error } = await db.from('ar_profils_acces').update(patch).eq('user_id', userId);
         if (error) throw error;
         res.status(200).json({ ok: true });
         return;

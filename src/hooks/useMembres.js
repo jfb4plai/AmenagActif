@@ -22,7 +22,7 @@ export function useMembresMutations() {
   const inval = () => qc.invalidateQueries({ queryKey: ['membres'] });
   return {
     inviter: useMutation({ mutationFn: (p) => apiMembres({ action: 'invite', ...p }), onSuccess: inval }),
-    changerRole: useMutation({ mutationFn: (p) => apiMembres({ action: 'setRole', ...p }), onSuccess: inval }),
+    changerRole: useMutation({ mutationFn: (p) => apiMembres({ action: 'setProfil', ...p }), onSuccess: inval }),
     retirer: useMutation({ mutationFn: (userId) => apiMembres({ action: 'revoke', userId }), onSuccess: inval }),
   };
 }

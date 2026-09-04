@@ -69,8 +69,12 @@ export function computeFicheClasse(input) {
       .map((s) => s.eleve_id)
   ).size;
 
-  const pia = [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))];
-  const par = referents.filter((r) => r.fonction === 'direction' || r.fonction === 'referent_ecole').map((r) => r.nom);
+  // referents : comptes rattachés à l'implantation, fonction ∈ 'direction' | 'referent_plai'.
+  // PIA = accompagnateur saisi par élève ; à défaut, le référent PLAI de l'implantation.
+  const piaEleves = [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))];
+  const piaEcole = referents.filter((r) => r.fonction === 'referent_plai').map((r) => r.nom).filter(Boolean);
+  const pia = piaEleves.length ? piaEleves : piaEcole;
+  const par = referents.filter((r) => r.fonction === 'direction').map((r) => r.nom).filter(Boolean);
 
   // Date de mise à jour : dernier changement d'aménagement ; à défaut, la
   // création de la classe / des élèves (= « première mise à jour »).

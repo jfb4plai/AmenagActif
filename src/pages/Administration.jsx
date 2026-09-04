@@ -4,7 +4,6 @@ import {
   useCatalogueAdmin, useCatalogueMutations,
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
-import GestionReferentsEcole from '../components/GestionReferentsEcole.jsx';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction' };
 const ROLE_SCOPE = ['referent_plai', 'direction']; // rôles rattachés à une école
@@ -16,7 +15,6 @@ export default function Administration() {
       <SectionMembres />
       <SectionAnnees />
       <SectionEcoles />
-      <GestionReferentsEcole />
       <SectionCatalogue />
     </div>
   );
@@ -27,7 +25,7 @@ function SectionMembres() {
   const { data: membres = [], isLoading, error } = useMembres();
   const { data: ecoles = [] } = useEcoles();
   const { inviter, changerRole, retirer } = useMembresMutations();
-  const [f, setF] = useState({ email: '', role: 'referent_plai', ecoleId: '' });
+  const [f, setF] = useState({ email: '', nom: '', role: 'referent_plai', ecoleId: '' });
   const nomEcole = (id) => ecoles.find((e) => e.id === id)?.nom ?? '—';
   const besoinEcole = (r) => ROLE_SCOPE.includes(r);
 
@@ -35,8 +33,8 @@ function SectionMembres() {
     <section className="space-y-3">
       <h2 className="font-semibold">Membres &amp; accès</h2>
       <p className="text-sm text-[color:var(--text3)]">
-        <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, limités à une école (classes, élèves, AR/AU, référents d'école, fiches).
-        Inviter envoie un e-mail avec un lien pour définir le mot de passe.
+        <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, limités à une école (classes, élèves, AR/AU, fiches).
+        Le <strong>nom</strong> figure sur les fiches (colonnes « référent·e PIA » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
       </p>
 
       <form
@@ -45,11 +43,14 @@ function SectionMembres() {
           e.preventDefault();
           if (!f.email.trim()) return;
           if (besoinEcole(f.role) && !f.ecoleId) return;
-          inviter.mutate({ email: f.email.trim(), role: f.role, ecoleId: f.ecoleId || null }, { onSuccess: () => setF({ email: '', role: 'referent_plai', ecoleId: '' }) });
+          inviter.mutate({ email: f.email.trim(), nom: f.nom.trim(), role: f.role, ecoleId: f.ecoleId || null }, { onSuccess: () => setF({ email: '', nom: '', role: 'referent_plai', ecoleId: '' }) });
         }}
       >
         <label className="text-sm">Adresse e-mail
           <input className="plai-input block" type="email" placeholder="prenom.nom@ecole.be" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+        </label>
+        <label className="text-sm">Nom (affiché sur la fiche)
+          <input className="plai-input block" placeholder="Hélène Dubois" value={f.nom} onChange={(e) => setF({ ...f, nom: e.target.value })} />
         </label>
         <label className="text-sm">Rôle
           <select className="plai-input block" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>
@@ -79,7 +80,9 @@ function SectionMembres() {
         <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
           {membres.map((m) => (
             <li key={m.userId} className="px-3 py-2 flex flex-wrap items-center gap-3">
-              <span className="flex-1 min-w-[12rem]">{m.email}</span>
+              <span className="min-w-[12rem]">{m.email}</span>
+              <input className="plai-input !py-1 text-sm w-40" defaultValue={m.nom ?? ''} placeholder="Nom"
+                onBlur={(e) => { if ((e.target.value || '') !== (m.nom || '')) changerRole.mutate({ userId: m.userId, role: m.role, ecoleId: m.ecoleId, nom: e.target.value }); }} />
               <select className="plai-input !w-auto !py-1 text-sm" value={m.role}
                 onChange={(e) => changerRole.mutate({ userId: m.userId, role: e.target.value, ecoleId: besoinEcole(e.target.value) ? (m.ecoleId || ecoles[0]?.id || null) : null })}>
                 <option value="admin">{LABEL_ROLE.admin}</option>

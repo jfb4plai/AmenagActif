@@ -5,6 +5,7 @@ import { useEcoles, useAnnees, useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche } from '../lib/imprimerFiche.js';
 import { useRole } from '../lib/auth.jsx';
+import { supabase } from '../lib/supabase.js';
 
 function Picker() {
   const { data: ecoles = [] } = useEcoles();
@@ -59,7 +60,6 @@ function FicheClasseContenu({ classeId }) {
   const { data: vm, isLoading, error } = useFicheClasse(classeId);
 
   async function copierLien() {
-    const { supabase } = await import('../lib/supabase.js');
     const { data: { session } } = await supabase.auth.getSession();
     const res = await fetch('/api/fiche-token', {
       method: 'POST',

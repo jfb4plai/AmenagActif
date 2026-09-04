@@ -19,8 +19,10 @@ async function chargerClasse(classeId) {
     supabase.from('ar_amenagements_classe').select('amenagement_id, cree_le').eq('classe_id', classeId),
     eleveIds.length ? supabase.from('ar_selections').select('eleve_id, amenagement_id, cree_le').in('eleve_id', eleveIds) : { data: [] },
     eleveIds.length ? supabase.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte, cree_le').in('eleve_id', eleveIds) : { data: [] },
-    supabase.from('ar_referents_ecole').select('nom, fonction').eq('ecole_id', classe.ecole_id).eq('annee_id', classe.annee_id),
+    supabase.from('ar_profils_acces').select('nom, role').eq('ecole_id', classe.ecole_id).in('role', ['direction', 'referent_plai']),
   ]);
+
+  const referents = (ref.data ?? []).map((r) => ({ nom: r.nom, fonction: r.role }));
 
   return computeFicheClasse({
     classe,
@@ -31,7 +33,7 @@ async function chargerClasse(classeId) {
     auClasse: au.data,
     selectionsAR: sel.data,
     libres: lib.data,
-    referents: ref.data,
+    referents,
   });
 }
 

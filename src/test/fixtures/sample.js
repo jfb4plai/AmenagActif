@@ -34,7 +34,7 @@ export const libres = [
 
 export const referents = [
   { nom: 'Julien', fonction: 'direction' },
-  { nom: 'Mona', fonction: 'plai' },
+  { nom: 'Mona', fonction: 'referent_plai' },
 ];
 
 export const contexte = { classeNom: '5LA', ecoleNom: 'Athénée X', anneeLibelle: '2025-2026' };

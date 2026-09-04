@@ -34,9 +34,9 @@
  * @property {string|null} chapitre_id
  * @property {string} texte
  *
- * @typedef {Object} ReferentEcole
+ * @typedef {Object} ReferentEcole   // compte rattaché à l'implantation
  * @property {string} nom
- * @property {'direction'|'referent_ecole'|'plai'} fonction
+ * @property {'direction'|'referent_plai'} fonction
  *
  * @typedef {Object} FicheClasseVM
  * @property {string} classeNom
