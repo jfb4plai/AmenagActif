@@ -6,7 +6,7 @@ import {
 
 export default function Administration() {
   return (
-    <div className="plai-section space-y-8 max-w-3xl">
+    <div className="plai-section space-y-8 max-w-4xl px-4">
       <h1 className="text-xl font-semibold">Administration</h1>
       <SectionAnnees />
       <SectionEcoles />
@@ -47,26 +47,37 @@ function SectionCatalogue() {
                 </span>
               </button>
               {estOuvert && (
-                <div className="px-3 pb-3 space-y-1">
+                <div className="px-3 pb-3 space-y-3">
                   {items.map((a) => (
-                    <div key={a.id} className="flex items-start gap-2 py-1">
-                      <select className="plai-input text-xs w-16" value={a.type}
-                        onChange={(e) => majAmenagement.mutate({ id: a.id, type: e.target.value })}>
-                        <option value="AU">AU</option>
-                        <option value="AR">AR</option>
-                      </select>
-                      <textarea className="plai-input flex-1 text-sm" rows={1} defaultValue={a.libelle}
-                        onBlur={(e) => { if (e.target.value.trim() && e.target.value !== a.libelle) majAmenagement.mutate({ id: a.id, libelle: e.target.value }); }} />
-                      <select className="plai-input text-xs w-28" value={a.chapitre_id}
-                        title="Déplacer vers un autre chapitre"
-                        onChange={(e) => majAmenagement.mutate({ id: a.id, chapitreId: e.target.value })}>
-                        {chapitres.map((c) => <option key={c.id} value={c.id}>{c.ordre}</option>)}
-                      </select>
-                      <label className="text-xs flex items-center gap-1 pt-1 whitespace-nowrap">
-                        <input type="checkbox" checked={a.actif}
-                          onChange={(e) => majAmenagement.mutate({ id: a.id, actif: e.target.checked })} />
-                        actif
-                      </label>
+                    <div key={a.id} className={`border rounded p-2 space-y-2 ${a.actif ? 'border-[color:var(--border)]' : 'border-dashed border-[color:var(--border)] opacity-60'}`}>
+                      <textarea
+                        className="plai-input text-sm w-full"
+                        rows={2}
+                        defaultValue={a.libelle}
+                        onBlur={(e) => { if (e.target.value.trim() && e.target.value !== a.libelle) majAmenagement.mutate({ id: a.id, libelle: e.target.value }); }}
+                      />
+                      <div className="flex flex-wrap items-center gap-3 text-xs">
+                        <label className="flex items-center gap-1">
+                          Type
+                          <select className="plai-input !w-auto !py-1" value={a.type}
+                            onChange={(e) => majAmenagement.mutate({ id: a.id, type: e.target.value })}>
+                            <option value="AU">AU — universel (classe)</option>
+                            <option value="AR">AR — raisonnable (élève)</option>
+                          </select>
+                        </label>
+                        <label className="flex items-center gap-1">
+                          Chapitre
+                          <select className="plai-input !w-auto !py-1" value={a.chapitre_id}
+                            onChange={(e) => majAmenagement.mutate({ id: a.id, chapitreId: e.target.value })}>
+                            {chapitres.map((c) => <option key={c.id} value={c.id}>{c.titre}</option>)}
+                          </select>
+                        </label>
+                        <label className="flex items-center gap-1">
+                          <input type="checkbox" checked={a.actif}
+                            onChange={(e) => majAmenagement.mutate({ id: a.id, actif: e.target.checked })} />
+                          actif
+                        </label>
+                      </div>
                     </div>
                   ))}
                   <AjoutAmenagement chapitreId={ch.id} onAdd={ajouterAmenagement.mutate} />
@@ -85,14 +96,20 @@ function AjoutAmenagement({ chapitreId, onAdd }) {
   const [libelle, setLibelle] = useState('');
   const [type, setType] = useState('AR');
   return (
-    <form className="flex gap-2 items-start pt-2"
+    <form className="border border-dashed border-teal rounded p-2 space-y-2"
       onSubmit={(e) => { e.preventDefault(); if (libelle.trim()) { onAdd({ chapitreId, libelle, type }); setLibelle(''); setType('AR'); } }}>
-      <select className="plai-input text-xs w-16" value={type} onChange={(e) => setType(e.target.value)}>
-        <option value="AU">AU</option>
-        <option value="AR">AR</option>
-      </select>
-      <input className="plai-input flex-1 text-sm" placeholder="Nouvel aménagement pour ce chapitre" value={libelle} onChange={(e) => setLibelle(e.target.value)} />
-      <button className="plai-btn" type="submit" disabled={!libelle.trim()}>Ajouter</button>
+      <textarea className="plai-input text-sm w-full" rows={2} placeholder="Nouvel aménagement pour ce chapitre"
+        value={libelle} onChange={(e) => setLibelle(e.target.value)} />
+      <div className="flex items-center gap-3 text-xs">
+        <label className="flex items-center gap-1">
+          Type
+          <select className="plai-input !w-auto !py-1" value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="AU">AU — universel</option>
+            <option value="AR">AR — raisonnable</option>
+          </select>
+        </label>
+        <button className="plai-btn" type="submit" disabled={!libelle.trim()}>Ajouter</button>
+      </div>
     </form>
   );
 }
