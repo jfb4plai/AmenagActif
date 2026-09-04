@@ -2,12 +2,15 @@
 -- À exécuter après 20260903_amenagactif_core.sql.
 
 -- ── Rôles ──
+-- Ordre important : retirer l'ancienne contrainte, convertir les lignes, PUIS
+-- ajouter la nouvelle contrainte (sinon 23514 sur les lignes role='plai').
 alter table ar_profils_acces drop constraint if exists ar_profils_acces_role_check;
-alter table ar_profils_acces
-  add constraint ar_profils_acces_role_check check (role in ('admin', 'referent_plai', 'direction'));
 
 update ar_profils_acces set role = 'admin'         where role = 'plai' and ecole_id is null;
 update ar_profils_acces set role = 'referent_plai' where role = 'plai';
+
+alter table ar_profils_acces
+  add constraint ar_profils_acces_role_check check (role in ('admin', 'referent_plai', 'direction'));
 
 -- ── Helpers ──
 create or replace function ar_is_admin() returns boolean
