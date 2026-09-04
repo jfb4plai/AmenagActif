@@ -1,6 +1,6 @@
 import { useRole } from '../lib/auth.jsx';
 
-/** roles: tableau de rôles autorisés, ex. ['plai'] */
+/** roles: tableau de rôles autorisés, ex. ['admin'] ou ['admin','referent_plai','direction'] */
 export default function RequireRole({ roles, children }) {
   const { role, loading } = useRole();
   if (loading) return <div className="plai-section">Chargement…</div>;

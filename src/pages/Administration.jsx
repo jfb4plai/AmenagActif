@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
-  useAnnees, useEcoles, useReferents, useAdminMutations,
+  useAnnees, useEcoles, useAdminMutations,
   useCatalogueAdmin, useCatalogueMutations,
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
+import GestionReferentsEcole from '../components/GestionReferentsEcole.jsx';
+
+const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction' };
+const ROLE_SCOPE = ['referent_plai', 'direction']; // rôles rattachés à une école
 
 export default function Administration() {
   return (
@@ -12,7 +16,7 @@ export default function Administration() {
       <SectionMembres />
       <SectionAnnees />
       <SectionEcoles />
-      <SectionReferents />
+      <GestionReferentsEcole />
       <SectionCatalogue />
     </div>
   );
@@ -23,14 +27,15 @@ function SectionMembres() {
   const { data: membres = [], isLoading, error } = useMembres();
   const { data: ecoles = [] } = useEcoles();
   const { inviter, changerRole, retirer } = useMembresMutations();
-  const [f, setF] = useState({ email: '', role: 'direction', ecoleId: '' });
+  const [f, setF] = useState({ email: '', role: 'referent_plai', ecoleId: '' });
   const nomEcole = (id) => ecoles.find((e) => e.id === id)?.nom ?? '—';
+  const besoinEcole = (r) => ROLE_SCOPE.includes(r);
 
   return (
     <section className="space-y-3">
       <h2 className="font-semibold">Membres &amp; accès</h2>
       <p className="text-sm text-[color:var(--text3)]">
-        <strong>Référent PLAI</strong> : accès complet (saisie, fiches, administration). <strong>Direction</strong> : lecture seule des fiches de son école.
+        <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, limités à une école (classes, élèves, AR/AU, référents d'école, fiches).
         Inviter envoie un e-mail avec un lien pour définir le mot de passe.
       </p>
 
@@ -39,8 +44,8 @@ function SectionMembres() {
         onSubmit={(e) => {
           e.preventDefault();
           if (!f.email.trim()) return;
-          if (f.role === 'direction' && !f.ecoleId) return;
-          inviter.mutate({ email: f.email.trim(), role: f.role, ecoleId: f.ecoleId || null }, { onSuccess: () => setF({ email: '', role: 'direction', ecoleId: '' }) });
+          if (besoinEcole(f.role) && !f.ecoleId) return;
+          inviter.mutate({ email: f.email.trim(), role: f.role, ecoleId: f.ecoleId || null }, { onSuccess: () => setF({ email: '', role: 'referent_plai', ecoleId: '' }) });
         }}
       >
         <label className="text-sm">Adresse e-mail
@@ -48,11 +53,12 @@ function SectionMembres() {
         </label>
         <label className="text-sm">Rôle
           <select className="plai-input block" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>
+            <option value="referent_plai">Référent PLAI</option>
             <option value="direction">Direction</option>
-            <option value="plai">Référent PLAI</option>
+            <option value="admin">Administrateur</option>
           </select>
         </label>
-        {f.role === 'direction' && (
+        {besoinEcole(f.role) && (
           <label className="text-sm">École
             <select className="plai-input block" value={f.ecoleId} onChange={(e) => setF({ ...f, ecoleId: e.target.value })}>
               <option value="">— choisir —</option>
@@ -75,18 +81,19 @@ function SectionMembres() {
             <li key={m.userId} className="px-3 py-2 flex flex-wrap items-center gap-3">
               <span className="flex-1 min-w-[12rem]">{m.email}</span>
               <select className="plai-input !w-auto !py-1 text-sm" value={m.role}
-                onChange={(e) => changerRole.mutate({ userId: m.userId, role: e.target.value, ecoleId: e.target.value === 'direction' ? (m.ecoleId || ecoles[0]?.id) : null })}>
-                <option value="plai">Référent PLAI</option>
-                <option value="direction">Direction</option>
+                onChange={(e) => changerRole.mutate({ userId: m.userId, role: e.target.value, ecoleId: besoinEcole(e.target.value) ? (m.ecoleId || ecoles[0]?.id || null) : null })}>
+                <option value="admin">{LABEL_ROLE.admin}</option>
+                <option value="referent_plai">{LABEL_ROLE.referent_plai}</option>
+                <option value="direction">{LABEL_ROLE.direction}</option>
               </select>
-              {m.role === 'direction' && (
+              {besoinEcole(m.role) && (
                 <select className="plai-input !w-auto !py-1 text-sm" value={m.ecoleId ?? ''}
-                  onChange={(e) => changerRole.mutate({ userId: m.userId, role: 'direction', ecoleId: e.target.value })}>
+                  onChange={(e) => changerRole.mutate({ userId: m.userId, role: m.role, ecoleId: e.target.value })}>
                   <option value="">— école —</option>
                   {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
                 </select>
               )}
-              {m.role === 'direction' && <span className="text-xs text-[color:var(--text3)]">{nomEcole(m.ecoleId)}</span>}
+              {besoinEcole(m.role) && <span className="text-xs text-[color:var(--text3)]">{nomEcole(m.ecoleId)}</span>}
               <button className="text-sm underline" onClick={() => { if (confirm(`Retirer l'accès de ${m.email} ?`)) retirer.mutate(m.userId); }}>retirer</button>
             </li>
           ))}
@@ -273,73 +280,6 @@ function SectionEcoles() {
         ))}
       </ul>
       <p className="text-xs text-[color:var(--text3)]">La liste ci-dessus ne montre que les écoles actives. Réactivation : contacter la maintenance (SQL).</p>
-    </section>
-  );
-}
-
-/* ─────────────── Référents d'école ─────────────── */
-function SectionReferents() {
-  const { data: ecoles = [] } = useEcoles();
-  const { data: annees = [] } = useAnnees();
-  const [ecoleId, setEcoleId] = useState('');
-  const [anneeId, setAnneeId] = useState('');
-  useEffect(() => {
-    if (!anneeId && annees.length) {
-      const active = annees.find((a) => a.active);
-      if (active) setAnneeId(active.id);
-    }
-  }, [annees, anneeId]);
-
-  const { data: referents = [] } = useReferents(ecoleId || null, anneeId || null);
-  const { ajouterReferent, supprimerReferent } = useAdminMutations();
-  const [f, setF] = useState({ nom: '', fonction: 'direction' });
-
-  const LABEL = { direction: 'Direction', referent_ecole: "Référent·e d'école", plai: 'PLAI' };
-
-  return (
-    <section className="space-y-3">
-      <h2 className="font-semibold">Référents d'école (colonne « PAR » de la fiche)</h2>
-      <p className="text-sm text-[color:var(--text3)]">Désignés par année. Direction et référent·e d'école apparaissent dans le tableau « PAR (Direction) » des fiches classe.</p>
-      <div className="flex gap-3">
-        <select className="plai-input" value={ecoleId} onChange={(e) => setEcoleId(e.target.value)}>
-          <option value="">École…</option>
-          {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
-        </select>
-        <select className="plai-input" value={anneeId} onChange={(e) => setAnneeId(e.target.value)}>
-          <option value="">Année…</option>
-          {annees.map((a) => <option key={a.id} value={a.id}>{a.libelle}{a.active ? ' (active)' : ''}</option>)}
-        </select>
-      </div>
-
-      {ecoleId && anneeId && (
-        <>
-          <form
-            className="flex flex-wrap gap-2 items-end"
-            onSubmit={(e) => { e.preventDefault(); if (f.nom.trim()) { ajouterReferent.mutate({ ecoleId, anneeId, ...f }); setF({ nom: '', fonction: 'direction' }); } }}
-          >
-            <label className="text-sm">Nom
-              <input className="plai-input block" placeholder="Julien Martin" value={f.nom} onChange={(e) => setF({ ...f, nom: e.target.value })} />
-            </label>
-            <label className="text-sm">Fonction
-              <select className="plai-input block" value={f.fonction} onChange={(e) => setF({ ...f, fonction: e.target.value })}>
-                <option value="direction">Direction</option>
-                <option value="referent_ecole">Référent·e d'école</option>
-                <option value="plai">PLAI</option>
-              </select>
-            </label>
-            <button className="plai-btn" type="submit" disabled={!f.nom.trim()}>Ajouter</button>
-          </form>
-          <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
-            {referents.length === 0 && <li className="px-3 py-2 text-[color:var(--text3)] text-sm">Aucun référent pour cette école et cette année.</li>}
-            {referents.map((r) => (
-              <li key={r.id} className="flex items-center justify-between px-3 py-2">
-                <span>{r.nom} <span className="text-[color:var(--text3)]">— {LABEL[r.fonction] ?? r.fonction}</span></span>
-                <button className="text-sm underline" onClick={() => supprimerReferent.mutate(r.id)}>retirer</button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
     </section>
   );
 }

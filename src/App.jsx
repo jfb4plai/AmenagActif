@@ -6,13 +6,16 @@ import RequireAuth from './components/RequireAuth.jsx';
 import RequireRole from './components/RequireRole.jsx';
 import { useRole } from './lib/auth.jsx';
 import Login from './pages/Login.jsx';
+import NouveauMotDePasse from './pages/NouveauMotDePasse.jsx';
 import SaisieEcole from './pages/SaisieEcole.jsx';
 import FicheClassePage from './pages/FicheClassePage.jsx';
 import FicheElevePage from './pages/FicheElevePage.jsx';
 import FichePublique from './pages/FichePublique.jsx';
-import NouveauMotDePasse from './pages/NouveauMotDePasse.jsx';
 import Administration from './pages/Administration.jsx';
+import MonEcole from './pages/MonEcole.jsx';
 import NotFound from './pages/NotFound.jsx';
+
+const EDITEURS = ['admin', 'referent_plai', 'direction'];
 
 function Shell({ children }) {
   return (
@@ -25,11 +28,11 @@ function Shell({ children }) {
   );
 }
 
-/** Redirige la racine selon le rôle : PLAI → saisie, direction → fiches. */
+/** Racine : tout le monde va vers la saisie (référent/direction éditent leur école). */
 function Accueil() {
-  const { role, loading } = useRole();
+  const { loading } = useRole();
   if (loading) return <div className="plai-section">Chargement…</div>;
-  return <Navigate to={role === 'direction' ? '/fiches' : '/saisie'} replace />;
+  return <Navigate to="/saisie" replace />;
 }
 
 export default function App() {
@@ -39,11 +42,12 @@ export default function App() {
       <Route path="/nouveau-mot-de-passe" element={<NouveauMotDePasse />} />
       <Route path="/fiche/:token" element={<FichePublique />} />
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />
-      <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={['plai']}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />
-      <Route path="/administration" element={<RequireAuth><Shell><RequireRole roles={['plai']}><Administration /></RequireRole></Shell></RequireAuth>} />
-      <Route path="/fiches" element={<RequireAuth><Shell><RequireRole roles={['plai','direction']}><FicheClassePage picker /></RequireRole></Shell></RequireAuth>} />
-      <Route path="/classe/:classeId/fiche" element={<RequireAuth><Shell><RequireRole roles={['plai','direction']}><FicheClassePage /></RequireRole></Shell></RequireAuth>} />
-      <Route path="/eleve/:eleveId/fiche" element={<RequireAuth><Shell><RequireRole roles={['plai','direction']}><FicheElevePage /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/mon-ecole" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><MonEcole /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/administration" element={<RequireAuth><Shell><RequireRole roles={['admin']}><Administration /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/fiches" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><FicheClassePage picker /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/classe/:classeId/fiche" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><FicheClassePage /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/eleve/:eleveId/fiche" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><FicheElevePage /></RequireRole></Shell></RequireAuth>} />
       <Route path="*" element={<Shell><NotFound /></Shell>} />
     </Routes>
   );

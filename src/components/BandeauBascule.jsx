@@ -4,9 +4,9 @@ import { useRole } from '../lib/auth.jsx';
 
 /** Rappel de bascule d'année (référent PLAI uniquement). */
 export default function BandeauBascule() {
-  const { role } = useRole();
+  const { isAdmin } = useRole();
   const active = useAnneeActive();
-  if (role !== 'plai') return null;
+  if (!isAdmin) return null;
   if (!besoinBasculeAnnee(active)) return null;
 
   return (
