@@ -7,6 +7,7 @@ export default function FichePublique() {
   const { token } = useParams();
   const { data, isLoading, error } = useQuery({
     queryKey: ['fiche-publique', token],
+    retry: false,
     queryFn: async () => {
       const res = await fetch(`/api/fiche-token?token=${encodeURIComponent(token)}`);
       if (!res.ok) throw new Error('lien invalide');
@@ -15,7 +16,7 @@ export default function FichePublique() {
   });
 
   if (isLoading) return <div className="plai-section">Chargement…</div>;
-  if (error) return <div className="plai-section"><p className="plai-error">Ce lien est invalide ou a expiré. Demandez un lien à jour à l'équipe PLAI.</p></div>;
+  if (error || !data?.vm) return <div className="plai-section"><p className="plai-error">Ce lien est invalide ou a expiré. Demandez un lien à jour à l'équipe PLAI.</p></div>;
 
   return (
     <div className="min-h-screen bg-[color:var(--bg)] py-6">
