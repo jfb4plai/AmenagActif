@@ -1,35 +1,70 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase.js';
 
 /**
  * Cible des liens d'invitation et de « mot de passe oublié ».
- * Supabase établit une session de récupération depuis l'URL au chargement ;
- * il ne reste qu'à définir le nouveau mot de passe.
+ * Supabase traite le jeton présent dans l'URL au chargement et ouvre une
+ * session de récupération ; il ne reste qu'à définir le mot de passe.
  */
 export default function NouveauMotDePasse() {
+  const [email, setEmail] = useState(null);
+  const [statut, setStatut] = useState('chargement'); // chargement | pret | invalide | fait
   const [mdp, setMdp] = useState('');
   const [mdp2, setMdp2] = useState('');
-  const [fait, setFait] = useState(false);
   const [erreur, setErreur] = useState(null);
   const [envoi, setEnvoi] = useState(false);
 
+  useEffect(() => {
+    let vivant = true;
+    const prendre = (session) => {
+      if (!vivant || !session?.user) return;
+      setEmail(session.user.email);
+      setStatut('pret');
+    };
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => prendre(session));
+    supabase.auth.getSession().then(({ data }) => prendre(data.session));
+    const t = setTimeout(() => {
+      if (vivant) setStatut((s) => (s === 'chargement' ? 'invalide' : s));
+    }, 5000);
+    return () => { vivant = false; sub.subscription.unsubscribe(); clearTimeout(t); };
+  }, []);
+
   async function soumettre(e) {
     e.preventDefault();
+    setErreur(null);
     if (mdp.length < 8) { setErreur('8 caractères minimum.'); return; }
     if (mdp !== mdp2) { setErreur('Les deux mots de passe diffèrent.'); return; }
     setEnvoi(true);
-    setErreur(null);
-    const { error } = await supabase.auth.updateUser({ password: mdp });
-    setEnvoi(false);
-    if (error) setErreur("Lien expiré ou invalide. Redemandez un lien depuis la page de connexion.");
-    else setFait(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: mdp });
+      if (error) throw error;
+      setStatut('fait');
+    } catch {
+      setErreur("Lien expiré ou invalide. Redemandez un lien depuis la page de connexion.");
+    } finally {
+      setEnvoi(false);
+    }
   }
 
-  if (fait) {
+  if (statut === 'chargement') {
+    return <div className="plai-section max-w-md mx-auto">Vérification du lien…</div>;
+  }
+
+  if (statut === 'invalide') {
     return (
       <div className="plai-section max-w-md mx-auto">
-        <p className="plai-success">Mot de passe défini.</p>
+        <p className="plai-error">Ce lien a expiré ou n'est pas valide.</p>
+        <Link to="/connexion" className="plai-btn inline-block mt-3">Retour à la connexion</Link>
+        <p className="text-sm text-[color:var(--text3)] mt-2">Depuis la page de connexion, « Mot de passe oublié ? » renvoie un nouveau lien.</p>
+      </div>
+    );
+  }
+
+  if (statut === 'fait') {
+    return (
+      <div className="plai-section max-w-md mx-auto">
+        <p className="plai-success">Mot de passe défini pour {email}.</p>
         <Link to="/connexion" className="plai-btn inline-block mt-3">Se connecter</Link>
       </div>
     );
@@ -37,7 +72,8 @@ export default function NouveauMotDePasse() {
 
   return (
     <div className="plai-section max-w-md mx-auto">
-      <h1 className="text-xl font-semibold mb-4">Définir un mot de passe</h1>
+      <h1 className="text-xl font-semibold mb-1">Définir un mot de passe</h1>
+      <p className="text-sm text-[color:var(--text3)] mb-4">Compte : <strong>{email}</strong></p>
       <form onSubmit={soumettre} className="space-y-4">
         <div>
           <label htmlFor="mdp" className="block font-medium">Nouveau mot de passe</label>
