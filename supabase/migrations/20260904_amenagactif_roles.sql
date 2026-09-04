@@ -1,6 +1,8 @@
 -- AménagActif — modèle de rôles : admin (global) + referent_plai / direction (une école).
 -- À exécuter après 20260903_amenagactif_core.sql.
 
+begin;
+
 -- ── Rôles ──
 -- Ordre important : retirer l'ancienne contrainte, convertir les lignes, PUIS
 -- ajouter la nouvelle contrainte (sinon 23514 sur les lignes role='plai').
@@ -81,3 +83,5 @@ create policy ar_snap_write on ar_fiche_snapshots for all to authenticated
 -- Référence (années, chapitres, aménagements), écoles, comptes, envois :
 -- restent en écriture admin uniquement — les politiques existantes utilisent
 -- ar_is_plai() qui pointe désormais sur ar_is_admin(). Rien à changer.
+
+commit;
