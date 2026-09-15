@@ -68,7 +68,23 @@ function FicheClasseContenu({ classeId }) {
     });
     if (!res.ok) { alert('Impossible de générer le lien.'); return; }
     const { url } = await res.json();
-    await navigator.clipboard.writeText(url);
+    const libelle = `Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`;
+
+    if (navigator.clipboard?.write && window.ClipboardItem) {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([`<a href="${url}">${libelle}</a>`], { type: 'text/html' }),
+            'text/plain': new Blob([`${libelle} : ${url}`], { type: 'text/plain' }),
+          }),
+        ]);
+        alert('Lien enseignant copié — collez-le dans votre e-mail, il apparaîtra sous forme de texte cliquable (« Aménagements à mettre en place… ») plutôt que l\'adresse brute.');
+        return;
+      } catch {
+        // navigateur sans support du presse-papier riche : repli plein texte
+      }
+    }
+    await navigator.clipboard.writeText(`${libelle} : ${url}`);
     alert('Lien enseignant copié dans le presse-papier.');
   }
 
