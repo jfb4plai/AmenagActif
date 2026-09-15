@@ -60,7 +60,8 @@ export default function SaisieEcole() {
           <div className="overflow-x-auto border border-[color:var(--border)] rounded">
             <table className="border-collapse text-sm">
               <EnTeteEleves classesAvecEleves={classesAvecEleves}
-                onSaveEleve={(v) => mut.upsertEleve.mutate(v)} />
+                onSaveEleve={(v) => mut.upsertEleve.mutateAsync(v)}
+                onDeleteEleve={(v) => mut.deleteEleve.mutateAsync(v)} />
               <tbody>
                 {chapitres.map((ch) => (
                   <ChapitreAR key={ch.id} chapitre={ch}

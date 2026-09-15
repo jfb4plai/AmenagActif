@@ -46,6 +46,14 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
+  const deleteEleve = useMutation({
+    mutationFn: async ({ id }) => {
+      const { error } = await supabase.from('ar_eleves').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: invalider,
+  });
+
   const ensureClasse = useMutation({
     mutationFn: async ({ nom, niveau }) => {
       const { data, error } = await supabase
@@ -74,5 +82,5 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
-  return { toggleAR, toggleAU, upsertEleve, ensureClasse, addLibre, removeLibre };
+  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, addLibre, removeLibre };
 }

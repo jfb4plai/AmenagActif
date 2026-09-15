@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import EleveEditor from './EleveEditor.jsx';
 
-export default function EnTeteEleves({ classesAvecEleves, onSaveEleve }) {
+export default function EnTeteEleves({ classesAvecEleves, onSaveEleve, onDeleteEleve }) {
   const [editId, setEditId] = useState(null);
 
   return (
@@ -19,7 +19,8 @@ export default function EnTeteEleves({ classesAvecEleves, onSaveEleve }) {
               {editId === e.id && (
                 <div className="absolute mt-1 z-40">
                   <EleveEditor eleve={e} onClose={() => setEditId(null)}
-                    onSave={(v) => { onSaveEleve({ id: e.id, classeId: e.classe_id, ...v }); setEditId(null); }} />
+                    onSave={(v) => onSaveEleve({ id: e.id, classeId: e.classe_id, ...v })}
+                    onDelete={onDeleteEleve ? () => onDeleteEleve({ id: e.id }) : undefined} />
                 </div>
               )}
             </th>
