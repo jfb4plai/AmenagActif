@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import AmenagementLibreForm from './AmenagementLibreForm.jsx';
 
-export default function ChapitreAR({ chapitre, amenagements, classesAvecEleves, selectionsAR, libres, onToggle, onAddLibre, onRemoveLibre }) {
+export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsAR, libres, onToggle, onAddLibre, onRemoveLibre }) {
   const [ouvert, setOuvert] = useState(false);
   const [libreOuvert, setLibreOuvert] = useState(false);
 
-  const cols = classesAvecEleves.flatMap(({ eleves }) => eleves);
+  const cols = eleves;
   const totalCols = cols.length;
   const estCoche = (eleveId, amId) => selectionsAR.some((s) => s.eleve_id === eleveId && s.amenagement_id === amId);
   const nbCoches = selectionsAR.filter((s) => amenagements.some((a) => a.id === s.amenagement_id)).length;

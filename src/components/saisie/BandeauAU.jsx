@@ -1,10 +1,11 @@
 /**
  * Aménagements universels : cochés UNE fois par classe (pas par élève).
  * Alimentent le bloc « Pour tous » de la fiche. Affiché en carte, au-dessus
- * de la grille des AR (qui, elle, est par élève).
+ * de la grille des AR (qui, elle, est par élève). Scopé à la classe
+ * sélectionnée dans le flux de saisie.
  */
-export default function BandeauAU({ classesAvecEleves, auCatalogue, chapitres, auClasse, onToggle }) {
-  const estCoche = (classeId, amId) => auClasse.some((x) => x.classe_id === classeId && x.amenagement_id === amId);
+export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, onToggle }) {
+  const estCoche = (amId) => auClasse.some((x) => x.amenagement_id === amId);
 
   const chapOrdre = new Map(chapitres.map((c) => [c.id, c.ordre]));
   const chapCourt = (chapId) => {
@@ -14,7 +15,7 @@ export default function BandeauAU({ classesAvecEleves, auCatalogue, chapitres, a
   const auTries = [...auCatalogue].sort(
     (a, b) => (chapOrdre.get(a.chapitre_id) ?? 99) - (chapOrdre.get(b.chapitre_id) ?? 99) || a.ordre - b.ordre
   );
-  const nbCoches = (classeId) => auTries.filter((a) => estCoche(classeId, a.id)).length;
+  const nbCoches = auTries.filter((a) => estCoche(a.id)).length;
 
   return (
     <section className="plai-card p-4" style={{ borderColor: 'var(--teal)', background: 'rgba(10,147,112,0.05)' }}>
@@ -23,34 +24,27 @@ export default function BandeauAU({ classesAvecEleves, auCatalogue, chapitres, a
         S'appliquent à <strong>tous les élèves</strong> de la classe. Cochés ici une seule fois — ils forment le bloc « Pour tous » de la fiche.
         Les aménagements <strong>par élève</strong> sont dans les 12 chapitres ci-dessous.
       </p>
-
-      <div className="flex flex-wrap gap-6">
-        {classesAvecEleves.map(({ classe }) => (
-          <div key={classe.id} className="min-w-[18rem] flex-1">
-            <div className="font-medium mb-1">
-              {classe.nom} <span className="text-[color:var(--text3)] font-normal">— {nbCoches(classe.id)} AU coché(s)</span>
-            </div>
-            <ul className="space-y-1">
-              {auTries.map((a) => (
-                <li key={a.id}>
-                  <label className="flex items-start gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      className="mt-0.5"
-                      checked={estCoche(classe.id, a.id)}
-                      onChange={(e) => onToggle({ classeId: classe.id, amenagementId: a.id, actif: e.target.checked })}
-                    />
-                    <span>
-                      {a.libelle}
-                      <span className="text-xs text-[color:var(--text3)]"> · {chapCourt(a.chapitre_id)}</span>
-                    </span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <div className="font-medium mb-1">
+        {classe.nom} <span className="text-[color:var(--text3)] font-normal">— {nbCoches} AU coché(s)</span>
       </div>
+      <ul className="space-y-1">
+        {auTries.map((a) => (
+          <li key={a.id}>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={estCoche(a.id)}
+                onChange={(e) => onToggle({ classeId: classe.id, amenagementId: a.id, actif: e.target.checked })}
+              />
+              <span>
+                {a.libelle}
+                <span className="text-xs text-[color:var(--text3)]"> · {chapCourt(a.chapitre_id)}</span>
+              </span>
+            </label>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
