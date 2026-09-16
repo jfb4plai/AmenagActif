@@ -35,6 +35,7 @@ function SectionMembres() {
       <p className="text-sm text-[color:var(--text3)]">
         <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, limités à une école (classes, élèves, AR/AU, fiches).
         Le <strong>nom</strong> figure sur les fiches (colonnes « référent·e PIA » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
+        Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : le champ <strong>Niveaux</strong> limite l'apparition de chacun aux classes concernées — vide, il apparaît sur toutes.
       </p>
 
       <form
@@ -97,6 +98,15 @@ function SectionMembres() {
                 </select>
               )}
               {besoinEcole(m.role) && <span className="text-xs text-[color:var(--text3)]">{nomEcole(m.ecoleId)}</span>}
+              {m.role === 'direction' && (
+                <input className="plai-input !py-1 text-sm w-48" defaultValue={(m.niveaux ?? []).join(',')}
+                  placeholder="Niveaux (ex: 3e,4e,5e,6e), vide=tous"
+                  onBlur={(e) => {
+                    const niveaux = e.target.value.split(',').map((n) => n.trim()).filter(Boolean);
+                    const actuel = (m.niveaux ?? []).join(',');
+                    if (e.target.value.trim() !== actuel) changerRole.mutate({ userId: m.userId, role: m.role, ecoleId: m.ecoleId, niveaux });
+                  }} />
+              )}
               <button className="text-sm underline" onClick={() => { if (confirm(`Retirer l'accès de ${m.email} ?`)) retirer.mutate(m.userId); }}>retirer</button>
             </li>
           ))}

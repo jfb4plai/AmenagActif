@@ -24,12 +24,12 @@ export default async function handler(req, res) {
     const origin = req.headers.origin || `https://${req.headers.host || ''}`;
 
     if (req.method === 'GET') {
-      const { data: rows, error } = await db.from('ar_profils_acces').select('user_id, nom, role, ecole_id');
+      const { data: rows, error } = await db.from('ar_profils_acces').select('user_id, nom, role, ecole_id, niveaux');
       if (error) throw error;
       const membres = await Promise.all(
         rows.map(async (r) => {
           const { data } = await db.auth.admin.getUserById(r.user_id);
-          return { userId: r.user_id, email: data?.user?.email ?? '(compte inconnu)', nom: r.nom ?? '', role: r.role, ecoleId: r.ecole_id };
+          return { userId: r.user_id, email: data?.user?.email ?? '(compte inconnu)', nom: r.nom ?? '', role: r.role, ecoleId: r.ecole_id, niveaux: r.niveaux ?? [] };
         })
       );
       membres.sort((a, b) => a.email.localeCompare(b.email));
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { action, email, userId, nom, role, ecoleId } = req.body || {};
+      const { action, email, userId, nom, role, ecoleId, niveaux } = req.body || {};
       const scoped = ROLE_SCOPE.includes(role);
       const ecolePour = () => (scoped ? ecoleId || null : null);
 
@@ -72,6 +72,7 @@ export default async function handler(req, res) {
           patch.ecole_id = ecoleId || null;
         }
         if (nom !== undefined) patch.nom = (nom || '').trim();
+        if (niveaux !== undefined) patch.niveaux = Array.isArray(niveaux) && niveaux.length ? niveaux : null;
         if (Object.keys(patch).length === 0) { res.status(400).json({ error: 'Rien à modifier.' }); return; }
         const { error } = await db.from('ar_profils_acces').update(patch).eq('user_id', userId);
         if (error) throw error;
