@@ -5,7 +5,7 @@ import { computeFicheClasse } from '../domain/projections/ficheClasse.js';
 async function chargerClasse(classeId) {
   const { data: classe, error } = await supabase
     .from('ar_classes')
-    .select('id, nom, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
+    .select('id, nom, niveau, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
     .eq('id', classeId).single();
   if (error) throw error;
 
@@ -19,10 +19,10 @@ async function chargerClasse(classeId) {
     supabase.from('ar_amenagements_classe').select('amenagement_id, cree_le').eq('classe_id', classeId),
     eleveIds.length ? supabase.from('ar_selections').select('eleve_id, amenagement_id, cree_le').in('eleve_id', eleveIds) : { data: [] },
     eleveIds.length ? supabase.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte, cree_le').in('eleve_id', eleveIds) : { data: [] },
-    supabase.from('ar_profils_acces').select('nom, role').eq('ecole_id', classe.ecole_id).in('role', ['direction', 'referent_plai']),
+    supabase.from('ar_profils_acces').select('nom, role, niveaux').eq('ecole_id', classe.ecole_id).in('role', ['direction', 'referent_plai']),
   ]);
 
-  const referents = (ref.data ?? []).map((r) => ({ nom: r.nom, fonction: r.role }));
+  const referents = (ref.data ?? []).map((r) => ({ nom: r.nom, fonction: r.role, niveaux: r.niveaux ?? null }));
 
   return computeFicheClasse({
     classe,

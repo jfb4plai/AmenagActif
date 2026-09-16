@@ -9,7 +9,7 @@ export async function loadClasseData(classeId) {
 
   const { data: classe, error: ec } = await db
     .from('ar_classes')
-    .select('id, nom, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
+    .select('id, nom, niveau, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
     .eq('id', classeId)
     .single();
   if (ec) throw ec;
@@ -32,7 +32,7 @@ export async function loadClasseData(classeId) {
     eleveIds.length
       ? db.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte, cree_le').in('eleve_id', eleveIds)
       : Promise.resolve({ data: [] }),
-    db.from('ar_profils_acces').select('nom, role').eq('ecole_id', classe.ecole_id).in('role', ['direction', 'referent_plai']),
+    db.from('ar_profils_acces').select('nom, role, niveaux').eq('ecole_id', classe.ecole_id).in('role', ['direction', 'referent_plai']),
   ]);
   for (const r of [cat, chap, au, sel, lib, ref]) if (r.error) throw r.error;
 
@@ -49,6 +49,6 @@ export async function loadClasseData(classeId) {
     auClasse: au.data,
     selectionsAR: sel.data,
     libres: lib.data,
-    referents: (ref.data ?? []).map((r) => ({ nom: r.nom, fonction: r.role })),
+    referents: (ref.data ?? []).map((r) => ({ nom: r.nom, fonction: r.role, niveaux: r.niveaux ?? null })),
   };
 }
