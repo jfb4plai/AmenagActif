@@ -17,6 +17,7 @@
  * @property {string} prenom
  * @property {string} initiale_nom
  * @property {string} referent_plai_nom
+ * @property {string} [commentaire]
  *
  * @typedef {Object} Classe
  * @property {string} id
@@ -46,11 +47,13 @@
  * @property {{ pia: string[], par: string[] }} tableauReferents
  * @property {{ libelle: string, chapitreTitre: string, surligne: boolean }[]} pourTous
  * @property {{ eleve: string, eleveId: string, amenagements: string[] }[]} parEleve
+ * @property {{ eleve: string, texte: string }[]} commentaires
  * @property {number} nbRecto
  *
  * @typedef {Object} FicheEleveVM
  * @property {string} eleve
  * @property {string} classeNom
  * @property {{ chapitreTitre: string, amenagements: string[] }[]} parChapitre
+ * @property {string} commentaire
  */
 export {};
