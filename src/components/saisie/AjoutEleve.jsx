@@ -40,8 +40,8 @@ export default function AjoutEleve({ onCreate }) {
       <label className="text-sm">Initiale
         <input className="plai-input block" maxLength={2} value={f.initiale} onChange={set('initiale')} placeholder="D" disabled={enCours} />
       </label>
-      <label className="text-sm">Référent PLAI
-        <input className="plai-input block" value={f.referent} onChange={set('referent')} placeholder="Mona" disabled={enCours} />
+      <label className="text-sm">Référent(s) PLAI
+        <input className="plai-input block" value={f.referent} onChange={set('referent')} placeholder="Mona, Julie" disabled={enCours} />
       </label>
       <button type="submit" className="plai-btn" disabled={enCours}>{enCours ? 'Création…' : 'Créer'}</button>
       <button type="button" className="text-sm underline" onClick={() => setOuvert(false)} disabled={enCours}>Annuler</button>

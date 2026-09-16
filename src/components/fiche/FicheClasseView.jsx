@@ -12,7 +12,7 @@ export default function FicheClasseView({ vm }) {
 
       <table className="w-full border border-black mb-4 text-sm">
         <thead><tr>
-          <th className="border border-black p-1">Intégrations (référent·e PIA)</th>
+          <th className="border border-black p-1">Référent(s) PLAI de votre classe</th>
           <th className="border border-black p-1">PAR (Direction)</th>
         </tr></thead>
         <tbody><tr>
