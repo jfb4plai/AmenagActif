@@ -5,7 +5,7 @@ import { useState } from 'react';
  * remplace la saisie libre du nom de classe pour fiabiliser le flux
  * (plus de correspondance texte hasardeuse entre "5LA" et "5 LA").
  */
-export default function SelecteurClasse({ classes, onSelect, onCreate }) {
+export default function SelecteurClasse({ classes = [], onSelect, onCreate }) {
   const [creation, setCreation] = useState(false);
   const [nom, setNom] = useState('');
   const [niveau, setNiveau] = useState('');
