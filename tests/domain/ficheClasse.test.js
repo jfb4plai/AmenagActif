@@ -56,6 +56,7 @@ describe('computeFicheClasse', () => {
   it('PAR : une direction sans niveaux assignés apparaît sur toutes les classes ; une direction restreinte à d\'autres niveaux est exclue', () => {
     const vm = computeFicheClasse(args());
     expect(vm.tableauReferents.par).toEqual(['Julien']);
+    expect(vm.tableauReferents.par).not.toContain('Sophie');
   });
 
   it('PAR : une direction dont les niveaux incluent celui de la classe apparaît', () => {

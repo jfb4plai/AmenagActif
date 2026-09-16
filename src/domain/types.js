@@ -24,6 +24,7 @@
  * @property {string} nom
  * @property {string} ecole_id
  * @property {string} annee_id
+ * @property {string} [niveau]
  *
  * @typedef {Object} SelectionAR
  * @property {string} eleve_id
@@ -38,6 +39,7 @@
  * @typedef {Object} ReferentEcole   // compte rattaché à l'implantation
  * @property {string} nom
  * @property {'direction'|'referent_plai'} fonction
+ * @property {string[]|null} [niveaux]
  *
  * @typedef {Object} FicheClasseVM
  * @property {string} classeNom
