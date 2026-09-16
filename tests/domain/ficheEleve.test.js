@@ -32,4 +32,9 @@ describe('computeFicheEleve', () => {
     const vm = computeFicheEleve(args('e3'));
     expect(vm.parChapitre.map((c) => c.chapitreTitre.slice(0, 2))).toEqual(['1.', '5.']);
   });
+
+  it('expose le commentaire de l\'élève (chaîne vide si aucun)', () => {
+    expect(computeFicheEleve(args('e2')).commentaire).toBe('Décès de la grand-mère mi-septembre, vigilance émotionnelle');
+    expect(computeFicheEleve(args('e1')).commentaire).toBe('');
+  });
 });

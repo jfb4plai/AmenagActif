@@ -42,5 +42,5 @@ export function computeFicheEleve(input) {
     .sort((a, b) => a.ordre - b.ordre)
     .map(({ chapitreTitre, amenagements }) => ({ chapitreTitre, amenagements }));
 
-  return { eleve: nomEleve, classeNom, parChapitre };
+  return { eleve: nomEleve, classeNom, parChapitre, commentaire: (eleve.commentaire ?? '').trim() };
 }
