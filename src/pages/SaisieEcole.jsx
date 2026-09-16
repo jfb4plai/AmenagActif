@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import SelecteurContexte from '../components/saisie/SelecteurContexte.jsx';
+import SelecteurClasse from '../components/saisie/SelecteurClasse.jsx';
 import BarreSaut from '../components/saisie/BarreSaut.jsx';
 import EnTeteEleves from '../components/saisie/EnTeteEleves.jsx';
 import BandeauAU from '../components/saisie/BandeauAU.jsx';
@@ -11,17 +12,17 @@ import { useGridMutations } from '../hooks/useGridMutations.js';
 
 export default function SaisieEcole() {
   const [ctx, setCtx] = useState({ ecoleId: null, anneeId: null });
+  const [classeId, setClasseId] = useState(null);
   const { data: cat } = useCatalogue();
   const { data: grid, isLoading, error } = useEcoleGrid(ctx.ecoleId, ctx.anneeId);
   const mut = useGridMutations(ctx.ecoleId, ctx.anneeId);
 
-  const classesAvecEleves = useMemo(() => {
-    if (!grid) return [];
-    return grid.classes.map((classe) => ({
-      classe,
-      eleves: grid.eleves.filter((e) => e.classe_id === classe.id),
-    }));
-  }, [grid]);
+  const classe = useMemo(() => grid?.classes.find((c) => c.id === classeId) ?? null, [grid, classeId]);
+  const eleves = useMemo(() => (grid?.eleves ?? []).filter((e) => e.classe_id === classeId), [grid, classeId]);
+  const referentSuggere = useMemo(() => {
+    const valeurs = [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))];
+    return valeurs.length === 1 ? valeurs[0] : '';
+  }, [eleves]);
 
   const chapitres = cat?.chapitres ?? [];
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
@@ -29,44 +30,52 @@ export default function SaisieEcole() {
   return (
     <div className="plai-section space-y-4">
       <h1 className="text-xl font-semibold">Saisie des aménagements</h1>
-      <SelecteurContexte ecoleId={ctx.ecoleId} anneeId={ctx.anneeId} onChange={setCtx} />
-
-      {ctx.ecoleId && ctx.anneeId && (
-        <AjoutEleve
-          onCreate={async ({ classeNom, niveau, prenom, initiale, referent }) => {
-            const classeId = await mut.ensureClasse.mutateAsync({ nom: classeNom, niveau });
-            await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, referentPlaiNom: referent });
-          }}
-        />
-      )}
+      <SelecteurContexte ecoleId={ctx.ecoleId} anneeId={ctx.anneeId} onChange={(v) => { setCtx(v); setClasseId(null); }} />
 
       {!ctx.ecoleId || !ctx.anneeId ? (
-        <p className="plai-empty">Choisir une école et une année pour afficher la grille.</p>
+        <p className="plai-empty">Choisir une école et une année pour commencer.</p>
       ) : isLoading ? (
-        <p>Chargement de la grille…</p>
+        <p>Chargement…</p>
       ) : error ? (
         <p className="plai-error">Erreur de chargement : {error.message}</p>
-      ) : grid.classes.length === 0 ? (
-        <p className="plai-empty">Aucune classe. Ajouter un élève créera sa classe.</p>
+      ) : !classe ? (
+        <SelecteurClasse
+          classes={grid.classes}
+          onSelect={setClasseId}
+          onCreate={({ nom, niveau }) => mut.ensureClasse.mutateAsync({ nom, niveau })}
+        />
       ) : (
         <>
-          <BandeauAU classesAvecEleves={classesAvecEleves} auCatalogue={auCat} chapitres={chapitres}
-            auClasse={grid.auClasse} onToggle={(v) => mut.toggleAU.mutate(v)} />
+          <div className="flex items-center justify-between">
+            <p className="text-sm">
+              <button className="underline text-teal" onClick={() => setClasseId(null)}>← Changer de classe</button>
+            </p>
+          </div>
+
+          <BandeauAU classe={classe} auCatalogue={auCat} chapitres={chapitres}
+            auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)} onToggle={(v) => mut.toggleAU.mutate(v)} />
+
+          <AjoutEleve
+            referentSuggere={referentSuggere}
+            onCreate={async ({ prenom, initiale, referent }) => {
+              await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, referentPlaiNom: referent });
+            }}
+          />
 
           <div>
-            <h2 className="font-semibold mb-1">Aménagements raisonnables — par élève</h2>
+            <h2 className="font-semibold mb-1">Aménagements raisonnables — {classe.nom}</h2>
             <BarreSaut chapitres={chapitres} />
           </div>
           <div className="overflow-x-auto border border-[color:var(--border)] rounded">
             <table className="border-collapse text-sm">
-              <EnTeteEleves classesAvecEleves={classesAvecEleves}
+              <EnTeteEleves eleves={eleves}
                 onSaveEleve={(v) => mut.upsertEleve.mutateAsync(v)}
                 onDeleteEleve={(v) => mut.deleteEleve.mutateAsync(v)} />
               <tbody>
                 {chapitres.map((ch) => (
                   <ChapitreAR key={ch.id} chapitre={ch}
                     amenagements={(cat.amenagements ?? []).filter((a) => a.chapitre_id === ch.id && a.type === 'AR')}
-                    classesAvecEleves={classesAvecEleves}
+                    eleves={eleves}
                     selectionsAR={grid.selectionsAR}
                     libres={grid.libres}
                     onToggle={(v) => mut.toggleAR.mutate(v)}

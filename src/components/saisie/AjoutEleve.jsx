@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function AjoutEleve({ onCreate }) {
+export default function AjoutEleve({ onCreate, referentSuggere }) {
   const [ouvert, setOuvert] = useState(false);
-  const [f, setF] = useState({ classeNom: '', niveau: '', prenom: '', initiale: '', referent: '' });
+  const [f, setF] = useState({ prenom: '', initiale: '', referent: '' });
   const [etat, setEtat] = useState('idle'); // idle | creation | erreur
   const [erreur, setErreur] = useState('');
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+
+  useEffect(() => {
+    if (ouvert && !f.referent && referentSuggere) setF((prev) => ({ ...prev, referent: referentSuggere }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ouvert, referentSuggere]);
 
   if (!ouvert) return <button className="plai-btn" onClick={() => setOuvert(true)}>+ élève</button>;
 
@@ -17,7 +22,7 @@ export default function AjoutEleve({ onCreate }) {
       await onCreate(f);
       setOuvert(false);
       setEtat('idle');
-      setF({ classeNom: '', niveau: '', prenom: '', initiale: '', referent: '' });
+      setF({ prenom: '', initiale: '', referent: '' });
     } catch (err) {
       setEtat('erreur');
       setErreur(err.message || "Échec de la création, réessayez.");
@@ -28,12 +33,6 @@ export default function AjoutEleve({ onCreate }) {
 
   return (
     <form className="plai-card p-3 flex flex-wrap gap-2 items-end" onSubmit={soumettre}>
-      <label className="text-sm">Classe
-        <input className="plai-input block" required value={f.classeNom} onChange={set('classeNom')} placeholder="5LA" disabled={enCours} />
-      </label>
-      <label className="text-sm">Niveau
-        <input className="plai-input block" value={f.niveau} onChange={set('niveau')} placeholder="5e" disabled={enCours} />
-      </label>
       <label className="text-sm">Prénom
         <input className="plai-input block" required value={f.prenom} onChange={set('prenom')} placeholder="Emilie" disabled={enCours} />
       </label>
