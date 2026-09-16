@@ -175,5 +175,6 @@ textarea.plai-input { resize: vertical; }
   }
   .fiche table { page-break-inside: auto; }
   .fiche tr { page-break-inside: avoid; }
+  .fiche + .fiche { page-break-before: always; }
   @page { size: A4; margin: 14mm; }
 }

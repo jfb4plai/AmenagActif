@@ -27,6 +27,7 @@ function Picker() {
   return (
     <div className="plai-section space-y-3">
       <h1 className="text-xl font-semibold">Fiches par classe</h1>
+      <Link className="text-sm text-teal underline" to="/fiches/ecole">Voir la fiche « vue école complète »</Link>
       <div className="flex gap-3">
         {ecoleUnique ? (
           <span className="plai-input inline-block bg-[color:var(--bg)]">{ecoleUnique.nom}</span>

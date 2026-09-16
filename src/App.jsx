@@ -9,6 +9,7 @@ import Login from './pages/Login.jsx';
 import NouveauMotDePasse from './pages/NouveauMotDePasse.jsx';
 import SaisieEcole from './pages/SaisieEcole.jsx';
 import FicheClassePage from './pages/FicheClassePage.jsx';
+import FicheEcolePage from './pages/FicheEcolePage.jsx';
 import FicheElevePage from './pages/FicheElevePage.jsx';
 import FichePublique from './pages/FichePublique.jsx';
 import Administration from './pages/Administration.jsx';
@@ -46,6 +47,7 @@ export default function App() {
       <Route path="/mon-ecole" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><MonEcole /></RequireRole></Shell></RequireAuth>} />
       <Route path="/administration" element={<RequireAuth><Shell><RequireRole roles={['admin']}><Administration /></RequireRole></Shell></RequireAuth>} />
       <Route path="/fiches" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><FicheClassePage picker /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/fiches/ecole" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><FicheEcolePage /></RequireRole></Shell></RequireAuth>} />
       <Route path="/classe/:classeId/fiche" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><FicheClassePage /></RequireRole></Shell></RequireAuth>} />
       <Route path="/eleve/:eleveId/fiche" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><FicheElevePage /></RequireRole></Shell></RequireAuth>} />
       <Route path="*" element={<Shell><NotFound /></Shell>} />
