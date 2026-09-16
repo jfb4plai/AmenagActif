@@ -52,6 +52,22 @@ export default function FicheClasseView({ vm }) {
           <td className="border border-black p-2 text-center w-16">{vm.nbRecto}</td>
         </tr></tbody>
       </table>
+
+      {vm.commentaires.length > 0 && (
+        <>
+          <h2 className="font-bold underline mb-1 mt-4">Commentaires :</h2>
+          <table className="w-full border border-black text-sm">
+            <tbody>
+              {vm.commentaires.map((c, i) => (
+                <tr key={i}>
+                  <td className="border border-black p-2 align-top w-32 font-medium">{c.eleve}</td>
+                  <td className="border border-black p-2">{c.texte}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
     </article>
   );
 }
