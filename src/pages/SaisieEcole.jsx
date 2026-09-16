@@ -3,6 +3,7 @@ import SelecteurContexte from '../components/saisie/SelecteurContexte.jsx';
 import SelecteurClasse from '../components/saisie/SelecteurClasse.jsx';
 import BarreSaut from '../components/saisie/BarreSaut.jsx';
 import EnTeteEleves from '../components/saisie/EnTeteEleves.jsx';
+import EleveEditor from '../components/saisie/EleveEditor.jsx';
 import BandeauAU from '../components/saisie/BandeauAU.jsx';
 import ChapitreAR from '../components/saisie/ChapitreAR.jsx';
 import AjoutEleve from '../components/saisie/AjoutEleve.jsx';
@@ -13,6 +14,7 @@ import { useGridMutations } from '../hooks/useGridMutations.js';
 export default function SaisieEcole() {
   const [ctx, setCtx] = useState({ ecoleId: null, anneeId: null });
   const [classeId, setClasseId] = useState(null);
+  const [editId, setEditId] = useState(null);
   const { data: cat } = useCatalogue();
   const { data: grid, isLoading, error } = useEcoleGrid(ctx.ecoleId, ctx.anneeId);
   const mut = useGridMutations(ctx.ecoleId, ctx.anneeId);
@@ -54,7 +56,7 @@ export default function SaisieEcole() {
         <>
           <div className="flex items-center justify-between">
             <p className="text-sm">
-              <button className="underline text-teal" onClick={() => setClasseId(null)}>← Changer de classe</button>
+              <button className="underline text-teal" onClick={() => { setClasseId(null); setEditId(null); }}>← Changer de classe</button>
             </p>
           </div>
 
@@ -71,18 +73,35 @@ export default function SaisieEcole() {
           </div>
 
           <div className="plai-card p-3 space-y-2">
-            <div className="text-sm">
-              <span className="font-medium">Élèves de la classe ({eleves.length}) : </span>
-              {eleves.length === 0 ? (
-                <span className="text-[color:var(--text3)]">aucun élève encodé pour l'instant</span>
-              ) : (
-                <span>{eleves.map((e) => `${e.prenom} ${e.initiale_nom}`.trim()).join(', ')}</span>
-              )}
-            </div>
+            <div className="text-sm font-medium">Élèves de la classe ({eleves.length})</div>
+            {eleves.length === 0 ? (
+              <p className="text-sm text-[color:var(--text3)]">Aucun élève encodé pour l'instant.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {eleves.map((e) => (
+                  <div key={e.id} className="relative">
+                    <button type="button"
+                      className={`plai-input !w-auto !py-1 text-sm ${e.commentaire ? 'border-teal text-teal font-medium' : ''}`}
+                      title={e.commentaire ? `Commentaire : ${e.commentaire}` : 'Cliquer pour modifier'}
+                      onClick={() => setEditId(editId === e.id ? null : e.id)}>
+                      {e.prenom} {e.initiale_nom}{e.commentaire ? ' · commentaire' : ''}
+                    </button>
+                    {editId === e.id && (
+                      <div className="absolute z-40 mt-1">
+                        <EleveEditor eleve={e} onClose={() => setEditId(null)}
+                          onSave={(v) => mut.upsertEleve.mutateAsync({ id: e.id, classeId: e.classe_id, ...v })}
+                          onDelete={() => mut.deleteEleve.mutateAsync({ id: e.id })} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-[color:var(--text3)]">Cliquez sur un nom pour voir ou modifier ses informations, dont son commentaire.</p>
             <AjoutEleve
               referentSuggere={referentSuggere}
-              onCreate={async ({ prenom, initiale, referent }) => {
-                await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, referentPlaiNom: referent });
+              onCreate={async ({ prenom, initiale, referent, commentaire }) => {
+                await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, referentPlaiNom: referent, commentaire });
               }}
             />
           </div>
