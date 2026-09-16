@@ -47,9 +47,9 @@ describe('computeFicheClasse', () => {
     expect(vm.nbRecto).toBe(2);
   });
 
-  it('tableauReferents sépare PIA (accompagnateurs élèves) et PAR (direction)', () => {
+  it('tableauReferents sépare PIA (référent·e·s PLAI de la classe, texte libre) et PAR (direction)', () => {
     const vm = computeFicheClasse(args());
-    expect(vm.tableauReferents.pia.sort()).toEqual(['Carole', 'Mona']);
+    expect(vm.tableauReferents.pia).toEqual(['Mona', 'Carole']);
     expect(vm.tableauReferents.par).toEqual(['Julien']);
   });
 
@@ -65,10 +65,9 @@ describe('computeFicheClasse', () => {
     expect(vm.tableauReferents.par.sort()).toEqual(['Julien', 'Karim']);
   });
 
-  it('PIA retombe sur le référent PLAI de l\'implantation si aucun accompagnateur par élève', () => {
-    const eleves = args().eleves.map((e) => ({ ...e, referent_plai_nom: '' }));
-    const vm = computeFicheClasse({ ...args(), eleves });
-    expect(vm.tableauReferents.pia).toEqual(['Mona']);
+  it('PIA : classe sans référent PLAI saisi → liste vide', () => {
+    const vm = computeFicheClasse({ ...args(), classe: { ...f.classe5LA, referent_plai_nom: '' } });
+    expect(vm.tableauReferents.pia).toEqual([]);
   });
 
   it('dateMaj = date de sélection la plus récente', () => {

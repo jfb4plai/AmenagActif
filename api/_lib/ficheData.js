@@ -9,14 +9,14 @@ export async function loadClasseData(classeId) {
 
   const { data: classe, error: ec } = await db
     .from('ar_classes')
-    .select('id, nom, niveau, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
+    .select('id, nom, niveau, referent_plai_nom, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
     .eq('id', classeId)
     .single();
   if (ec) throw ec;
 
   const { data: eleves, error: ee } = await db
     .from('ar_eleves')
-    .select('id, classe_id, prenom, initiale_nom, referent_plai_nom, commentaire, created_at')
+    .select('id, classe_id, prenom, initiale_nom, commentaire, created_at')
     .eq('classe_id', classeId)
     .order('prenom');
   if (ee) throw ee;

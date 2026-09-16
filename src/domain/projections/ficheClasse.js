@@ -95,11 +95,10 @@ export function computeFicheClasse(input) {
       .map((s) => s.eleve_id)
   ).size;
 
-  // referents : comptes rattachés à l'implantation, fonction ∈ 'direction' | 'referent_plai'.
-  // PIA = accompagnateur saisi par élève ; à défaut, le référent PLAI de l'implantation.
-  const piaEleves = [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))];
-  const piaEcole = referents.filter((r) => r.fonction === 'referent_plai').map((r) => r.nom).filter(Boolean);
-  const pia = piaEleves.length ? piaEleves : piaEcole;
+  // PIA = référent(s) PLAI de la classe (texte libre, un ou plusieurs noms séparés par une
+  // virgule, saisi une fois pour la classe — pas dérivé des élèves individuels).
+  const pia = (input.classe?.referent_plai_nom ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  // referents : comptes direction rattachés à l'implantation (PAR de la fiche).
   const niveauClasse = input.classe?.niveau ?? null;
   const par = referents
     .filter((r) => r.fonction === 'direction')

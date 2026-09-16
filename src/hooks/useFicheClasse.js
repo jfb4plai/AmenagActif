@@ -5,12 +5,12 @@ import { computeFicheClasse } from '../domain/projections/ficheClasse.js';
 async function chargerClasse(classeId) {
   const { data: classe, error } = await supabase
     .from('ar_classes')
-    .select('id, nom, niveau, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
+    .select('id, nom, niveau, referent_plai_nom, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
     .eq('id', classeId).single();
   if (error) throw error;
 
   const { data: eleves } = await supabase
-    .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, referent_plai_nom, commentaire, created_at').eq('classe_id', classeId).order('prenom');
+    .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, commentaire, created_at').eq('classe_id', classeId).order('prenom');
   const eleveIds = eleves.map((e) => e.id);
 
   const [cat, chap, au, sel, lib, ref] = await Promise.all([

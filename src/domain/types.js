@@ -16,7 +16,6 @@
  * @property {string} classe_id
  * @property {string} prenom
  * @property {string} initiale_nom
- * @property {string} referent_plai_nom
  * @property {string} [commentaire]
  *
  * @typedef {Object} Classe
@@ -25,6 +24,7 @@
  * @property {string} ecole_id
  * @property {string} annee_id
  * @property {string} [niveau]
+ * @property {string} [referent_plai_nom]
  *
  * @typedef {Object} SelectionAR
  * @property {string} eleve_id
@@ -49,6 +49,7 @@
  * @property {{ pia: string[], par: string[] }} tableauReferents
  * @property {{ libelle: string, chapitreTitre: string, surligne: boolean }[]} pourTous
  * @property {{ eleve: string, eleveId: string, amenagements: string[] }[]} parEleve
+ * @property {{ libelle: string, eleves: string[] }[]} parAmenagement
  * @property {{ eleve: string, texte: string }[]} commentaires
  * @property {number} nbRecto
  *

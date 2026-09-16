@@ -33,8 +33,8 @@ export function useGridMutations(ecoleId, anneeId) {
   });
 
   const upsertEleve = useMutation({
-    mutationFn: async ({ id, classeId, prenom, initialeNom, referentPlaiNom, commentaire }) => {
-      const row = { prenom, initiale_nom: initialeNom ?? '', referent_plai_nom: referentPlaiNom ?? '', commentaire: commentaire ?? '' };
+    mutationFn: async ({ id, classeId, prenom, initialeNom, commentaire }) => {
+      const row = { prenom, initiale_nom: initialeNom ?? '', commentaire: commentaire ?? '' };
       if (id) {
         const { error } = await supabase.from('ar_eleves').update(row).eq('id', id);
         if (error) throw error;
@@ -66,6 +66,14 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
+  const majReferentPlaiClasse = useMutation({
+    mutationFn: async ({ classeId, referentPlaiNom }) => {
+      const { error } = await supabase.from('ar_classes').update({ referent_plai_nom: referentPlaiNom ?? '' }).eq('id', classeId);
+      if (error) throw error;
+    },
+    onSuccess: invalider,
+  });
+
   const addLibre = useMutation({
     mutationFn: async ({ eleveId, chapitreId, texte }) => {
       const { error } = await supabase.from('ar_amenagements_libres').insert({ eleve_id: eleveId, chapitre_id: chapitreId ?? null, texte });
@@ -82,5 +90,5 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
-  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, addLibre, removeLibre };
+  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, majReferentPlaiClasse, addLibre, removeLibre };
 }

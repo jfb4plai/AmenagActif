@@ -3,7 +3,6 @@ import { useState } from 'react';
 export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
   const [prenom, setPrenom] = useState(eleve?.prenom ?? '');
   const [initiale, setInitiale] = useState(eleve?.initiale_nom ?? '');
-  const [ref, setRef] = useState(eleve?.referent_plai_nom ?? '');
   const [commentaire, setCommentaire] = useState(eleve?.commentaire ?? '');
   const [etat, setEtat] = useState('idle'); // idle | enregistrement | enregistre | suppression | erreur
   const [erreur, setErreur] = useState('');
@@ -14,7 +13,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
     setEtat('enregistrement');
     setErreur('');
     try {
-      await onSave({ prenom, initialeNom: initiale, referentPlaiNom: ref, commentaire });
+      await onSave({ prenom, initialeNom: initiale, commentaire });
       setEtat('enregistre');
       setTimeout(onClose, 600);
     } catch (e) {
@@ -47,12 +46,6 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
         <input className="plai-input w-full" maxLength={2} value={initiale} onChange={(e) => setInitiale(e.target.value)} placeholder="D" disabled={enCours} />
         <p className="text-xs text-[color:var(--text3)]">Affichée « Emilie D. » sur la fiche. Pas de nom complet.</p>
       </div>
-      <div>
-        <label className="block text-sm font-medium">Référent(s) PLAI de cet élève</label>
-        <input className="plai-input w-full" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Mona, Julie" disabled={enCours} />
-        <p className="text-xs text-[color:var(--text3)]">Nom de l'accompagnateur·ice qui suit cet élève en particulier. Plusieurs noms : séparez-les par une virgule (ex. « Mona, Julie »). Combiné à ceux des autres élèves de la classe, ça alimente le tableau « Référent(s) PLAI » de la fiche.</p>
-      </div>
-
       <div>
         <label className="block text-sm font-medium">Commentaire (facultatif)</label>
         <textarea className="plai-input w-full" rows={2} value={commentaire} onChange={(e) => setCommentaire(e.target.value)}

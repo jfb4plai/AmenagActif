@@ -1,16 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-export default function AjoutEleve({ onCreate, referentSuggere }) {
+export default function AjoutEleve({ onCreate }) {
   const [ouvert, setOuvert] = useState(false);
-  const [f, setF] = useState({ prenom: '', initiale: '', referent: '', commentaire: '' });
+  const [f, setF] = useState({ prenom: '', initiale: '', commentaire: '' });
   const [etat, setEtat] = useState('idle'); // idle | creation | erreur
   const [erreur, setErreur] = useState('');
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
-
-  useEffect(() => {
-    if (ouvert && !f.referent && referentSuggere) setF((prev) => ({ ...prev, referent: referentSuggere }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ouvert, referentSuggere]);
 
   if (!ouvert) return <button className="plai-btn" onClick={() => setOuvert(true)}>+ élève</button>;
 
@@ -22,7 +17,7 @@ export default function AjoutEleve({ onCreate, referentSuggere }) {
       await onCreate(f);
       setOuvert(false);
       setEtat('idle');
-      setF({ prenom: '', initiale: '', referent: '', commentaire: '' });
+      setF({ prenom: '', initiale: '', commentaire: '' });
     } catch (err) {
       setEtat('erreur');
       setErreur(err.message || "Échec de la création, réessayez.");
@@ -38,9 +33,6 @@ export default function AjoutEleve({ onCreate, referentSuggere }) {
       </label>
       <label className="text-sm">Initiale
         <input className="plai-input block" maxLength={2} value={f.initiale} onChange={set('initiale')} placeholder="D" disabled={enCours} />
-      </label>
-      <label className="text-sm">Référent(s) PLAI de cet élève
-        <input className="plai-input block" value={f.referent} onChange={set('referent')} placeholder="Mona, Julie" disabled={enCours} />
       </label>
       <label className="text-sm w-full">Commentaire (facultatif)
         <textarea className="plai-input block w-full" rows={2} value={f.commentaire} onChange={set('commentaire')}

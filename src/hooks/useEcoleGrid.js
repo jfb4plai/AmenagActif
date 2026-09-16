@@ -30,13 +30,13 @@ export function useEcoleGrid(ecoleId, anneeId) {
     enabled: !!ecoleId && !!anneeId,
     queryFn: async () => {
       const { data: classes, error: ec } = await supabase
-        .from('ar_classes').select('id, nom, niveau').eq('ecole_id', ecoleId).eq('annee_id', anneeId).order('nom');
+        .from('ar_classes').select('id, nom, niveau, referent_plai_nom').eq('ecole_id', ecoleId).eq('annee_id', anneeId).order('nom');
       if (ec) throw ec;
       const classeIds = classes.map((c) => c.id);
       if (classeIds.length === 0) return { classes, eleves: [], selectionsAR: [], auClasse: [], libres: [] };
 
       const { data: eleves, error: ee } = await supabase
-        .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, referent_plai_nom, commentaire').in('classe_id', classeIds).order('prenom');
+        .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, commentaire').in('classe_id', classeIds).order('prenom');
       if (ee) throw ee;
       const eleveIds = eleves.map((e) => e.id);
 

@@ -21,11 +21,6 @@ export default function SaisieEcole() {
 
   const classe = useMemo(() => grid?.classes.find((c) => c.id === classeId) ?? null, [grid, classeId]);
   const eleves = useMemo(() => (grid?.eleves ?? []).filter((e) => e.classe_id === classeId), [grid, classeId]);
-  const referentsClasse = useMemo(
-    () => [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))],
-    [eleves]
-  );
-  const referentSuggere = referentsClasse.length === 1 ? referentsClasse[0] : '';
 
   const chapitres = cat?.chapitres ?? [];
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
@@ -60,15 +55,18 @@ export default function SaisieEcole() {
             </p>
           </div>
 
-          <div className="plai-card p-3 text-sm">
-            <span className="font-medium">Référent(s) PLAI de la classe : </span>
-            {referentsClasse.length === 0 ? (
-              <span className="text-[color:var(--text3)]">aucun renseigné pour l'instant</span>
-            ) : (
-              <span>{referentsClasse.join(', ')}</span>
-            )}
-            <p className="text-xs text-[color:var(--text3)] mt-1">
-              C'est ce qui apparaîtra sur la fiche classe — vérifiez l'orthographe. Plusieurs variantes proches (ex. « Mona » et « mona ») signalent probablement une faute de frappe à corriger dans la fiche d'un élève.
+          <div className="plai-card p-3 text-sm space-y-1">
+            <label className="font-medium block" htmlFor="referent-plai-classe">Référent(s) PLAI de la classe</label>
+            <input id="referent-plai-classe" key={classe.id} className="plai-input w-full"
+              defaultValue={classe.referent_plai_nom ?? ''} placeholder="Mona, Julie"
+              onBlur={(e) => {
+                const valeur = e.target.value.trim();
+                if (valeur !== (classe.referent_plai_nom ?? '')) {
+                  mut.majReferentPlaiClasse.mutate({ classeId, referentPlaiNom: valeur });
+                }
+              }} />
+            <p className="text-xs text-[color:var(--text3)]">
+              Nom(s) de la ou des personnes à contacter pour l'accompagnement PLAI de cette classe. Plusieurs noms : séparez-les par une virgule (ex. « Mona, Julie »). Modifiable à tout moment si la situation change en cours d'année — c'est ce qui apparaît sur la fiche classe.
             </p>
           </div>
 
@@ -99,9 +97,8 @@ export default function SaisieEcole() {
             )}
             <p className="text-xs text-[color:var(--text3)]">Cliquez sur un nom pour voir ou modifier ses informations, dont son commentaire.</p>
             <AjoutEleve
-              referentSuggere={referentSuggere}
-              onCreate={async ({ prenom, initiale, referent, commentaire }) => {
-                await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, referentPlaiNom: referent, commentaire });
+              onCreate={async ({ prenom, initiale, commentaire }) => {
+                await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, commentaire });
               }}
             />
           </div>
