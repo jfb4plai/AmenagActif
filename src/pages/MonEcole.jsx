@@ -37,7 +37,7 @@ export default function MonEcole() {
       <section className="space-y-2">
         <h2 className="font-semibold">Équipe de l'implantation</h2>
         <p className="text-sm text-[color:var(--text3)]">
-          Ces noms alimentent les colonnes « référent·e PIA » et « PAR (Direction) » des fiches.
+          Ces noms alimentent les colonnes « Référent(s) PLAI » et « PAR (Direction) » des fiches.
           Pour ajouter ou retirer une personne, ou corriger un nom, contactez l'administrateur.
         </p>
         <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">

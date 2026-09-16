@@ -34,7 +34,7 @@ function SectionMembres() {
       <h2 className="font-semibold">Membres &amp; accès</h2>
       <p className="text-sm text-[color:var(--text3)]">
         <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, limités à une école (classes, élèves, AR/AU, fiches).
-        Le <strong>nom</strong> figure sur les fiches (colonnes « référent·e PIA » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
+        Le <strong>nom</strong> figure sur les fiches (colonnes « Référent(s) PLAI » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
         Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : le champ <strong>Niveaux</strong> limite l'apparition de chacun aux classes concernées — vide, il apparaît sur toutes.
       </p>
 
