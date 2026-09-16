@@ -28,7 +28,7 @@ export default function BandeauAU({ classesAvecEleves, auCatalogue, chapitres, a
         {classesAvecEleves.map(({ classe }) => (
           <div key={classe.id} className="min-w-[18rem] flex-1">
             <div className="font-medium mb-1">
-              {classe.nom} <span className="text-[color:var(--text3)] font-normal">— {nbCoches(classe.id)} AU coché{nbCoches(classe.id) > 1 ? 's' : ''}</span>
+              {classe.nom} <span className="text-[color:var(--text3)] font-normal">— {nbCoches(classe.id)} AU coché(s)</span>
             </div>
             <ul className="space-y-1">
               {auTries.map((a) => (

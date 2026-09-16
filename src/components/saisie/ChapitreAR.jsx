@@ -19,7 +19,7 @@ export default function ChapitreAR({ chapitre, amenagements, classesAvecEleves, 
             aria-expanded={ouvert} onClick={() => setOuvert((v) => !v)}>
             <span>{ouvert ? '▼' : '▶'}</span>
             <span className="font-semibold">{chapitre.titre}</span>
-            <span className="text-sm text-[color:var(--text3)]">({nbCoches} AR cochés)</span>
+            <span className="text-sm text-[color:var(--text3)]">({nbCoches} AR coché(s))</span>
           </button>
         </td>
       </tr>
