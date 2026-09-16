@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { supabase } from '../lib/supabase.js';
-import { useRole } from '../lib/auth.jsx';
+import { useRole, useAuth } from '../lib/auth.jsx';
 
 const lien = ({ isActive }) => (isActive ? 'font-semibold text-teal' : 'text-[color:var(--text2)]');
 
@@ -12,6 +12,7 @@ const LABEL_ROLE = {
 
 export default function Nav() {
   const { role, isAdmin } = useRole();
+  const { session } = useAuth();
   return (
     <header className="plai-nav flex items-center gap-6 px-4 py-2 border-b border-[color:var(--border)]">
       <Link to="/" className="flex items-center gap-2">
@@ -25,7 +26,12 @@ export default function Nav() {
         {isAdmin && <NavLink to="/administration" className={lien}>Administration</NavLink>}
       </nav>
       <div className="ml-auto text-sm flex items-center gap-3">
-        {role && <span className="text-[color:var(--text3)]">{LABEL_ROLE[role] ?? role}</span>}
+        {session?.user?.email && (
+          <span className="text-[color:var(--text3)]">
+            {session.user.email}
+            {role && <> · {LABEL_ROLE[role] ?? role}</>}
+          </span>
+        )}
         <button className="plai-btn" onClick={() => supabase.auth.signOut()}>Déconnexion</button>
       </div>
     </header>
