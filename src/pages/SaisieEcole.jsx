@@ -38,6 +38,8 @@ export default function SaisieEcole() {
         <p>Chargement…</p>
       ) : error ? (
         <p className="plai-error">Erreur de chargement : {error.message}</p>
+      ) : !grid ? (
+        <p>Chargement…</p>
       ) : !classe ? (
         <SelecteurClasse
           classes={grid.classes}
