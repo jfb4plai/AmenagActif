@@ -8,8 +8,10 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
   const cols = eleves;
   const totalCols = cols.length;
   const estCoche = (eleveId, amId) => selectionsAR.some((s) => s.eleve_id === eleveId && s.amenagement_id === amId);
-  const nbCoches = selectionsAR.filter((s) => amenagements.some((a) => a.id === s.amenagement_id)).length;
-  const libresChap = libres.filter((l) => l.chapitre_id === chapitre.id);
+  // selectionsAR est passé pour toute l'école (useEcoleGrid) : ne compter que les élèves de cette classe.
+  const nbCoches = selectionsAR.filter((s) => amenagements.some((a) => a.id === s.amenagement_id) && cols.some((c) => c.id === s.eleve_id)).length;
+  // libres est passé pour toute l'école (useEcoleGrid) : ne garder que les élèves de cette classe.
+  const libresChap = libres.filter((l) => l.chapitre_id === chapitre.id && cols.some((c) => c.id === l.eleve_id));
 
   return (
     <>
