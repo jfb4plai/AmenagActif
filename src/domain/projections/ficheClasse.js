@@ -75,6 +75,7 @@ export function computeFicheClasse(input) {
   }
   // Les aménagements libres n'ont pas d'ordre de catalogue : ils se placent
   // après tous les AR, dans le même ordre que dans parEleve (Infinity trie en dernier).
+  // Entre eux, l'ordre suit celui du tableau `libres` (insertion) : non garanti au-delà.
   for (const l of libres) {
     const e = eleves.find((x) => x.id === l.eleve_id);
     if (!e) continue;
