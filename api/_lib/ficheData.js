@@ -16,7 +16,7 @@ export async function loadClasseData(classeId) {
 
   const { data: eleves, error: ee } = await db
     .from('ar_eleves')
-    .select('id, classe_id, prenom, initiale_nom, referent_plai_nom, created_at')
+    .select('id, classe_id, prenom, initiale_nom, referent_plai_nom, commentaire, created_at')
     .eq('classe_id', classeId)
     .order('prenom');
   if (ee) throw ee;

@@ -4,7 +4,7 @@ import { computeFicheEleve } from '../domain/projections/ficheEleve.js';
 
 async function charger(eleveId) {
   const { data: eleve, error } = await supabase
-    .from('ar_eleves').select('id, prenom, initiale_nom, classe_id, ar_classes(nom)').eq('id', eleveId).single();
+    .from('ar_eleves').select('id, prenom, initiale_nom, commentaire, classe_id, ar_classes(nom)').eq('id', eleveId).single();
   if (error) throw error;
   const [cat, chap, sel, lib] = await Promise.all([
     supabase.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type'),
