@@ -53,6 +53,17 @@ describe('computeFicheClasse', () => {
     expect(vm.tableauReferents.par).toEqual(['Julien']);
   });
 
+  it('PAR : une direction sans niveaux assignés apparaît sur toutes les classes ; une direction restreinte à d\'autres niveaux est exclue', () => {
+    const vm = computeFicheClasse(args());
+    expect(vm.tableauReferents.par).toEqual(['Julien']);
+  });
+
+  it('PAR : une direction dont les niveaux incluent celui de la classe apparaît', () => {
+    const referents = [...args().referents, { nom: 'Karim', fonction: 'direction', niveaux: ['5e', '6e'] }];
+    const vm = computeFicheClasse({ ...args(), referents });
+    expect(vm.tableauReferents.par.sort()).toEqual(['Julien', 'Karim']);
+  });
+
   it('PIA retombe sur le référent PLAI de l\'implantation si aucun accompagnateur par élève', () => {
     const eleves = args().eleves.map((e) => ({ ...e, referent_plai_nom: '' }));
     const vm = computeFicheClasse({ ...args(), eleves });

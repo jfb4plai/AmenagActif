@@ -11,7 +11,7 @@ export const amenagements = [
   { id: 'a-ar5', chapitre_id: 'c5', ordre: 1, libelle: 'Utiliser les livres audio pour la lecture', type: 'AR' },
 ];
 
-export const classe5LA = { id: 'cl-5la', nom: '5LA', ecole_id: 'ec1', annee_id: 'an1', created_at: '2026-08-20T08:00:00Z' };
+export const classe5LA = { id: 'cl-5la', nom: '5LA', niveau: '5e', ecole_id: 'ec1', annee_id: 'an1', created_at: '2026-08-20T08:00:00Z' };
 
 export const eleves = [
   { id: 'e1', classe_id: 'cl-5la', prenom: 'Emilie', initiale_nom: 'D', referent_plai_nom: 'Mona', commentaire: '', created_at: '2026-08-21T08:00:00Z' },
@@ -33,8 +33,9 @@ export const libres = [
 ];
 
 export const referents = [
-  { nom: 'Julien', fonction: 'direction' },
-  { nom: 'Mona', fonction: 'referent_plai' },
+  { nom: 'Julien', fonction: 'direction', niveaux: null },
+  { nom: 'Sophie', fonction: 'direction', niveaux: ['1e', '2e'] },
+  { nom: 'Mona', fonction: 'referent_plai', niveaux: null },
 ];
 
 export const contexte = { classeNom: '5LA', ecoleNom: 'Athénée X', anneeLibelle: '2025-2026' };
