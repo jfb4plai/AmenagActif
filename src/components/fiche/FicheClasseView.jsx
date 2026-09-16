@@ -32,14 +32,12 @@ export default function FicheClasseView({ vm }) {
       <h2 className="font-bold underline mb-1">AR spécifiques à un élève :</h2>
       <table className="w-full border border-black mb-4 text-sm">
         <tbody>
-          {vm.parEleve.length === 0 && <tr><td className="border border-black p-2 text-gray-500">Aucun.</td></tr>}
-          {vm.parEleve.map((row) => (
-            <tr key={row.eleve}>
-              <td className="border border-black p-2 align-top w-32 font-medium">
-                {row.eleveId ? <a className="text-teal underline" href={`/eleve/${row.eleveId}/fiche`}>{row.eleve}</a> : row.eleve}
-              </td>
+          {vm.parAmenagement.length === 0 && <tr><td className="border border-black p-2 text-gray-500">Aucun.</td></tr>}
+          {vm.parAmenagement.map((row) => (
+            <tr key={row.libelle}>
+              <td className="border border-black p-2 align-top w-64">{row.libelle}</td>
               <td className="border border-black p-2">
-                <ul className="list-disc pl-5">{row.amenagements.map((a, i) => <li key={i}>{a}</li>)}</ul>
+                <ul className="list-disc pl-5">{row.eleves.map((e, i) => <li key={i}>{e}</li>)}</ul>
               </td>
             </tr>
           ))}
