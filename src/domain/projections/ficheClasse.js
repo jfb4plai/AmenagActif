@@ -35,6 +35,9 @@ export function computeFicheClasse(input) {
     }));
 
   const nomEleve = (e) => `${e.prenom}${e.initiale_nom ? ' ' + e.initiale_nom + '.' : ''}`;
+  const commentaires = eleves
+    .filter((e) => (e.commentaire ?? '').trim())
+    .map((e) => ({ eleve: nomEleve(e), texte: e.commentaire.trim() }));
   const arParEleveId = new Map();
   for (const s of selectionsAR) {
     const a = amgtById.get(s.amenagement_id);
@@ -95,6 +98,7 @@ export function computeFicheClasse(input) {
     tableauReferents: { pia, par },
     pourTous,
     parEleve,
+    commentaires,
     nbRecto,
   };
 }

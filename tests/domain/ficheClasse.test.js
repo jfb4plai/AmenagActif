@@ -76,4 +76,11 @@ describe('computeFicheClasse', () => {
     const vm = computeFicheClasse({ ...args(), classe: { nom: '5LA' }, eleves: [], selectionsAR: [], auClasse: [], libres: [] });
     expect(vm.dateMaj).toBeNull();
   });
+
+  it('commentaires : un élève avec commentaire non vide, les autres omis', () => {
+    const vm = computeFicheClasse(args());
+    expect(vm.commentaires).toEqual([
+      { eleve: 'Karim B.', texte: 'Décès de la grand-mère mi-septembre, vigilance émotionnelle' },
+    ]);
+  });
 });

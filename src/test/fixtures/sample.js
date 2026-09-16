@@ -14,9 +14,9 @@ export const amenagements = [
 export const classe5LA = { id: 'cl-5la', nom: '5LA', ecole_id: 'ec1', annee_id: 'an1', created_at: '2026-08-20T08:00:00Z' };
 
 export const eleves = [
-  { id: 'e1', classe_id: 'cl-5la', prenom: 'Emilie', initiale_nom: 'D', referent_plai_nom: 'Mona', created_at: '2026-08-21T08:00:00Z' },
-  { id: 'e2', classe_id: 'cl-5la', prenom: 'Karim', initiale_nom: 'B', referent_plai_nom: 'Mona', created_at: '2026-08-21T08:00:00Z' },
-  { id: 'e3', classe_id: 'cl-5la', prenom: 'Lea', initiale_nom: 'M', referent_plai_nom: 'Carole', created_at: '2026-08-21T08:00:00Z' },
+  { id: 'e1', classe_id: 'cl-5la', prenom: 'Emilie', initiale_nom: 'D', referent_plai_nom: 'Mona', commentaire: '', created_at: '2026-08-21T08:00:00Z' },
+  { id: 'e2', classe_id: 'cl-5la', prenom: 'Karim', initiale_nom: 'B', referent_plai_nom: 'Mona', commentaire: 'Décès de la grand-mère mi-septembre, vigilance émotionnelle', created_at: '2026-08-21T08:00:00Z' },
+  { id: 'e3', classe_id: 'cl-5la', prenom: 'Lea', initiale_nom: 'M', referent_plai_nom: 'Carole', commentaire: '', created_at: '2026-08-21T08:00:00Z' },
 ];
 
 export const auClasse = [{ classe_id: 'cl-5la', amenagement_id: 'a-au1', cree_le: '2026-09-01T08:00:00Z' }];
