@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useEcoles, useAnnees, useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import { useFicheClasse } from '../hooks/useFicheClasse.js';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
@@ -20,8 +20,17 @@ export default function FicheEcolePage() {
   const [ecoleId, setEcoleId] = useState('');
   const [anneeId, setAnneeId] = useState('');
 
+  useEffect(() => {
+    if (ecoleUnique && ecoleId !== ecoleUnique.id) setEcoleId(ecoleUnique.id);
+  }, [ecoleUnique, ecoleId]);
+  useEffect(() => {
+    if (anneeId) return;
+    const active = annees.find((a) => a.active);
+    if (active) setAnneeId(active.id);
+  }, [annees, anneeId]);
+
   const ecoleActive = ecoleUnique?.id || ecoleId;
-  const anneeActive = anneeId || annees.find((a) => a.active)?.id || '';
+  const anneeActive = anneeId;
   const { data: grid } = useEcoleGrid(ecoleActive || null, anneeActive || null);
   const classes = grid?.classes ?? [];
 
