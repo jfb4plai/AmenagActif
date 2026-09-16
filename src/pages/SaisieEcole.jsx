@@ -19,10 +19,11 @@ export default function SaisieEcole() {
 
   const classe = useMemo(() => grid?.classes.find((c) => c.id === classeId) ?? null, [grid, classeId]);
   const eleves = useMemo(() => (grid?.eleves ?? []).filter((e) => e.classe_id === classeId), [grid, classeId]);
-  const referentSuggere = useMemo(() => {
-    const valeurs = [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))];
-    return valeurs.length === 1 ? valeurs[0] : '';
-  }, [eleves]);
+  const referentsClasse = useMemo(
+    () => [...new Set(eleves.map((e) => e.referent_plai_nom).filter(Boolean))],
+    [eleves]
+  );
+  const referentSuggere = referentsClasse.length === 1 ? referentsClasse[0] : '';
 
   const chapitres = cat?.chapitres ?? [];
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
@@ -41,16 +42,31 @@ export default function SaisieEcole() {
       ) : !grid ? (
         <p>Chargement…</p>
       ) : !classe ? (
-        <SelecteurClasse
-          classes={grid.classes}
-          onSelect={setClasseId}
-          onCreate={({ nom, niveau }) => mut.ensureClasse.mutateAsync({ nom, niveau })}
-        />
+        <>
+          <p className="text-sm text-[color:var(--text3)]">Pour saisir les informations d'un élève, il faut d'abord choisir sa classe ci-dessous — ou en créer une nouvelle.</p>
+          <SelecteurClasse
+            classes={grid.classes}
+            onSelect={setClasseId}
+            onCreate={({ nom, niveau }) => mut.ensureClasse.mutateAsync({ nom, niveau })}
+          />
+        </>
       ) : (
         <>
           <div className="flex items-center justify-between">
             <p className="text-sm">
               <button className="underline text-teal" onClick={() => setClasseId(null)}>← Changer de classe</button>
+            </p>
+          </div>
+
+          <div className="plai-card p-3 text-sm">
+            <span className="font-medium">Référent(s) PLAI de la classe : </span>
+            {referentsClasse.length === 0 ? (
+              <span className="text-[color:var(--text3)]">aucun renseigné pour l'instant</span>
+            ) : (
+              <span>{referentsClasse.join(', ')}</span>
+            )}
+            <p className="text-xs text-[color:var(--text3)] mt-1">
+              C'est ce qui apparaîtra sur la fiche classe — vérifiez l'orthographe. Plusieurs variantes proches (ex. « Mona » et « mona ») signalent probablement une faute de frappe à corriger dans la fiche d'un élève.
             </p>
           </div>
 
