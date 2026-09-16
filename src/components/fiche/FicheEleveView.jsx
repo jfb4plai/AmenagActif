@@ -15,6 +15,12 @@ export default function FicheEleveView({ vm }) {
           <ul className="list-disc pl-6">{ch.amenagements.map((a, i) => <li key={i}>{a}</li>)}</ul>
         </section>
       ))}
+      {vm.commentaire && (
+        <section className="mt-3">
+          <h2 className="font-bold">Commentaire</h2>
+          <p>{vm.commentaire}</p>
+        </section>
+      )}
     </article>
   );
 }
