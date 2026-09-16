@@ -48,9 +48,9 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
         <p className="text-xs text-[color:var(--text3)]">Affichée « Emilie D. » sur la fiche. Pas de nom complet.</p>
       </div>
       <div>
-        <label className="block text-sm font-medium">Référent(s) PLAI (accompagnateur)</label>
+        <label className="block text-sm font-medium">Référent(s) PLAI de cet élève</label>
         <input className="plai-input w-full" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Mona, Julie" disabled={enCours} />
-        <p className="text-xs text-[color:var(--text3)]">Nom de l'accompagnateur·ice qui suit cet élève. Plusieurs noms : séparez-les par une virgule (ex. « Mona, Julie »). Apparaît dans le tableau « Référent(s) PLAI » de la fiche.</p>
+        <p className="text-xs text-[color:var(--text3)]">Nom de l'accompagnateur·ice qui suit cet élève en particulier. Plusieurs noms : séparez-les par une virgule (ex. « Mona, Julie »). Combiné à ceux des autres élèves de la classe, ça alimente le tableau « Référent(s) PLAI » de la fiche.</p>
       </div>
 
       <div>

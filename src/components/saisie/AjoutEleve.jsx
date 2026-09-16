@@ -39,7 +39,7 @@ export default function AjoutEleve({ onCreate, referentSuggere }) {
       <label className="text-sm">Initiale
         <input className="plai-input block" maxLength={2} value={f.initiale} onChange={set('initiale')} placeholder="D" disabled={enCours} />
       </label>
-      <label className="text-sm">Référent(s) PLAI
+      <label className="text-sm">Référent(s) PLAI de cet élève
         <input className="plai-input block" value={f.referent} onChange={set('referent')} placeholder="Mona, Julie" disabled={enCours} />
       </label>
       <label className="text-sm w-full">Commentaire (facultatif)
