@@ -37,7 +37,11 @@ export default function FicheClasseView({ vm }) {
             <tr key={row.libelle}>
               <td className="border border-black p-2 align-top w-1/2">{row.libelle}</td>
               <td className="border border-black p-2">
-                <ul className="list-disc pl-5">{row.eleves.map((e, i) => <li key={i}>{e}</li>)}</ul>
+                <ul className="list-disc pl-5">
+                  {row.eleves.map((e, i) => (
+                    <li key={i}><a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a></li>
+                  ))}
+                </ul>
               </td>
             </tr>
           ))}

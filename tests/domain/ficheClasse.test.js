@@ -103,7 +103,7 @@ describe('computeFicheClasse', () => {
       'Vérifier oralement la consigne avant de commencer',
     ]);
     const doubler = vm.parAmenagement.find((x) => x.libelle === 'Doubler les espaces de réponse');
-    expect(doubler.eleves).toEqual(['Emilie D.']);
+    expect(doubler.eleves).toEqual([{ nom: 'Emilie D.', eleveId: 'e1' }]);
   });
 
   it('parAmenagement : ne contient pas l\'AR recto ni les commentaires', () => {
@@ -116,6 +116,9 @@ describe('computeFicheClasse', () => {
     const selectionsAR = [...args().selectionsAR, { eleve_id: 'e3', amenagement_id: 'a-ar1', cree_le: '2026-09-03T08:00:00Z' }];
     const vm = computeFicheClasse({ ...args(), selectionsAR });
     const doubler = vm.parAmenagement.find((x) => x.libelle === 'Doubler les espaces de réponse');
-    expect(doubler.eleves).toEqual(['Emilie D.', 'Lea M.']);
+    expect(doubler.eleves).toEqual([
+      { nom: 'Emilie D.', eleveId: 'e1' },
+      { nom: 'Lea M.', eleveId: 'e3' },
+    ]);
   });
 });

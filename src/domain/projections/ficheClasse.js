@@ -63,15 +63,15 @@ export function computeFicheClasse(input) {
     .filter((x) => x.amenagements.length > 0);
 
   const parAmenagementMap = new Map();
-  const ajouterEleveAAmenagement = (libelle, chapOrdreVal, ordreVal, nom) => {
+  const ajouterEleveAAmenagement = (libelle, chapOrdreVal, ordreVal, nom, eleveId) => {
     if (!parAmenagementMap.has(libelle)) parAmenagementMap.set(libelle, { chapOrdreVal, ordreVal, eleves: [] });
-    parAmenagementMap.get(libelle).eleves.push(nom);
+    parAmenagementMap.get(libelle).eleves.push({ nom, eleveId });
   };
   for (const [eleveId, amgts] of arParEleveId.entries()) {
     const e = eleves.find((x) => x.id === eleveId);
     if (!e) continue;
     // arParEleveId exclut déjà l'AR recto (filtré plus haut à sa construction).
-    for (const a of amgts) ajouterEleveAAmenagement(a.libelle, chapOrdre(a), a.ordre, nomEleve(e));
+    for (const a of amgts) ajouterEleveAAmenagement(a.libelle, chapOrdre(a), a.ordre, nomEleve(e), e.id);
   }
   // Les aménagements libres n'ont pas d'ordre de catalogue : ils se placent
   // après tous les AR, dans le même ordre que dans parEleve (Infinity trie en dernier).
@@ -79,7 +79,7 @@ export function computeFicheClasse(input) {
   for (const l of libres) {
     const e = eleves.find((x) => x.id === l.eleve_id);
     if (!e) continue;
-    ajouterEleveAAmenagement(l.texte, Infinity, Infinity, nomEleve(e));
+    ajouterEleveAAmenagement(l.texte, Infinity, Infinity, nomEleve(e), e.id);
   }
   const parAmenagement = [...parAmenagementMap.entries()]
     .sort(([, a], [, b]) => a.chapOrdreVal - b.chapOrdreVal || a.ordreVal - b.ordreVal)

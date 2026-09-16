@@ -49,7 +49,7 @@
  * @property {{ pia: string[], par: string[] }} tableauReferents
  * @property {{ libelle: string, chapitreTitre: string, surligne: boolean }[]} pourTous
  * @property {{ eleve: string, eleveId: string, amenagements: string[] }[]} parEleve
- * @property {{ libelle: string, eleves: string[] }[]} parAmenagement
+ * @property {{ libelle: string, eleves: { nom: string, eleveId: string }[] }[]} parAmenagement
  * @property {{ eleve: string, texte: string }[]} commentaires
  * @property {number} nbRecto
  *
