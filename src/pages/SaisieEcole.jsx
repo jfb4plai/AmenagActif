@@ -70,15 +70,25 @@ export default function SaisieEcole() {
             </p>
           </div>
 
+          <div className="plai-card p-3 space-y-2">
+            <div className="text-sm">
+              <span className="font-medium">Élèves de la classe ({eleves.length}) : </span>
+              {eleves.length === 0 ? (
+                <span className="text-[color:var(--text3)]">aucun élève encodé pour l'instant</span>
+              ) : (
+                <span>{eleves.map((e) => `${e.prenom} ${e.initiale_nom}`.trim()).join(', ')}</span>
+              )}
+            </div>
+            <AjoutEleve
+              referentSuggere={referentSuggere}
+              onCreate={async ({ prenom, initiale, referent }) => {
+                await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, referentPlaiNom: referent });
+              }}
+            />
+          </div>
+
           <BandeauAU classe={classe} auCatalogue={auCat} chapitres={chapitres}
             auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)} onToggle={(v) => mut.toggleAU.mutate(v)} />
-
-          <AjoutEleve
-            referentSuggere={referentSuggere}
-            onCreate={async ({ prenom, initiale, referent }) => {
-              await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, referentPlaiNom: referent });
-            }}
-          />
 
           <div>
             <h2 className="font-semibold mb-1">Aménagements raisonnables — {classe.nom}</h2>
