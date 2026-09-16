@@ -95,4 +95,28 @@ describe('computeFicheClasse', () => {
       { eleve: 'Karim B.', texte: 'Décès de la grand-mère mi-septembre, vigilance émotionnelle' },
     ]);
   });
+
+  it('parAmenagement : une ligne par AR/libre, triée par ordre de chapitre, avec la liste des élèves concernés', () => {
+    const vm = computeFicheClasse(args());
+    expect(vm.parAmenagement.map((x) => x.libelle)).toEqual([
+      'Doubler les espaces de réponse',
+      'Utiliser les livres audio pour la lecture',
+      'Vérifier oralement la consigne avant de commencer',
+    ]);
+    const doubler = vm.parAmenagement.find((x) => x.libelle === 'Doubler les espaces de réponse');
+    expect(doubler.eleves).toEqual(['Emilie D.']);
+  });
+
+  it('parAmenagement : ne contient pas l\'AR recto ni les commentaires', () => {
+    const vm = computeFicheClasse(args());
+    expect(vm.parAmenagement.some((x) => x.libelle === 'Cours uniquement en recto')).toBe(false);
+    expect(vm.parAmenagement.some((x) => x.libelle.includes('grand-mère'))).toBe(false);
+  });
+
+  it('parAmenagement : un même AR partagé par deux élèves liste les deux noms', () => {
+    const selectionsAR = [...args().selectionsAR, { eleve_id: 'e3', amenagement_id: 'a-ar1', cree_le: '2026-09-03T08:00:00Z' }];
+    const vm = computeFicheClasse({ ...args(), selectionsAR });
+    const doubler = vm.parAmenagement.find((x) => x.libelle === 'Doubler les espaces de réponse');
+    expect(doubler.eleves).toEqual(['Emilie D.', 'Lea M.']);
+  });
 });
