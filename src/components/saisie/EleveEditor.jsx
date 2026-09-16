@@ -4,6 +4,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
   const [prenom, setPrenom] = useState(eleve?.prenom ?? '');
   const [initiale, setInitiale] = useState(eleve?.initiale_nom ?? '');
   const [ref, setRef] = useState(eleve?.referent_plai_nom ?? '');
+  const [commentaire, setCommentaire] = useState(eleve?.commentaire ?? '');
   const [etat, setEtat] = useState('idle'); // idle | enregistrement | enregistre | suppression | erreur
   const [erreur, setErreur] = useState('');
 
@@ -13,7 +14,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
     setEtat('enregistrement');
     setErreur('');
     try {
-      await onSave({ prenom, initialeNom: initiale, referentPlaiNom: ref });
+      await onSave({ prenom, initialeNom: initiale, referentPlaiNom: ref, commentaire });
       setEtat('enregistre');
       setTimeout(onClose, 600);
     } catch (e) {
@@ -50,6 +51,13 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
         <label className="block text-sm font-medium">Référent PLAI (accompagnateur)</label>
         <input className="plai-input w-full" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Mona" disabled={enCours} />
         <p className="text-xs text-[color:var(--text3)]">Nom de l'accompagnateur·ice qui suit cet élève. Apparaît dans le tableau PIA de la fiche.</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium">Commentaire (facultatif)</label>
+        <textarea className="plai-input w-full" rows={2} value={commentaire} onChange={(e) => setCommentaire(e.target.value)}
+          placeholder="Ex. : décès de la grand-mère mi-septembre, vigilance émotionnelle" disabled={enCours} />
+        <p className="text-xs text-[color:var(--text3)]">Information ponctuelle, à effacer quand elle n'est plus pertinente. Apparaît en bas de la fiche classe et de la fiche élève — pas dans le tableau des AR.</p>
       </div>
 
       {etat === 'erreur' && <p className="plai-error text-xs">{erreur}</p>}
