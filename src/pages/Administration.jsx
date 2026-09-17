@@ -69,6 +69,9 @@ function SectionMembres() {
           </label>
         )}
         <button className="plai-btn" type="submit" disabled={inviter.isPending}>{inviter.isPending ? 'Envoi…' : 'Inviter'}</button>
+        <p className="text-xs text-[color:var(--text3)] max-w-xs">
+          Le domaine d'envoi est récent : le mail peut atterrir dans les indésirables (surtout sur Outlook). Prévenez la personne invitée par un autre canal si elle ne reçoit rien.
+        </p>
       </form>
       {inviter.isError && <p className="plai-error">{inviter.error.message}</p>}
       {inviter.isSuccess && <p className="plai-success">Invitation envoyée.</p>}
