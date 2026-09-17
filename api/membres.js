@@ -1,7 +1,9 @@
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
+import { envoyerEmail } from './_lib/email.js';
 
 const ROLES = ['admin', 'referent_plai', 'direction'];
 const ROLE_SCOPE = ['referent_plai', 'direction'];
+const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction' };
 
 /** Retourne l'utilisateur appelant s'il est administrateur, sinon null. */
 async function exigerAdmin(req) {
@@ -45,7 +47,11 @@ export default async function handler(req, res) {
       if (action === 'invite') {
         if (!email || !ROLES.includes(role)) { res.status(400).json({ error: 'Email et rôle valides requis.' }); return; }
         if (scoped && !ecoleId) { res.status(400).json({ error: 'Ce rôle doit être rattaché à une école.' }); return; }
-        const { data, error } = await db.auth.admin.inviteUserByEmail(email, { redirectTo: `${origin}/nouveau-mot-de-passe` });
+        const { data, error } = await db.auth.admin.generateLink({
+          type: 'invite',
+          email,
+          options: { redirectTo: `${origin}/nouveau-mot-de-passe` },
+        });
         if (error) {
           if (/already|registered|exist/i.test(String(error.message))) {
             res.status(409).json({ error: "Ce compte existe déjà dans le projet Supabase. Ajoutez-le via SQL (ar_profils_acces) — voir README." });
@@ -56,6 +62,28 @@ export default async function handler(req, res) {
         const { error: e2 } = await db.from('ar_profils_acces')
           .upsert({ user_id: data.user.id, nom: (nom || '').trim(), role, ecole_id: ecolePour() }, { onConflict: 'user_id' });
         if (e2) throw e2;
+
+        const lien = data.properties.action_link;
+        const roleLabel = LABEL_ROLE[role] ?? role;
+        try {
+          await envoyerEmail({
+            to: email,
+            subject: 'Invitation à AménagActif',
+            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${lien}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p>Ce lien est personnel, ne le transférez pas.</p>`,
+          });
+        } catch (e3) {
+          res.status(502).json({ error: `Compte créé, mais l'envoi de l'email d'invitation a échoué (${e3.message}). Réessayez l'invitation.` });
+          return;
+        }
+        try {
+          await envoyerEmail({
+            to: moi.email,
+            subject: `AménagActif — invitation envoyée à ${email}`,
+            html: `<p>Confirmation : vous venez d'inviter <strong>${email}</strong> avec le rôle <strong>${roleLabel}</strong>${scoped ? ' (école rattachée)' : ''}, le ${new Date().toLocaleString('fr-BE')}.</p>`,
+          });
+        } catch (e4) {
+          console.error("Notification admin (invitation) échouée :", e4);
+        }
         res.status(200).json({ ok: true });
         return;
       }
