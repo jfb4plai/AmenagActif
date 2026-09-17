@@ -15,6 +15,7 @@ export default function SaisieEcole() {
   const [ctx, setCtx] = useState({ ecoleId: null, anneeId: null });
   const [classeId, setClasseId] = useState(null);
   const [editId, setEditId] = useState(null);
+  const [recherche, setRecherche] = useState('');
   const { data: cat } = useCatalogue();
   const { data: grid, isLoading, error } = useEcoleGrid(ctx.ecoleId, ctx.anneeId);
   const mut = useGridMutations(ctx.ecoleId, ctx.anneeId);
@@ -108,6 +109,13 @@ export default function SaisieEcole() {
 
           <div>
             <h2 className="font-semibold mb-1">Aménagements raisonnables — {classe.nom}</h2>
+            <div className="mb-2">
+              <input type="search" className="plai-input w-full max-w-sm" placeholder="Rechercher un AR par mot-clé (ex : bruit, temps, oral)…"
+                value={recherche} onChange={(e) => setRecherche(e.target.value)} />
+              <p className="text-xs text-[color:var(--text3)]">
+                Filtre les aménagements dans tous les chapitres, sans devoir les déplier un par un. Videz le champ pour revenir à la vue normale.
+              </p>
+            </div>
             <BarreSaut chapitres={chapitres} />
           </div>
           <div className="overflow-x-auto border border-[color:var(--border)] rounded">
@@ -122,6 +130,7 @@ export default function SaisieEcole() {
                     eleves={eleves}
                     selectionsAR={grid.selectionsAR}
                     libres={grid.libres}
+                    filtre={recherche}
                     onToggle={(v) => mut.toggleAR.mutate(v)}
                     onAddLibre={(v) => mut.addLibre.mutate(v)}
                     onRemoveLibre={(v) => mut.removeLibre.mutate(v)} />
