@@ -8,10 +8,11 @@ const LABEL_ROLE = {
   admin: 'Administrateur',
   referent_plai: 'Référent PLAI',
   direction: 'Direction',
+  agent_plai: 'Agent accompagnant',
 };
 
 export default function Nav() {
-  const { role, isAdmin } = useRole();
+  const { role, isAdmin, editeurEcole } = useRole();
   const { session } = useAuth();
   return (
     <header className="plai-nav flex items-center gap-6 px-4 py-2 border-b border-[color:var(--border)]">
@@ -20,7 +21,7 @@ export default function Nav() {
         <span className="font-serif text-lg">AménagActif</span>
       </Link>
       <nav className="flex gap-4 text-sm">
-        <NavLink to="/saisie" className={lien}>Saisie</NavLink>
+        {editeurEcole && <NavLink to="/saisie" className={lien}>Saisie</NavLink>}
         <NavLink to="/fiches" className={lien}>Fiches</NavLink>
         {!isAdmin && role && <NavLink to="/mon-ecole" className={lien}>Mon école</NavLink>}
         {isAdmin && <NavLink to="/administration" className={lien}>Administration</NavLink>}

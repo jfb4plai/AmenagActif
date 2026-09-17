@@ -5,8 +5,8 @@ import {
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 
-const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction' };
-const ROLE_SCOPE = ['referent_plai', 'direction']; // rôles rattachés à une école
+const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
+const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles rattachés à une école
 
 export default function Administration() {
   return (
@@ -57,6 +57,7 @@ function SectionMembres() {
           <select className="plai-input block" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>
             <option value="referent_plai">Référent PLAI</option>
             <option value="direction">Direction</option>
+            <option value="agent_plai">Agent accompagnant</option>
             <option value="admin">Administrateur</option>
           </select>
         </label>
@@ -92,6 +93,7 @@ function SectionMembres() {
                 <option value="admin">{LABEL_ROLE.admin}</option>
                 <option value="referent_plai">{LABEL_ROLE.referent_plai}</option>
                 <option value="direction">{LABEL_ROLE.direction}</option>
+                <option value="agent_plai">{LABEL_ROLE.agent_plai}</option>
               </select>
               {besoinEcole(m.role) && (
                 <select className="plai-input !w-auto !py-1 text-sm" value={m.ecoleId ?? ''}

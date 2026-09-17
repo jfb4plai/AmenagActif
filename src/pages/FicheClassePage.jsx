@@ -59,6 +59,7 @@ export default function FicheClassePage({ picker }) {
 
 function FicheClasseContenu({ classeId }) {
   const { data: vm, isLoading, error } = useFicheClasse(classeId);
+  const { role } = useRole();
 
   async function copierLien() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -95,7 +96,7 @@ function FicheClasseContenu({ classeId }) {
     <div className="plai-section space-y-3">
       <div className="flex gap-3 no-print">
         <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
-        <button className="plai-btn" onClick={copierLien}>Copier le lien enseignant</button>
+        {role !== 'agent_plai' && <button className="plai-btn" onClick={copierLien}>Copier le lien enseignant</button>}
       </div>
       <FicheClasseView vm={vm} />
     </div>

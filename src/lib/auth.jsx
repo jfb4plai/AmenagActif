@@ -26,7 +26,7 @@ export function useAuth() {
   return ctx;
 }
 
-/** @returns {{ role: 'admin'|'referent_plai'|'direction'|null, ecoleId: string|null, isAdmin: boolean, editeurEcole: boolean, loading: boolean }} */
+/** @returns {{ role: 'admin'|'referent_plai'|'direction'|'agent_plai'|null, ecoleId: string|null, isAdmin: boolean, editeurEcole: boolean, loading: boolean }} */
 export function useRole() {
   const { session, ready } = useAuth();
   const { data, isLoading } = useQuery({
