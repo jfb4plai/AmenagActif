@@ -37,18 +37,23 @@ export function useAdminMutations() {
   });
 
   const ajouterEcole = useMutation({
-    mutationFn: async ({ nom, implantation }) => {
-      const { error } = await supabase.from('ar_ecoles').insert({ nom: nom.trim(), implantation: implantation?.trim() || null });
+    mutationFn: async ({ nom, implantation, implantationNom }) => {
+      const { error } = await supabase.from('ar_ecoles').insert({
+        nom: nom.trim(),
+        implantation: implantation?.trim() || null,
+        implantation_nom: implantationNom?.trim() || null,
+      });
       if (error) throw error;
     },
     onSuccess: inval,
   });
 
   const majEcole = useMutation({
-    mutationFn: async ({ id, nom, implantation, actif }) => {
+    mutationFn: async ({ id, nom, implantation, implantationNom, actif }) => {
       const patch = {};
       if (nom !== undefined) patch.nom = nom.trim();
       if (implantation !== undefined) patch.implantation = implantation?.trim() || null;
+      if (implantationNom !== undefined) patch.implantation_nom = implantationNom?.trim() || null;
       if (actif !== undefined) patch.actif = actif;
       const { error } = await supabase.from('ar_ecoles').update(patch).eq('id', id);
       if (error) throw error;
