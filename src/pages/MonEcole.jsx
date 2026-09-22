@@ -1,5 +1,8 @@
 import { useEcoles } from '../hooks/useEcoleGrid.js';
-import { useEquipeEcole } from '../hooks/useAdmin.js';
+import { useEquipeEcole, useAnneeActive } from '../hooks/useAdmin.js';
+import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
+import { useAgentsPlai } from '../hooks/useAgentsPlai.js';
+import { useAccompagnantsEleves, useAccompagnantsMutations } from '../hooks/useAccompagnants.js';
 import { useRole } from '../lib/auth.jsx';
 
 const LABEL = { referent_plai: 'Référent PLAI', direction: 'Direction' };
@@ -51,7 +54,63 @@ export default function MonEcole() {
         </ul>
       </section>
 
+      <SectionAccompagnants ecoleId={ecole.id} />
+
       {/* À venir (Plan 2) : gestion des enseignants par classe. */}
     </div>
+  );
+}
+
+function SectionAccompagnants({ ecoleId }) {
+  const anneeActive = useAnneeActive();
+  const { data: grid, isLoading } = useEcoleGrid(ecoleId, anneeActive?.id ?? null);
+  const { data: agents = [] } = useAgentsPlai();
+  const eleves = grid?.eleves ?? [];
+  const eleveIds = eleves.map((e) => e.id);
+  const { data: assignations = [] } = useAccompagnantsEleves(eleveIds);
+  const { assigner, retirer } = useAccompagnantsMutations();
+  const classes = grid?.classes ?? [];
+  const nomClasse = (classeId) => classes.find((c) => c.id === classeId)?.nom ?? '';
+  const agentsDe = (eleveId) => assignations.filter((a) => a.eleve_id === eleveId).map((a) => a.user_id);
+  const nomAgent = (userId) => { const a = agents.find((x) => x.userId === userId); return a ? (a.nom || a.email) : userId; };
+
+  if (!anneeActive) return null;
+
+  return (
+    <section className="space-y-2">
+      <h2 className="font-semibold">Accompagnants par élève</h2>
+      <p className="text-sm text-[color:var(--text3)]">
+        Un accompagnant assigné à un élève peut saisir ses AR, les AU de sa classe, et corriger son statut IPT/PAR — vérifiez la liste des comptes agent PLAI du pôle avant d'en ajouter un.
+      </p>
+      {isLoading ? <p>Chargement…</p> : eleves.length === 0 ? (
+        <p className="plai-empty">Aucun élève encodé pour l'année active.</p>
+      ) : (
+        <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
+          {eleves.map((e) => (
+            <li key={e.id} className="px-3 py-2 space-y-1">
+              <div className="text-sm font-medium">
+                {e.prenom} {e.initiale_nom} <span className="text-[color:var(--text3)] font-normal">— {nomClasse(e.classe_id)}</span>
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                {agentsDe(e.id).map((userId) => (
+                  <span key={userId} className="text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full flex items-center gap-1">
+                    {nomAgent(userId)}
+                    <button type="button" className="underline" onClick={() => retirer.mutate({ eleveId: e.id, userId })}>retirer</button>
+                  </span>
+                ))}
+                <select className="plai-input !w-auto !py-1 text-xs" value=""
+                  onChange={(ev) => { if (ev.target.value) assigner.mutate({ eleveId: e.id, userId: ev.target.value }); }}>
+                  <option value="">+ assigner un accompagnant…</option>
+                  {agents.filter((a) => !agentsDe(e.id).includes(a.userId)).map((a) => (
+                    <option key={a.userId} value={a.userId}>{a.nom || a.email}</option>
+                  ))}
+                </select>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {(assigner.isError || retirer.isError) && <p className="plai-error">Action impossible, réessayez.</p>}
+    </section>
   );
 }
