@@ -272,12 +272,21 @@ function SectionEcoles() {
         onSubmit={(e) => { e.preventDefault(); if (f.nom.trim()) { ajouterEcole.mutate(f); setF({ nom: '', implantation: '' }); } }}
       >
         <label className="text-sm">Nom
-          <input className="plai-input block" placeholder="Athénée Léonie de Waha" value={f.nom} onChange={(e) => setF({ ...f, nom: e.target.value })} />
+          <input className="plai-input block" placeholder="Athénée Léonie de Waha" value={f.nom} onChange={(e) => setF({ ...f, nom: e.target.value })}
+            list="ecoles-existantes" autoComplete="off" />
+          <datalist id="ecoles-existantes">
+            {ecoles.map((e) => <option key={e.id} value={e.nom} />)}
+          </datalist>
         </label>
         <label className="text-sm">Implantation (code court)
           <input className="plai-input block" placeholder="waha" value={f.implantation} onChange={(e) => setF({ ...f, implantation: e.target.value })} />
         </label>
         <button className="plai-btn" type="submit" disabled={!f.nom.trim()}>Ajouter</button>
+        {f.nom.trim().length >= 3 && ecoles.some((e) => e.nom.toLowerCase().includes(f.nom.trim().toLowerCase())) && (
+          <p className="text-xs text-amber-700 w-full">
+            Attention : une école au nom proche existe peut-être déjà dans la liste ci-dessous — vérifiez avant d'ajouter un doublon.
+          </p>
+        )}
       </form>
       <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
         {ecoles.map((e) => (
