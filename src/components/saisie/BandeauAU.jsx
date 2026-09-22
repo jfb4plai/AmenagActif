@@ -24,6 +24,9 @@ export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, on
         S'appliquent à <strong>tous les élèves</strong> de la classe. Cochés ici une seule fois — ils forment le bloc « Pour tous » de la fiche.
         Les aménagements <strong>par élève</strong> sont dans les chapitres ci-dessous.
       </p>
+      <p className="text-sm text-amber-700 mb-3">
+        Ne décochez jamais un AU sans certitude — il a probablement été coché par un·e collègue pour un autre élève de cette classe.
+      </p>
       <div className="font-medium mb-1">
         {classe.nom} <span className="text-[color:var(--text3)] font-normal">— {nbCoches} AU coché(s)</span>
       </div>
