@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  useAnnees, useEcoles, useAdminMutations,
+  useAnnees, useEcoles, useEcolesAdmin, useAdminMutations,
   useCatalogueAdmin, useCatalogueMutations,
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
@@ -259,14 +259,14 @@ function SectionAnnees() {
 
 /* ─────────────── Écoles / implantations ─────────────── */
 function SectionEcoles() {
-  const { data: ecoles = [] } = useEcoles();
+  const { data: ecoles = [] } = useEcolesAdmin();
   const { ajouterEcole, majEcole } = useAdminMutations();
   const [f, setF] = useState({ nom: '', implantation: '' });
 
   return (
     <section className="space-y-3">
       <h2 className="font-semibold">Écoles / implantations</h2>
-      <p className="text-sm text-[color:var(--text3)]">Les 11 implantations secondaires accompagnées. Désactiver une école la retire des sélecteurs sans supprimer ses données.</p>
+      <p className="text-sm text-[color:var(--text3)]">Les 11 implantations secondaires accompagnées. Désactiver une école la retire des sélecteurs (saisie, fiches) sans supprimer ses données ; réactivable à tout moment ci-dessous.</p>
       <form
         className="flex flex-wrap gap-2 items-end"
         onSubmit={(e) => { e.preventDefault(); if (f.nom.trim()) { ajouterEcole.mutate(f); setF({ nom: '', implantation: '' }); } }}
@@ -281,7 +281,7 @@ function SectionEcoles() {
       </form>
       <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
         {ecoles.map((e) => (
-          <li key={e.id} className="flex items-center justify-between px-3 py-2 gap-3">
+          <li key={e.id} className={`flex items-center justify-between px-3 py-2 gap-3 ${e.actif ? '' : 'opacity-60'}`}>
             <input
               className="plai-input flex-1"
               defaultValue={e.nom}
@@ -293,11 +293,18 @@ function SectionEcoles() {
               placeholder="code"
               onBlur={(ev) => { if ((ev.target.value || null) !== (e.implantation ?? null)) majEcole.mutate({ id: e.id, implantation: ev.target.value }); }}
             />
-            <button className="text-sm underline" onClick={() => majEcole.mutate({ id: e.id, actif: false })}>désactiver</button>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${e.actif ? 'bg-teal/10 text-teal' : 'bg-[color:var(--border)] text-[color:var(--text3)]'}`}>
+              {e.actif ? 'active' : 'désactivée'}
+            </span>
+            {e.actif ? (
+              <button className="text-sm underline" onClick={() => majEcole.mutate({ id: e.id, actif: false })}>désactiver</button>
+            ) : (
+              <button className="text-sm underline text-teal" onClick={() => majEcole.mutate({ id: e.id, actif: true })}>réactiver</button>
+            )}
           </li>
         ))}
       </ul>
-      <p className="text-xs text-[color:var(--text3)]">La liste ci-dessus ne montre que les écoles actives. Réactivation : contacter la maintenance (SQL).</p>
+      <p className="text-xs text-[color:var(--text3)]">Cette liste montre toutes les écoles, actives et désactivées.</p>
     </section>
   );
 }
