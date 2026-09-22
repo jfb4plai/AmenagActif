@@ -12,6 +12,18 @@ export function useEcoles() {
   });
 }
 
+/** Toutes les écoles, actives et désactivées — réservé à l'écran admin (SectionEcoles). */
+export function useEcolesAdmin() {
+  return useQuery({
+    queryKey: ['ecoles-admin'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('ar_ecoles').select('id, nom, implantation, actif').order('nom');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useAnnees() {
   return useQuery({
     queryKey: ['annees'],

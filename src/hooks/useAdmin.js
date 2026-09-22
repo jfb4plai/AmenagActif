@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase.js';
-import { useAnnees, useEcoles } from './useEcoleGrid.js';
+import { useAnnees, useEcoles, useEcolesAdmin } from './useEcoleGrid.js';
 
-export { useAnnees, useEcoles };
+export { useAnnees, useEcoles, useEcolesAdmin };
 
 /** Année active, ou null. */
 export function useAnneeActive() {
@@ -15,6 +15,7 @@ export function useAdminMutations() {
   const inval = () => {
     qc.invalidateQueries({ queryKey: ['annees'] });
     qc.invalidateQueries({ queryKey: ['ecoles'] });
+    qc.invalidateQueries({ queryKey: ['ecoles-admin'] });
   };
 
   const ajouterAnnee = useMutation({
