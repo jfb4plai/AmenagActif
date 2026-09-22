@@ -51,6 +51,7 @@ export default function FicheEcolePage() {
         </select>
         {ecoleActive && anneeActive && <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>}
       </div>
+      {/* ecole.implantation = numéro FASE (PAS ecole.implantation_nom, qui est le nom de l'implantation, admin only). */}
       {ecoleActive && anneeActive && ecole && <p className="font-semibold mb-2">{ecole.nom} · FASE {ecole.implantation || '—'}</p>}
       {ecoleActive && anneeActive && classes.map((c) => <FicheUneClasse key={c.id} classeId={c.id} showStatutEleve />)}
     </div>

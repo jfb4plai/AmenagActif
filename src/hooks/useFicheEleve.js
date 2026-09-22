@@ -18,6 +18,7 @@ async function charger(eleveId) {
     eleve,
     classeNom: eleve.ar_classes?.nom ?? '',
     ecoleNom: eleve.ar_classes?.ar_ecoles?.nom ?? '',
+    // ecoleFase = numéro FASE = colonne `implantation` (PAS `implantation_nom`, qui est le nom de l'implantation, admin only).
     ecoleFase: eleve.ar_classes?.ar_ecoles?.implantation ?? '',
     amenagements: cat.data,
     chapitres: chap.data,
