@@ -24,5 +24,7 @@ export function useMembresMutations() {
     inviter: useMutation({ mutationFn: (p) => apiMembres({ action: 'invite', ...p }), onSuccess: inval }),
     changerRole: useMutation({ mutationFn: (p) => apiMembres({ action: 'setProfil', ...p }), onSuccess: inval }),
     retirer: useMutation({ mutationFn: (userId) => apiMembres({ action: 'revoke', userId }), onSuccess: inval }),
+    assignerEcole: useMutation({ mutationFn: (p) => apiMembres({ action: 'addEcole', ...p }), onSuccess: inval }),
+    retirerEcole: useMutation({ mutationFn: (p) => apiMembres({ action: 'removeEcole', ...p }), onSuccess: inval }),
   };
 }
