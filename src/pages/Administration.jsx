@@ -7,6 +7,7 @@ import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles rattachés à une école
+const ROLE_SCOPE_MULTI = ['referent_plai', 'direction']; // rôles pouvant être rattachés à PLUSIEURS écoles (pas agent_plai)
 
 export default function Administration() {
   return (
@@ -96,7 +97,7 @@ function SectionMembres() {
                 <option value="direction">{LABEL_ROLE.direction}</option>
                 <option value="agent_plai">{LABEL_ROLE.agent_plai}</option>
               </select>
-              {besoinEcole(m.role) && (
+              {ROLE_SCOPE_MULTI.includes(m.role) ? (
                 <div className="flex flex-wrap gap-2 items-center">
                   {(m.ecoleIds ?? []).map((ecoleId) => (
                     <span key={ecoleId} className="text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -110,7 +111,13 @@ function SectionMembres() {
                     {ecoles.filter((e) => !(m.ecoleIds ?? []).includes(e.id)).map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
                   </select>
                 </div>
-              )}
+              ) : besoinEcole(m.role) ? (
+                <select className="plai-input !w-auto !py-1 text-sm" value={m.ecoleId ?? ''}
+                  onChange={(e) => changerRole.mutate({ userId: m.userId, role: m.role, ecoleId: e.target.value })}>
+                  <option value="">— école —</option>
+                  {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+                </select>
+              ) : null}
               {m.role === 'direction' && (
                 <input className="plai-input !py-1 text-sm w-48" defaultValue={(m.niveaux ?? []).join(',')}
                   placeholder="Niveaux (ex: 3e,4e,5e,6e), vide=tous"

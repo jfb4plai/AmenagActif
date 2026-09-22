@@ -13,16 +13,26 @@ async function chargerClasse(classeId) {
     .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, commentaire, created_at').eq('classe_id', classeId).order('prenom');
   const eleveIds = eleves.map((e) => e.id);
 
-  const [cat, chap, au, sel, lib, ref] = await Promise.all([
+  const [cat, chap, au, sel, lib, liensEcole] = await Promise.all([
     supabase.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type'),
     supabase.from('ar_chapitres').select('id, ordre, titre').order('ordre'),
     supabase.from('ar_amenagements_classe').select('amenagement_id, cree_le').eq('classe_id', classeId),
     eleveIds.length ? supabase.from('ar_selections').select('eleve_id, amenagement_id, cree_le').in('eleve_id', eleveIds) : { data: [] },
     eleveIds.length ? supabase.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte, cree_le').in('eleve_id', eleveIds) : { data: [] },
-    supabase.from('ar_profils_acces').select('nom, role, niveaux').eq('ecole_id', classe.ecole_id).in('role', ['direction', 'referent_plai']),
+    // Comptes referent_plai/direction multi-écoles rattachés à cette école via ar_profils_acces_ecoles.
+    supabase.from('ar_profils_acces_ecoles').select('user_id').eq('ecole_id', classe.ecole_id),
   ]);
 
-  const referents = (ref.data ?? []).map((r) => ({ nom: r.nom, fonction: r.role, niveaux: r.niveaux ?? null }));
+  const userIdsMultiEcoles = (liensEcole.data ?? []).map((l) => l.user_id);
+  const { data: refRows } = await supabase
+    .from('ar_profils_acces')
+    .select('user_id, nom, role, niveaux, ecole_id')
+    .in('role', ['direction', 'referent_plai']);
+  // Un compte est référent de cette classe soit via l'ancienne colonne ecole_id
+  // (une seule école), soit via ar_profils_acces_ecoles (multi-écoles).
+  const referents = (refRows ?? [])
+    .filter((r) => r.ecole_id === classe.ecole_id || userIdsMultiEcoles.includes(r.user_id))
+    .map((r) => ({ nom: r.nom, fonction: r.role, niveaux: r.niveaux ?? null }));
 
   return computeFicheClasse({
     classe,
