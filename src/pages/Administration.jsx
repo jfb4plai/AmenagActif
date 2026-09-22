@@ -125,7 +125,7 @@ function SectionMembres() {
 /* ─────────────── Catalogue des aménagements ─────────────── */
 function SectionCatalogue() {
   const { data } = useCatalogueAdmin();
-  const { majAmenagement, ajouterAmenagement } = useCatalogueMutations();
+  const { majAmenagement, ajouterAmenagement, ajouterChapitre } = useCatalogueMutations();
   const [ouvert, setOuvert] = useState(null);
   const chapitres = data?.chapitres ?? [];
   const amenagements = data?.amenagements ?? [];
@@ -193,7 +193,8 @@ function SectionCatalogue() {
           );
         })}
       </div>
-      {(majAmenagement.isError || ajouterAmenagement.isError) && <p className="plai-error">Action impossible, réessayez.</p>}
+      <AjoutChapitre onAdd={ajouterChapitre.mutate} />
+      {(majAmenagement.isError || ajouterAmenagement.isError || ajouterChapitre.isError) && <p className="plai-error">Action impossible, réessayez.</p>}
     </section>
   );
 }
@@ -216,6 +217,23 @@ function AjoutAmenagement({ chapitreId, onAdd }) {
         </label>
         <button className="plai-btn" type="submit" disabled={!libelle.trim()}>Ajouter</button>
       </div>
+    </form>
+  );
+}
+
+function AjoutChapitre({ onAdd }) {
+  const [titre, setTitre] = useState('');
+  return (
+    <form className="border border-dashed border-teal rounded p-2 flex flex-wrap items-end gap-2"
+      onSubmit={(e) => { e.preventDefault(); if (titre.trim()) { onAdd({ titre }); setTitre(''); } }}>
+      <label className="text-sm flex-1 min-w-[12rem]">Nouveau chapitre
+        <input className="plai-input block w-full" placeholder="Ex. : Accompagnement numérique"
+          value={titre} onChange={(e) => setTitre(e.target.value)} />
+        <span className="block text-xs text-[color:var(--text3)] font-normal">
+          Ajouté à la fin de la liste (13e chapitre, 14e…). Une fois créé, dépliez-le ci-dessus pour y ajouter des AU/AR.
+        </span>
+      </label>
+      <button className="plai-btn" type="submit" disabled={!titre.trim()}>Ajouter le chapitre</button>
     </form>
   );
 }
