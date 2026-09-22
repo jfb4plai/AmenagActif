@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import EleveEditor from './EleveEditor.jsx';
 
-export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve }) {
+export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve, identiteVerrouillee }) {
   const [editId, setEditId] = useState(null);
 
   return (
@@ -16,7 +16,7 @@ export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve }) {
             </button>
             {editId === e.id && (
               <div className="absolute mt-1 z-40">
-                <EleveEditor eleve={e} onClose={() => setEditId(null)}
+                <EleveEditor eleve={e} onClose={() => setEditId(null)} identiteVerrouillee={identiteVerrouillee}
                   onSave={(v) => onSaveEleve({ id: e.id, classeId: e.classe_id, ...v })}
                   onDelete={onDeleteEleve ? () => onDeleteEleve({ id: e.id }) : undefined} />
               </div>
