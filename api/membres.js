@@ -2,7 +2,7 @@ import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { envoyerEmail } from './_lib/email.js';
 
 const ROLES = ['admin', 'referent_plai', 'direction', 'agent_plai'];
-const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai'];
+const ROLE_SCOPE = ['referent_plai', 'direction'];
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 
 /** Retourne l'utilisateur appelant s'il est administrateur, sinon null. */
