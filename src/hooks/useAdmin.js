@@ -65,13 +65,18 @@ export function useEquipeEcole(ecoleId) {
     queryKey: ['equipe-ecole', ecoleId],
     enabled: !!ecoleId,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: liens, error: e1 } = await supabase
+        .from('ar_profils_acces_ecoles').select('user_id').eq('ecole_id', ecoleId);
+      if (e1) throw e1;
+      const userIds = liens.map((l) => l.user_id);
+      if (userIds.length === 0) return [];
+      const { data, error: e2 } = await supabase
         .from('ar_profils_acces')
         .select('user_id, nom, role')
-        .eq('ecole_id', ecoleId)
+        .in('user_id', userIds)
         .in('role', ['referent_plai', 'direction'])
         .order('role');
-      if (error) throw error;
+      if (e2) throw e2;
       return data;
     },
   });
