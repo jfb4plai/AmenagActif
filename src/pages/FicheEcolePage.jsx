@@ -33,6 +33,7 @@ export default function FicheEcolePage() {
   const anneeActive = anneeId;
   const { data: grid } = useEcoleGrid(ecoleActive || null, anneeActive || null);
   const classes = grid?.classes ?? [];
+  const ecole = ecoleActive ? ecoles.find((x) => x.id === ecoleActive) : null;
 
   return (
     <div className="plai-section space-y-3">
@@ -50,10 +51,7 @@ export default function FicheEcolePage() {
         </select>
         {ecoleActive && anneeActive && <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>}
       </div>
-      {ecoleActive && anneeActive && (() => {
-        const ecole = ecoles.find((x) => x.id === ecoleActive);
-        return ecole ? <p className="font-semibold mb-2">{ecole.nom} · FASE {ecole.implantation || '—'}</p> : null;
-      })()}
+      {ecoleActive && anneeActive && ecole && <p className="font-semibold mb-2">{ecole.nom} · FASE {ecole.implantation || '—'}</p>}
       {ecoleActive && anneeActive && classes.map((c) => <FicheUneClasse key={c.id} classeId={c.id} showStatutEleve />)}
     </div>
   );
