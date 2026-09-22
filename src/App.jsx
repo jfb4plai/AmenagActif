@@ -14,10 +14,11 @@ import FicheElevePage from './pages/FicheElevePage.jsx';
 import FichePublique from './pages/FichePublique.jsx';
 import Administration from './pages/Administration.jsx';
 import MonEcole from './pages/MonEcole.jsx';
+import MesElevesPage from './pages/MesElevesPage.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const EDITEURS = ['admin', 'referent_plai', 'direction'];
-const LECTEURS = [...EDITEURS, 'agent_plai']; // + accès lecture seule (fiches, mon école)
+const LECTEURS = [...EDITEURS, 'agent_plai']; // + accès lecture seule (fiches)
 
 function Shell({ children }) {
   return (
@@ -30,12 +31,14 @@ function Shell({ children }) {
   );
 }
 
-/** Racine : les éditeurs (admin/référent/direction) vont vers la saisie, les rôles
- * lecture seule (agent accompagnant) vers la fiche vue école. */
+/** Racine : les éditeurs (admin/référent/direction) vont vers la saisie, les
+ * agents accompagnants vers leurs élèves assignés, les autres vers la fiche vue école. */
 function Accueil() {
-  const { loading, editeurEcole } = useRole();
+  const { loading, role, editeurEcole } = useRole();
   if (loading) return <div className="plai-section">Chargement…</div>;
-  return <Navigate to={editeurEcole ? '/saisie' : '/fiches/ecole'} replace />;
+  if (editeurEcole) return <Navigate to="/saisie" replace />;
+  if (role === 'agent_plai') return <Navigate to="/mes-eleves" replace />;
+  return <Navigate to="/fiches/ecole" replace />;
 }
 
 export default function App() {
@@ -46,7 +49,8 @@ export default function App() {
       <Route path="/fiche/:token" element={<FichePublique />} />
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />
       <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />
-      <Route path="/mon-ecole" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><MonEcole /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/mon-ecole" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><MonEcole /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/mes-eleves" element={<RequireAuth><Shell><RequireRole roles={['agent_plai']}><MesElevesPage /></RequireRole></Shell></RequireAuth>} />
       <Route path="/administration" element={<RequireAuth><Shell><RequireRole roles={['admin']}><Administration /></RequireRole></Shell></RequireAuth>} />
       <Route path="/fiches" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><FicheClassePage picker /></RequireRole></Shell></RequireAuth>} />
       <Route path="/fiches/ecole" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><FicheEcolePage /></RequireRole></Shell></RequireAuth>} />
