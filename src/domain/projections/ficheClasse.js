@@ -37,7 +37,7 @@ export function computeFicheClasse(input) {
   const nomEleve = (e) => `${e.prenom}${e.initiale_nom ? ' ' + e.initiale_nom + '.' : ''}`;
   const commentaires = eleves
     .filter((e) => (e.commentaire ?? '').trim())
-    .map((e) => ({ eleve: nomEleve(e), texte: e.commentaire.trim() }));
+    .map((e) => ({ eleve: nomEleve(e), statut: e.statut, texte: e.commentaire.trim() }));
   const arParEleveId = new Map();
   for (const s of selectionsAR) {
     const a = amgtById.get(s.amenagement_id);
@@ -63,15 +63,15 @@ export function computeFicheClasse(input) {
     .filter((x) => x.amenagements.length > 0);
 
   const parAmenagementMap = new Map();
-  const ajouterEleveAAmenagement = (libelle, chapOrdreVal, ordreVal, nom, eleveId) => {
+  const ajouterEleveAAmenagement = (libelle, chapOrdreVal, ordreVal, nom, eleveId, statut) => {
     if (!parAmenagementMap.has(libelle)) parAmenagementMap.set(libelle, { chapOrdreVal, ordreVal, eleves: [] });
-    parAmenagementMap.get(libelle).eleves.push({ nom, eleveId });
+    parAmenagementMap.get(libelle).eleves.push({ nom, eleveId, statut });
   };
   for (const [eleveId, amgts] of arParEleveId.entries()) {
     const e = eleves.find((x) => x.id === eleveId);
     if (!e) continue;
     // arParEleveId exclut déjà l'AR recto (filtré plus haut à sa construction).
-    for (const a of amgts) ajouterEleveAAmenagement(a.libelle, chapOrdre(a), a.ordre, nomEleve(e), e.id);
+    for (const a of amgts) ajouterEleveAAmenagement(a.libelle, chapOrdre(a), a.ordre, nomEleve(e), e.id, e.statut);
   }
   // Les aménagements libres n'ont pas d'ordre de catalogue : ils se placent
   // après tous les AR, dans le même ordre que dans parEleve (Infinity trie en dernier).
@@ -79,7 +79,7 @@ export function computeFicheClasse(input) {
   for (const l of libres) {
     const e = eleves.find((x) => x.id === l.eleve_id);
     if (!e) continue;
-    ajouterEleveAAmenagement(l.texte, Infinity, Infinity, nomEleve(e), e.id);
+    ajouterEleveAAmenagement(l.texte, Infinity, Infinity, nomEleve(e), e.id, e.statut);
   }
   const parAmenagement = [...parAmenagementMap.entries()]
     .sort(([, a], [, b]) => a.chapOrdreVal - b.chapOrdreVal || a.ordreVal - b.ordreVal)
