@@ -281,7 +281,7 @@ function SectionEcoles() {
       </form>
       <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
         {ecoles.map((e) => (
-          <li key={e.id} className={`flex items-center justify-between px-3 py-2 gap-3 ${e.actif ? '' : 'opacity-60'}`}>
+          <li key={e.id} className={`flex items-center justify-between px-3 py-2 gap-3 ${e.actif ? '' : 'bg-[color:var(--border)]/30'}`}>
             <input
               className="plai-input flex-1"
               defaultValue={e.nom}
