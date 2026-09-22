@@ -48,7 +48,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
         <p className="text-xs text-[color:var(--text3)]">Affichée « Emilie D. » sur la fiche. Pas de nom complet.</p>
       </div>
       <div>
-        <label className="block text-sm font-medium">Statut</label>
+        <label className="block text-sm font-medium">Statut administratif</label>
         <div className="flex gap-3 text-sm">
           <label className="flex items-center gap-1">
             <input type="radio" name={`statut-${eleve?.id ?? 'nouveau'}`} value="IPT" checked={statut === 'IPT'}
@@ -62,9 +62,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
           </label>
         </div>
         <p className="text-xs text-[color:var(--text3)]">
-          IPT (Intégration Permanente Totale) : pas de protocole formel. PAR (Protocole d'Aménagements Raisonnables) :
-          élève suivi par un protocole officiel — les AR/AU cochés ci-dessous devront y être reportés. Ne change rien
-          à l'affichage de cette fiche, sert uniquement à trier les élèves plus tard.
+          IPT (Intégration Permanente Totale) ou PAR (Protocole d'Aménagements Raisonnables) — ne change rien à l'affichage de cette fiche, sert à trier les élèves plus tard.
         </p>
       </div>
       <div>
