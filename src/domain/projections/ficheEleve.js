@@ -2,6 +2,8 @@
  * @param {{
  *  eleve: import('../types.js').Eleve,
  *  classeNom: string,
+ *  ecoleNom: string,
+ *  ecoleFase: string,
  *  amenagements: import('../types.js').Amenagement[],
  *  chapitres: import('../types.js').Chapitre[],
  *  selectionsAR: import('../types.js').SelectionAR[],
