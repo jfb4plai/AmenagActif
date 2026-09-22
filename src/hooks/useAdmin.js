@@ -107,6 +107,13 @@ export function useCatalogueMutations() {
     return (data?.[0]?.ordre ?? 0) + 1;
   };
 
+  const prochainOrdreChapitre = async () => {
+    const { data } = await supabase
+      .from('ar_chapitres').select('ordre')
+      .order('ordre', { ascending: false }).limit(1);
+    return (data?.[0]?.ordre ?? 0) + 1;
+  };
+
   const majAmenagement = useMutation({
     mutationFn: async ({ id, libelle, type, actif, chapitreId }) => {
       const patch = {};
@@ -134,7 +141,16 @@ export function useCatalogueMutations() {
     onSuccess: inval,
   });
 
-  return { majAmenagement, ajouterAmenagement };
+  const ajouterChapitre = useMutation({
+    mutationFn: async ({ titre }) => {
+      const ordre = await prochainOrdreChapitre();
+      const { error } = await supabase.from('ar_chapitres').insert({ ordre, titre: titre.trim() });
+      if (error) throw error;
+    },
+    onSuccess: inval,
+  });
+
+  return { majAmenagement, ajouterAmenagement, ajouterChapitre };
 }
 
 /**

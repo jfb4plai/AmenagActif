@@ -22,7 +22,7 @@ export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, on
       <h2 className="font-semibold text-teal">Aménagements universels de la classe</h2>
       <p className="text-sm text-[color:var(--text3)] mb-3">
         S'appliquent à <strong>tous les élèves</strong> de la classe. Cochés ici une seule fois — ils forment le bloc « Pour tous » de la fiche.
-        Les aménagements <strong>par élève</strong> sont dans les 12 chapitres ci-dessous.
+        Les aménagements <strong>par élève</strong> sont dans les chapitres ci-dessous.
       </p>
       <div className="font-medium mb-1">
         {classe.nom} <span className="text-[color:var(--text3)] font-normal">— {nbCoches} AU coché(s)</span>
