@@ -1,5 +1,5 @@
-/** @param {{ vm: import('../../domain/types.js').FicheClasseVM }} props */
-export default function FicheClasseView({ vm }) {
+/** @param {{ vm: import('../../domain/types.js').FicheClasseVM, showStatutEleve?: boolean }} props */
+export default function FicheClasseView({ vm, showStatutEleve = false }) {
   const date = vm.dateMaj ? new Date(vm.dateMaj).toLocaleDateString('fr-BE') : '…';
   return (
     <article className="fiche max-w-3xl mx-auto bg-white p-8 text-[15px] leading-relaxed" style={{ fontFamily: 'Arial, sans-serif' }}>
@@ -39,7 +39,12 @@ export default function FicheClasseView({ vm }) {
               <td className="border border-black p-2">
                 <ul className="list-disc pl-5">
                   {row.eleves.map((e, i) => (
-                    <li key={i}><a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a></li>
+                    <li key={i}>
+                      <a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a>
+                      {showStatutEleve && (
+                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 ml-1">{e.statut}</span>
+                      )}
+                    </li>
                   ))}
                 </ul>
               </td>
@@ -62,7 +67,12 @@ export default function FicheClasseView({ vm }) {
             <tbody>
               {vm.commentaires.map((c, i) => (
                 <tr key={i}>
-                  <td className="border border-black p-2 align-top w-32 font-medium">{c.eleve}</td>
+                  <td className="border border-black p-2 align-top w-32 font-medium">
+                    {c.eleve}
+                    {showStatutEleve && (
+                      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 ml-1">{c.statut}</span>
+                    )}
+                  </td>
                   <td className="border border-black p-2">{c.texte}</td>
                 </tr>
               ))}

@@ -91,7 +91,7 @@ describe('computeFicheClasse', () => {
   it('commentaires : un élève avec commentaire non vide, les autres omis', () => {
     const vm = computeFicheClasse(args());
     expect(vm.commentaires).toEqual([
-      { eleve: 'Karim B.', texte: 'Décès de la grand-mère mi-septembre, vigilance émotionnelle' },
+      { eleve: 'Karim B.', statut: 'IPT', texte: 'Décès de la grand-mère mi-septembre, vigilance émotionnelle' },
     ]);
   });
 
@@ -103,7 +103,7 @@ describe('computeFicheClasse', () => {
       'Vérifier oralement la consigne avant de commencer',
     ]);
     const doubler = vm.parAmenagement.find((x) => x.libelle === 'Doubler les espaces de réponse');
-    expect(doubler.eleves).toEqual([{ nom: 'Emilie D.', eleveId: 'e1' }]);
+    expect(doubler.eleves).toEqual([{ nom: 'Emilie D.', eleveId: 'e1', statut: 'PAR' }]);
   });
 
   it('parAmenagement : ne contient pas l\'AR recto ni les commentaires', () => {
@@ -117,8 +117,8 @@ describe('computeFicheClasse', () => {
     const vm = computeFicheClasse({ ...args(), selectionsAR });
     const doubler = vm.parAmenagement.find((x) => x.libelle === 'Doubler les espaces de réponse');
     expect(doubler.eleves).toEqual([
-      { nom: 'Emilie D.', eleveId: 'e1' },
-      { nom: 'Lea M.', eleveId: 'e3' },
+      { nom: 'Emilie D.', eleveId: 'e1', statut: 'PAR' },
+      { nom: 'Lea M.', eleveId: 'e3', statut: 'PAR' },
     ]);
   });
 });

@@ -5,11 +5,11 @@ import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche } from '../lib/imprimerFiche.js';
 import { useRole } from '../lib/auth.jsx';
 
-function FicheUneClasse({ classeId }) {
+function FicheUneClasse({ classeId, showStatutEleve }) {
   const { data: vm, isLoading, error } = useFicheClasse(classeId);
   if (isLoading) return <p>Chargement de la classe…</p>;
   if (error) return <p className="plai-error">{error.message}</p>;
-  return <FicheClasseView vm={vm} />;
+  return <FicheClasseView vm={vm} showStatutEleve={showStatutEleve} />;
 }
 
 export default function FicheEcolePage() {
@@ -33,6 +33,7 @@ export default function FicheEcolePage() {
   const anneeActive = anneeId;
   const { data: grid } = useEcoleGrid(ecoleActive || null, anneeActive || null);
   const classes = grid?.classes ?? [];
+  const ecole = ecoleActive ? ecoles.find((x) => x.id === ecoleActive) : null;
 
   return (
     <div className="plai-section space-y-3">
@@ -50,7 +51,9 @@ export default function FicheEcolePage() {
         </select>
         {ecoleActive && anneeActive && <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>}
       </div>
-      {ecoleActive && anneeActive && classes.map((c) => <FicheUneClasse key={c.id} classeId={c.id} />)}
+      {/* ecole.implantation = numéro FASE (PAS ecole.implantation_nom, qui est le nom de l'implantation, admin only). */}
+      {ecoleActive && anneeActive && ecole && <p className="font-semibold mb-2">{ecole.nom} · FASE {ecole.implantation || '—'}</p>}
+      {ecoleActive && anneeActive && classes.map((c) => <FicheUneClasse key={c.id} classeId={c.id} showStatutEleve />)}
     </div>
   );
 }

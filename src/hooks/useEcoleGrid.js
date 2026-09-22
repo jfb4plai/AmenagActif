@@ -17,7 +17,7 @@ export function useEcolesAdmin() {
   return useQuery({
     queryKey: ['ecoles-admin'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('ar_ecoles').select('id, nom, implantation, actif').order('nom');
+      const { data, error } = await supabase.from('ar_ecoles').select('id, nom, implantation, implantation_nom, actif').order('nom');
       if (error) throw error;
       return data;
     },
