@@ -24,7 +24,7 @@ export default function Administration() {
 function SectionMembres() {
   const { data: membres = [], isLoading, error } = useMembres();
   const { data: ecoles = [] } = useEcoles();
-  const { inviter, changerRole, retirer } = useMembresMutations();
+  const { inviter, changerRole, retirer, assignerEcole, retirerEcole } = useMembresMutations();
   const [f, setF] = useState({ email: '', nom: '', role: 'referent_plai', ecoleId: '' });
   const nomEcole = (id) => ecoles.find((e) => e.id === id)?.nom ?? '—';
   const besoinEcole = (r) => ROLE_SCOPE.includes(r);
@@ -33,7 +33,7 @@ function SectionMembres() {
     <section className="space-y-3">
       <h2 className="font-semibold">Membres &amp; accès</h2>
       <p className="text-sm text-[color:var(--text3)]">
-        <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, limités à une école (classes, élèves, AR/AU, fiches).
+        <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, sur une ou plusieurs écoles (classes, élèves, AR/AU, fiches).
         Le <strong>nom</strong> figure sur les fiches (colonnes « Référent(s) PLAI » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
         Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : le champ <strong>Niveaux</strong> limite l'apparition de chacun aux classes concernées — vide, il apparaît sur toutes.
       </p>
@@ -67,6 +67,7 @@ function SectionMembres() {
               <option value="">— choisir —</option>
               {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
             </select>
+            <span className="block text-xs text-[color:var(--text3)] font-normal">École de départ — d'autres écoles pourront être ajoutées ensuite ci-dessous.</span>
           </label>
         )}
         <button className="plai-btn" type="submit" disabled={inviter.isPending}>{inviter.isPending ? 'Envoi…' : 'Inviter'}</button>
@@ -87,29 +88,36 @@ function SectionMembres() {
             <li key={m.userId} className="px-3 py-2 flex flex-wrap items-center gap-3">
               <span className="min-w-[12rem]">{m.email}</span>
               <input className="plai-input !py-1 text-sm w-40" defaultValue={m.nom ?? ''} placeholder="Nom"
-                onBlur={(e) => { if ((e.target.value || '') !== (m.nom || '')) changerRole.mutate({ userId: m.userId, role: m.role, ecoleId: m.ecoleId, nom: e.target.value }); }} />
+                onBlur={(e) => { if ((e.target.value || '') !== (m.nom || '')) changerRole.mutate({ userId: m.userId, role: m.role, nom: e.target.value }); }} />
               <select className="plai-input !w-auto !py-1 text-sm" value={m.role}
-                onChange={(e) => changerRole.mutate({ userId: m.userId, role: e.target.value, ecoleId: besoinEcole(e.target.value) ? (m.ecoleId || ecoles[0]?.id || null) : null })}>
+                onChange={(e) => changerRole.mutate({ userId: m.userId, role: e.target.value })}>
                 <option value="admin">{LABEL_ROLE.admin}</option>
                 <option value="referent_plai">{LABEL_ROLE.referent_plai}</option>
                 <option value="direction">{LABEL_ROLE.direction}</option>
                 <option value="agent_plai">{LABEL_ROLE.agent_plai}</option>
               </select>
               {besoinEcole(m.role) && (
-                <select className="plai-input !w-auto !py-1 text-sm" value={m.ecoleId ?? ''}
-                  onChange={(e) => changerRole.mutate({ userId: m.userId, role: m.role, ecoleId: e.target.value })}>
-                  <option value="">— école —</option>
-                  {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
-                </select>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {(m.ecoleIds ?? []).map((ecoleId) => (
+                    <span key={ecoleId} className="text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full flex items-center gap-1">
+                      {nomEcole(ecoleId)}
+                      <button type="button" className="underline" onClick={() => retirerEcole.mutate({ userId: m.userId, ecoleId })}>retirer</button>
+                    </span>
+                  ))}
+                  <select className="plai-input !w-auto !py-1 text-xs" value=""
+                    onChange={(e) => { if (e.target.value) assignerEcole.mutate({ userId: m.userId, ecoleId: e.target.value }); }}>
+                    <option value="">+ ajouter une école…</option>
+                    {ecoles.filter((e) => !(m.ecoleIds ?? []).includes(e.id)).map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+                  </select>
+                </div>
               )}
-              {besoinEcole(m.role) && <span className="text-xs text-[color:var(--text3)]">{nomEcole(m.ecoleId)}</span>}
               {m.role === 'direction' && (
                 <input className="plai-input !py-1 text-sm w-48" defaultValue={(m.niveaux ?? []).join(',')}
                   placeholder="Niveaux (ex: 3e,4e,5e,6e), vide=tous"
                   onBlur={(e) => {
                     const niveaux = e.target.value.split(',').map((n) => n.trim()).filter(Boolean);
                     const actuel = (m.niveaux ?? []).join(',');
-                    if (e.target.value.trim() !== actuel) changerRole.mutate({ userId: m.userId, role: m.role, ecoleId: m.ecoleId, niveaux });
+                    if (e.target.value.trim() !== actuel) changerRole.mutate({ userId: m.userId, role: m.role, niveaux });
                   }} />
               )}
               <button className="text-sm underline" onClick={() => { if (confirm(`Retirer l'accès de ${m.email} ?`)) retirer.mutate(m.userId); }}>retirer</button>
@@ -117,7 +125,7 @@ function SectionMembres() {
           ))}
         </ul>
       )}
-      {(changerRole.isError || retirer.isError) && <p className="plai-error">{(changerRole.error || retirer.error)?.message}</p>}
+      {(changerRole.isError || retirer.isError || assignerEcole.isError || retirerEcole.isError) && <p className="plai-error">Action impossible, réessayez.</p>}
     </section>
   );
 }
