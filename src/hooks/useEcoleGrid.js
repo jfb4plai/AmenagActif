@@ -36,7 +36,7 @@ export function useEcoleGrid(ecoleId, anneeId) {
       if (classeIds.length === 0) return { classes, eleves: [], selectionsAR: [], auClasse: [], libres: [] };
 
       const { data: eleves, error: ee } = await supabase
-        .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, commentaire').in('classe_id', classeIds).order('prenom');
+        .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, commentaire, statut').in('classe_id', classeIds).order('prenom');
       if (ee) throw ee;
       const eleveIds = eleves.map((e) => e.id);
 
