@@ -39,12 +39,19 @@ export default function MesElevesPage() {
 }
 
 function ClasseAccompagnee({ classe, ecole, eleves }) {
-  const { data: cat } = useCatalogue();
-  const { data: grid } = useEcoleGrid(classe.ecole_id, classe.annee_id);
+  const { data: cat, error: catError } = useCatalogue();
+  const { data: grid, error: gridError } = useEcoleGrid(classe.ecole_id, classe.annee_id);
   const mut = useGridMutations(classe.ecole_id, classe.annee_id);
   const chapitres = cat?.chapitres ?? [];
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
 
+  if (catError || gridError) {
+    return (
+      <div className="plai-card p-4">
+        <p className="plai-error">Erreur de chargement de {classe.nom} : {(gridError || catError).message}</p>
+      </div>
+    );
+  }
   if (!grid || !cat) return <div className="plai-card p-4">Chargement de {classe.nom}…</div>;
 
   return (
