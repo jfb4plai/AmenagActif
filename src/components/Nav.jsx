@@ -23,7 +23,8 @@ export default function Nav() {
       <nav className="flex gap-4 text-sm">
         {editeurEcole && <NavLink to="/saisie" className={lien}>Saisie</NavLink>}
         <NavLink to="/fiches" className={lien}>Fiches</NavLink>
-        {!isAdmin && role && <NavLink to="/mon-ecole" className={lien}>Mon école</NavLink>}
+        {(role === 'referent_plai' || role === 'direction') && <NavLink to="/mon-ecole" className={lien}>Mon école</NavLink>}
+        {role === 'agent_plai' && <NavLink to="/mes-eleves" className={lien}>Mes élèves</NavLink>}
         {isAdmin && <NavLink to="/administration" className={lien}>Administration</NavLink>}
       </nav>
       <div className="ml-auto text-sm flex items-center gap-3">
