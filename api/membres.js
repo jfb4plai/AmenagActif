@@ -26,12 +26,17 @@ export default async function handler(req, res) {
     const db = supabaseAdmin();
 
     if (req.method === 'GET') {
-      const { data: rows, error } = await db.from('ar_profils_acces').select('user_id, nom, role, ecole_id, niveaux');
+      const [{ data: rows, error }, { data: liens, error: eLiens }] = await Promise.all([
+        db.from('ar_profils_acces').select('user_id, nom, role, ecole_id, niveaux'),
+        db.from('ar_profils_acces_ecoles').select('user_id, ecole_id'),
+      ]);
       if (error) throw error;
+      if (eLiens) throw eLiens;
       const membres = await Promise.all(
         rows.map(async (r) => {
           const { data } = await db.auth.admin.getUserById(r.user_id);
-          return { userId: r.user_id, email: data?.user?.email ?? '(compte inconnu)', nom: r.nom ?? '', role: r.role, ecoleId: r.ecole_id, niveaux: r.niveaux ?? [] };
+          const ecoleIds = liens.filter((l) => l.user_id === r.user_id).map((l) => l.ecole_id);
+          return { userId: r.user_id, email: data?.user?.email ?? '(compte inconnu)', nom: r.nom ?? '', role: r.role, ecoleId: r.ecole_id, ecoleIds, niveaux: r.niveaux ?? [] };
         })
       );
       membres.sort((a, b) => a.email.localeCompare(b.email));
@@ -62,6 +67,11 @@ export default async function handler(req, res) {
         const { error: e2 } = await db.from('ar_profils_acces')
           .upsert({ user_id: data.user.id, nom: (nom || '').trim(), role, ecole_id: ecolePour() }, { onConflict: 'user_id' });
         if (e2) throw e2;
+
+        if (scoped && ecoleId) {
+          const { error: e2b } = await db.from('ar_profils_acces_ecoles').insert({ user_id: data.user.id, ecole_id: ecoleId });
+          if (e2b && e2b.code !== '23505') throw e2b;
+        }
 
         const lien = data.properties.action_link;
         const roleLabel = LABEL_ROLE[role] ?? role;
@@ -95,7 +105,6 @@ export default async function handler(req, res) {
           if (!ROLES.includes(role)) { res.status(400).json({ error: 'Rôle invalide.' }); return; }
           patch.role = role;
           patch.ecole_id = ROLE_SCOPE.includes(role) ? (ecoleId || null) : null;
-          if (ROLE_SCOPE.includes(role) && !patch.ecole_id) { res.status(400).json({ error: 'Ce rôle doit être rattaché à une école.' }); return; }
         } else if (ecoleId !== undefined) {
           patch.ecole_id = ecoleId || null;
         }
@@ -103,6 +112,22 @@ export default async function handler(req, res) {
         if (niveaux !== undefined) patch.niveaux = Array.isArray(niveaux) && niveaux.length ? niveaux : null;
         if (Object.keys(patch).length === 0) { res.status(400).json({ error: 'Rien à modifier.' }); return; }
         const { error } = await db.from('ar_profils_acces').update(patch).eq('user_id', userId);
+        if (error) throw error;
+        res.status(200).json({ ok: true });
+        return;
+      }
+
+      if (action === 'addEcole') {
+        if (!userId || !ecoleId) { res.status(400).json({ error: 'userId et ecoleId requis.' }); return; }
+        const { error } = await db.from('ar_profils_acces_ecoles').insert({ user_id: userId, ecole_id: ecoleId });
+        if (error && error.code !== '23505') throw error;
+        res.status(200).json({ ok: true });
+        return;
+      }
+
+      if (action === 'removeEcole') {
+        if (!userId || !ecoleId) { res.status(400).json({ error: 'userId et ecoleId requis.' }); return; }
+        const { error } = await db.from('ar_profils_acces_ecoles').delete().eq('user_id', userId).eq('ecole_id', ecoleId);
         if (error) throw error;
         res.status(200).json({ ok: true });
         return;
