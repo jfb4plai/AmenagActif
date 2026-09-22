@@ -4,6 +4,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
   const [prenom, setPrenom] = useState(eleve?.prenom ?? '');
   const [initiale, setInitiale] = useState(eleve?.initiale_nom ?? '');
   const [commentaire, setCommentaire] = useState(eleve?.commentaire ?? '');
+  const [statut, setStatut] = useState(eleve?.statut ?? '');
   const [etat, setEtat] = useState('idle'); // idle | enregistrement | enregistre | suppression | erreur
   const [erreur, setErreur] = useState('');
 
@@ -13,7 +14,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
     setEtat('enregistrement');
     setErreur('');
     try {
-      await onSave({ prenom, initialeNom: initiale, commentaire });
+      await onSave({ prenom, initialeNom: initiale, commentaire, statut });
       setEtat('enregistre');
       setTimeout(onClose, 600);
     } catch (e) {
@@ -47,6 +48,26 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
         <p className="text-xs text-[color:var(--text3)]">Affichée « Emilie D. » sur la fiche. Pas de nom complet.</p>
       </div>
       <div>
+        <label className="block text-sm font-medium">Statut</label>
+        <div className="flex gap-3 text-sm">
+          <label className="flex items-center gap-1">
+            <input type="radio" name={`statut-${eleve?.id ?? 'nouveau'}`} value="IPT" checked={statut === 'IPT'}
+              onChange={() => setStatut('IPT')} disabled={enCours} />
+            IPT
+          </label>
+          <label className="flex items-center gap-1">
+            <input type="radio" name={`statut-${eleve?.id ?? 'nouveau'}`} value="PAR" checked={statut === 'PAR'}
+              onChange={() => setStatut('PAR')} disabled={enCours} />
+            PAR
+          </label>
+        </div>
+        <p className="text-xs text-[color:var(--text3)]">
+          IPT (Intégration Permanente Totale) : pas de protocole formel. PAR (Protocole d'Aménagements Raisonnables) :
+          élève suivi par un protocole officiel — les AR/AU cochés ci-dessous devront y être reportés. Ne change rien
+          à l'affichage de cette fiche, sert uniquement à trier les élèves plus tard.
+        </p>
+      </div>
+      <div>
         <label className="block text-sm font-medium">Commentaire (facultatif)</label>
         <textarea className="plai-input w-full" rows={2} value={commentaire} onChange={(e) => setCommentaire(e.target.value)}
           placeholder="Ex. : décès de la grand-mère mi-septembre, vigilance émotionnelle" disabled={enCours} />
@@ -57,7 +78,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
       {etat === 'enregistre' && <p className="plai-success text-xs">Enregistré ✓</p>}
 
       <div className="flex items-center gap-2">
-        <button className="plai-btn" onClick={enregistrer} disabled={!prenom.trim() || enCours}>
+        <button className="plai-btn" onClick={enregistrer} disabled={!prenom.trim() || !statut || enCours}>
           {etat === 'enregistrement' ? 'Enregistrement…' : 'Enregistrer'}
         </button>
         <button className="text-sm underline" onClick={onClose} disabled={enCours}>Annuler</button>
