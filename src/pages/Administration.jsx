@@ -6,7 +6,7 @@ import {
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
-const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles rattachés à une école
+const ROLE_SCOPE = ['referent_plai', 'direction']; // rôles rattachés à une école
 
 export default function Administration() {
   return (
