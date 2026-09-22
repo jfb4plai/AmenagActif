@@ -4,6 +4,7 @@ import { envoyerEmail } from './_lib/email.js';
 const ROLES = ['admin', 'referent_plai', 'direction', 'agent_plai'];
 const ROLE_SCOPE = ['referent_plai', 'direction'];
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
+const APP_URL = 'https://amenagactif.jfb4plai.com';
 
 /** Retourne l'utilisateur appelant s'il est administrateur, sinon null. */
 async function exigerAdmin(req) {
@@ -23,7 +24,6 @@ export default async function handler(req, res) {
     const moi = await exigerAdmin(req);
     if (!moi) { res.status(403).json({ error: 'Réservé aux administrateurs.' }); return; }
     const db = supabaseAdmin();
-    const origin = req.headers.origin || `https://${req.headers.host || ''}`;
 
     if (req.method === 'GET') {
       const { data: rows, error } = await db.from('ar_profils_acces').select('user_id, nom, role, ecole_id, niveaux');
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         const { data, error } = await db.auth.admin.generateLink({
           type: 'invite',
           email,
-          options: { redirectTo: `${origin}/nouveau-mot-de-passe` },
+          options: { redirectTo: `${APP_URL}/nouveau-mot-de-passe` },
         });
         if (error) {
           if (/already|registered|exist/i.test(String(error.message))) {
