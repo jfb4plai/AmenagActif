@@ -5,6 +5,8 @@ import * as f from '../../src/test/fixtures/sample.js';
 const args = (eleveId) => ({
   eleve: f.eleves.find((e) => e.id === eleveId),
   classeNom: '5LA',
+  ecoleNom: f.contexte.ecoleNom,
+  ecoleFase: f.contexte.ecoleFase,
   amenagements: f.amenagements,
   chapitres: f.chapitres,
   selectionsAR: f.selectionsAR,
@@ -36,5 +38,12 @@ describe('computeFicheEleve', () => {
   it('expose le commentaire de l\'élève (chaîne vide si aucun)', () => {
     expect(computeFicheEleve(args('e2')).commentaire).toBe('Décès de la grand-mère mi-septembre, vigilance émotionnelle');
     expect(computeFicheEleve(args('e1')).commentaire).toBe('');
+  });
+
+  it('expose le nom de l\'école, le numéro FASE et le statut IPT/PAR de l\'élève', () => {
+    const vm = computeFicheEleve(args('e1'));
+    expect(vm.ecoleNom).toBe('Athénée X');
+    expect(vm.ecoleFase).toBe('482');
+    expect(vm.statut).toBe('PAR');
   });
 });
