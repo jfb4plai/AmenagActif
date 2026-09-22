@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
+export default function EleveEditor({ eleve, onSave, onDelete, onClose, identiteVerrouillee }) {
   const [prenom, setPrenom] = useState(eleve?.prenom ?? '');
   const [initiale, setInitiale] = useState(eleve?.initiale_nom ?? '');
   const [commentaire, setCommentaire] = useState(eleve?.commentaire ?? '');
@@ -40,12 +40,22 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
     <div className="plai-card p-3 space-y-2 w-72">
       <div>
         <label className="block text-sm font-medium">Prénom</label>
-        <input className="plai-input w-full" value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Emilie" disabled={enCours} />
+        {identiteVerrouillee ? (
+          <p className="plai-input w-full bg-[color:var(--border)]/30">{prenom}</p>
+        ) : (
+          <input className="plai-input w-full" value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Emilie" disabled={enCours} />
+        )}
       </div>
       <div>
         <label className="block text-sm font-medium">Initiale du nom</label>
-        <input className="plai-input w-full" maxLength={2} value={initiale} onChange={(e) => setInitiale(e.target.value)} placeholder="D" disabled={enCours} />
-        <p className="text-xs text-[color:var(--text3)]">Affichée « Emilie D. » sur la fiche. Pas de nom complet.</p>
+        {identiteVerrouillee ? (
+          <p className="plai-input w-full bg-[color:var(--border)]/30">{initiale}</p>
+        ) : (
+          <>
+            <input className="plai-input w-full" maxLength={2} value={initiale} onChange={(e) => setInitiale(e.target.value)} placeholder="D" disabled={enCours} />
+            <p className="text-xs text-[color:var(--text3)]">Affichée « Emilie D. » sur la fiche. Pas de nom complet.</p>
+          </>
+        )}
       </div>
       <div>
         <label className="block text-sm font-medium">Statut administratif</label>
@@ -65,12 +75,14 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
           IPT (Intégration Permanente Totale) ou PAR (Protocole d'Aménagements Raisonnables) — ne change rien à l'affichage de cette fiche, sert à trier les élèves plus tard.
         </p>
       </div>
-      <div>
-        <label className="block text-sm font-medium">Commentaire (facultatif)</label>
-        <textarea className="plai-input w-full" rows={2} value={commentaire} onChange={(e) => setCommentaire(e.target.value)}
-          placeholder="Ex. : décès de la grand-mère mi-septembre, vigilance émotionnelle" disabled={enCours} />
-        <p className="text-xs text-[color:var(--text3)]">Information ponctuelle, à effacer quand elle n'est plus pertinente. Apparaît en bas de la fiche classe et de la fiche élève — pas dans le tableau des AR.</p>
-      </div>
+      {!identiteVerrouillee && (
+        <div>
+          <label className="block text-sm font-medium">Commentaire (facultatif)</label>
+          <textarea className="plai-input w-full" rows={2} value={commentaire} onChange={(e) => setCommentaire(e.target.value)}
+            placeholder="Ex. : décès de la grand-mère mi-septembre, vigilance émotionnelle" disabled={enCours} />
+          <p className="text-xs text-[color:var(--text3)]">Information ponctuelle, à effacer quand elle n'est plus pertinente. Apparaît en bas de la fiche classe et de la fiche élève — pas dans le tableau des AR.</p>
+        </div>
+      )}
 
       {etat === 'erreur' && <p className="plai-error text-xs">{erreur}</p>}
       {etat === 'enregistre' && <p className="plai-success text-xs">Enregistré ✓</p>}
@@ -82,7 +94,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
         <button className="text-sm underline" onClick={onClose} disabled={enCours}>Annuler</button>
       </div>
 
-      {eleve?.id && onDelete && (
+      {!identiteVerrouillee && eleve?.id && onDelete && (
         <div className="pt-2 border-t border-[color:var(--border)]">
           <button className="text-xs underline text-red-600" onClick={supprimer} disabled={enCours}>
             {etat === 'suppression' ? 'Suppression…' : "Supprimer l'élève (ex. départ)"}
