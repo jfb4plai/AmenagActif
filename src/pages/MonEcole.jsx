@@ -1,24 +1,32 @@
 import { useEcoles } from '../hooks/useEcoleGrid.js';
-import { useEquipeEcole } from '../hooks/useAdmin.js';
+import { useEquipeEcole, useMesEcolesLiees } from '../hooks/useAdmin.js';
 import { useRole } from '../lib/auth.jsx';
 
-const LABEL = { referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
+const LABEL = { referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant', admin: 'Administrateur' };
 
 export default function MonEcole() {
   const { isAdmin } = useRole();
-  const { data: ecoles = [], isLoading } = useEcoles();
+  const { data: ecolesToutes = [], isLoading } = useEcoles();
+  const { data: mesEcoleIds = [], isLoading: chargementLiens } = useMesEcolesLiees();
 
-  if (isLoading) return <div className="plai-section">Chargement…</div>;
+  if (isLoading || (isAdmin && chargementLiens)) return <div className="plai-section">Chargement…</div>;
 
-  if (isAdmin) {
+  // useEcoles() est déjà scopé par la RLS pour référent/direction/agent — mais un
+  // admin lit TOUTES les écoles (ar_is_admin() court-circuite la RLS), donc on
+  // filtre nous-mêmes sur ses rattachements personnels (facultatifs, identification
+  // "terrain" seulement, voir Administration.jsx).
+  const ecoles = isAdmin ? ecolesToutes.filter((e) => mesEcoleIds.includes(e.id)) : ecolesToutes;
+
+  if (isAdmin && ecoles.length === 0) {
     return (
       <div className="plai-section max-w-3xl px-4">
         <p className="plai-empty">En tant qu'administrateur, gérez les écoles et les membres dans « Administration ».</p>
+        <p className="text-sm text-[color:var(--text3)] mt-2">Aucune implantation de terrain rattachée à votre compte — possible depuis Administration → Membres &amp; accès.</p>
       </div>
     );
   }
 
-  if (ecoles.length === 0) {
+  if (!isAdmin && ecoles.length === 0) {
     return (
       <div className="plai-section max-w-3xl px-4">
         <p className="plai-error">Aucune école n'est rattachée à votre compte. Contactez l'administrateur.</p>

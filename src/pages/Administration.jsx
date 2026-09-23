@@ -6,8 +6,8 @@ import {
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
-const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles rattachés à une école
-const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai']; // rôles pouvant être rattachés à PLUSIEURS écoles
+const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles nécessitant une école à l'invitation
+const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai', 'admin']; // rôles pouvant être rattachés à PLUSIEURS écoles ensuite (admin : rattachement facultatif, identification "Mon école" seulement — aucun droit supplémentaire)
 
 export default function Administration() {
   return (
@@ -32,7 +32,10 @@ function SectionMembres() {
 
   const admins = membres.filter((m) => m.role === 'admin');
   const dansEcole = (m, ecoleId) => m.ecoleId === ecoleId || (m.ecoleIds ?? []).includes(ecoleId);
-  const parEcole = ecoles.map((ecole) => ({ ecole, membres: membres.filter((m) => m.role !== 'admin' && dansEcole(m, ecole.id)) }));
+  // Un admin rattaché (facultatif) à une école apparaît aussi dans son groupe — identification
+  // "personne de terrain" seulement, aucun droit supplémentaire (déjà global via ar_is_admin()).
+  const parEcole = ecoles.map((ecole) => ({ ecole, membres: membres.filter((m) => dansEcole(m, ecole.id)) }));
+  // Un admin sans école n'est pas une anomalie (c'est le cas normal) : on ne le signale pas ici.
   const sansEcole = membres.filter((m) => m.role !== 'admin' && !m.ecoleId && (m.ecoleIds ?? []).length === 0);
 
   return (
@@ -44,6 +47,7 @@ function SectionMembres() {
         Le <strong>nom</strong> figure sur les fiches (colonnes « Référent(s) PLAI » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
         Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : le champ <strong>Niveaux</strong> limite l'apparition de chacun aux classes concernées — vide, il apparaît sur toutes.
         Ci-dessous, la liste est groupée par implantation — un référent, une direction ou un agent multi-écoles apparaît dans chacune des siennes.
+        Un <strong>administrateur</strong> peut aussi être rattaché à une ou plusieurs écoles (chips ci-dessous) — uniquement pour apparaître dans « Mon école » comme personne de terrain, aucun droit supplémentaire (il a déjà accès à tout).
       </p>
 
       <form

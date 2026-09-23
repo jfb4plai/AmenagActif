@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase.js';
+import { useAuth } from '../lib/auth.jsx';
 import { useAnnees, useEcoles, useEcolesAdmin } from './useEcoleGrid.js';
 
 export { useAnnees, useEcoles, useEcolesAdmin };
@@ -64,9 +65,29 @@ export function useAdminMutations() {
   return { ajouterAnnee, activerAnnee, ajouterEcole, majEcole };
 }
 
+/** Écoles auxquelles LE COMPTE COURANT est personnellement rattaché (table de
+ * liaison), quel que soit son rôle. Pour un admin, useEcoles() renvoie déjà
+ * toutes les écoles (ar_is_admin() court-circuite la RLS) — ce hook sert à
+ * retrouver uniquement celles où il est identifié comme personne de terrain
+ * (voir MonEcole.jsx). Pour les autres rôles, useEcoles() est déjà scopé par
+ * la RLS et ce hook n'est pas nécessaire. */
+export function useMesEcolesLiees() {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: ['mes-ecoles-liees', session?.user?.id],
+    enabled: !!session,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('ar_profils_acces_ecoles').select('ecole_id').eq('user_id', session.user.id);
+      if (error) throw error;
+      return data.map((d) => d.ecole_id);
+    },
+  });
+}
+
 /** Équipe d'une implantation : référent PLAI + direction (multi-écoles, table de
- * liaison) et agents accompagnants (rattachement direct, une seule école) —
- * lecture, via RLS. */
+ * liaison), agents accompagnants (rattachement direct, une seule école), et
+ * administrateurs rattachés facultativement (identification "terrain" — même
+ * table de liaison, aucun droit supplémentaire) — lecture, via RLS. */
 export function useEquipeEcole(ecoleId) {
   return useQuery({
     queryKey: ['equipe-ecole', ecoleId],
@@ -84,7 +105,7 @@ export function useEquipeEcole(ecoleId) {
         .from('ar_profils_acces')
         .select('user_id, nom, role')
         .in('user_id', userIds)
-        .in('role', ['referent_plai', 'direction', 'agent_plai'])
+        .in('role', ['referent_plai', 'direction', 'agent_plai', 'admin'])
         .order('role');
       if (e2) throw e2;
       return data;
