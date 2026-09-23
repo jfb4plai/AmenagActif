@@ -12,6 +12,7 @@ import FicheClassePage from './pages/FicheClassePage.jsx';
 import FicheEcolePage from './pages/FicheEcolePage.jsx';
 import FicheElevePage from './pages/FicheElevePage.jsx';
 import FichePublique from './pages/FichePublique.jsx';
+import CatalogueAmenagements from './pages/CatalogueAmenagements.jsx';
 import Administration from './pages/Administration.jsx';
 import MonEcole from './pages/MonEcole.jsx';
 import NotFound from './pages/NotFound.jsx';
@@ -43,6 +44,7 @@ export default function App() {
       <Route path="/connexion" element={<Login />} />
       <Route path="/nouveau-mot-de-passe" element={<NouveauMotDePasse />} />
       <Route path="/fiche/:token" element={<FichePublique />} />
+      <Route path="/catalogue-amenagements" element={<CatalogueAmenagements />} />
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />
       <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />
       <Route path="/mon-ecole" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><MonEcole /></RequireRole></Shell></RequireAuth>} />

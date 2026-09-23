@@ -23,8 +23,13 @@ export default function FichePublique() {
       <div className="text-center mb-3 no-print space-y-2">
         <p className="text-sm text-[color:var(--text3)]">Fiche en lecture seule — diffusion restreinte aux enseignants concernés.</p>
         <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
+        <p className="text-sm">
+          <a className="text-teal underline" href="/catalogue-amenagements" target="_blank" rel="noopener noreferrer">
+            Voir la liste complète des aménagements possibles (AU/AR)
+          </a>
+        </p>
       </div>
-      <FicheClasseView vm={data.vm} />
+      <FicheClasseView vm={data.vm} lienEleve={false} />
     </div>
   );
 }

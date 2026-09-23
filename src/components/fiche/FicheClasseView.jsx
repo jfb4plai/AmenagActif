@@ -1,5 +1,7 @@
-/** @param {{ vm: import('../../domain/types.js').FicheClasseVM, showStatutEleve?: boolean }} props */
-export default function FicheClasseView({ vm, showStatutEleve = false }) {
+/** @param {{ vm: import('../../domain/types.js').FicheClasseVM, showStatutEleve?: boolean, lienEleve?: boolean }} props
+ * lienEleve : false sur la fiche publique (FichePublique.jsx) — les enseignants qui la consultent
+ * n'ont pas de compte et ne peuvent pas ouvrir /eleve/:id/fiche (page authentifiée). */
+export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve = true }) {
   const date = vm.dateMaj ? new Date(vm.dateMaj).toLocaleDateString('fr-BE') : '…';
   return (
     <article className="fiche max-w-3xl mx-auto bg-white p-8 text-[15px] leading-relaxed" style={{ fontFamily: 'Arial, sans-serif' }}>
@@ -40,7 +42,7 @@ export default function FicheClasseView({ vm, showStatutEleve = false }) {
                 <ul className="list-disc pl-5">
                   {row.eleves.map((e, i) => (
                     <li key={i}>
-                      <a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a>
+                      {lienEleve ? <a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a> : <span>{e.nom}</span>}
                       {showStatutEleve && (
                         <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 ml-1">{e.statut}</span>
                       )}
