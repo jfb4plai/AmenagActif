@@ -10,7 +10,10 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
         <span>Date de mise à jour : {date}</span>
       </header>
       <h1 className="text-center bg-gray-200 py-2 font-bold text-lg mb-4">Aménagements raisonnables — {vm.classeNom}</h1>
-      <p className="text-sm text-gray-600 mb-4">{vm.ecoleNom} · {vm.anneeLibelle}</p>
+      <p className="text-sm text-gray-600 mb-4">
+        {vm.ecoleNom} · {vm.anneeLibelle}
+        {vm.classesSources && <> · Classes regroupées : {vm.classesSources.join(', ')}</>}
+      </p>
 
       <table className="w-full border border-black mb-4 text-sm">
         <thead><tr>

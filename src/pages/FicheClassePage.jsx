@@ -10,10 +10,16 @@ import { supabase } from '../lib/supabase.js';
 function Picker() {
   const { data: ecoles = [] } = useEcoles();
   const { data: annees = [] } = useAnnees();
-  const { isAdmin } = useRole();
+  const { isAdmin, role } = useRole();
   const ecoleUnique = !isAdmin && ecoles.length === 1 ? ecoles[0] : null;
   const [ecoleId, setEcoleId] = useState('');
   const [anneeId, setAnneeId] = useState('');
+  const [selection, setSelection] = useState(new Set());
+  const [nomGroupe, setNomGroupe] = useState('');
+  const [genere, setGenere] = useState(null); // { url } | { erreur }
+  const [enCours, setEnCours] = useState(false);
+  const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction';
+
   useEffect(() => {
     if (ecoleUnique && ecoleId !== ecoleUnique.id) setEcoleId(ecoleUnique.id);
   }, [ecoleUnique, ecoleId]);
@@ -24,6 +30,36 @@ function Picker() {
     }
   }, [annees, anneeId]);
   const { data: grid } = useEcoleGrid(ecoleId || null, anneeId || null);
+
+  function basculer(classeId) {
+    setSelection((s) => {
+      const n = new Set(s);
+      n.has(classeId) ? n.delete(classeId) : n.add(classeId);
+      return n;
+    });
+    setGenere(null);
+  }
+
+  async function genererLienGroupe() {
+    setEnCours(true);
+    setGenere(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/fiche-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token ?? ''}` },
+        body: JSON.stringify({ classeIds: [...selection], nomGroupe: nomGroupe.trim() || undefined }),
+      });
+      if (!res.ok) { const b = await res.json().catch(() => ({})); setGenere({ erreur: b.error || 'Échec de la génération.' }); return; }
+      const { url } = await res.json();
+      setGenere({ url });
+    } catch {
+      setGenere({ erreur: 'Échec de la génération.' });
+    } finally {
+      setEnCours(false);
+    }
+  }
+
   return (
     <div className="plai-section space-y-3">
       <h1 className="text-xl font-semibold">Fiches par classe</h1>
@@ -42,11 +78,38 @@ function Picker() {
           {annees.map((a) => <option key={a.id} value={a.id}>{a.libelle}</option>)}
         </select>
       </div>
-      <ul className="list-disc pl-6">
+      <ul className="space-y-1">
         {(grid?.classes ?? []).map((c) => (
-          <li key={c.id}><Link className="text-teal underline" to={`/classe/${c.id}/fiche`}>{c.nom}</Link></li>
+          <li key={c.id} className="flex items-center gap-2">
+            {peutGrouper && (
+              <input type="checkbox" checked={selection.has(c.id)} onChange={() => basculer(c.id)}
+                aria-label={`Sélectionner ${c.nom} pour un regroupement`} />
+            )}
+            <Link className="text-teal underline" to={`/classe/${c.id}/fiche`}>{c.nom}</Link>
+          </li>
         ))}
       </ul>
+
+      {peutGrouper && selection.size >= 2 && (
+        <div className="plai-card p-3 space-y-2 max-w-md">
+          <p className="font-medium text-sm">Fiche groupée — {selection.size} classes sélectionnées</p>
+          <p className="text-xs text-[color:var(--text3)]">
+            Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…) : une seule fiche,
+            AU et AR fusionnés, sans doublon. L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule.
+          </p>
+          <label className="text-sm block">Nom du groupe (optionnel)
+            <input className="plai-input w-full" placeholder="Atelier cuisine 3e" value={nomGroupe} onChange={(e) => setNomGroupe(e.target.value)} />
+            <span className="block text-xs text-[color:var(--text3)] font-normal">Affiché en titre de la fiche. Vide : les noms des classes sont concatenés (« 3LA + 3LB »).</span>
+          </label>
+          <button className="plai-btn" onClick={genererLienGroupe} disabled={enCours}>{enCours ? 'Génération…' : 'Générer le lien groupé'}</button>
+          {genere?.url && (
+            <p className="text-sm break-all">
+              <a className="text-teal underline" href={genere.url} target="_blank" rel="noopener noreferrer">{genere.url}</a>
+            </p>
+          )}
+          {genere?.erreur && <p className="plai-error text-sm">{genere.erreur}</p>}
+        </div>
+      )}
     </div>
   );
 }
