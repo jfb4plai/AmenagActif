@@ -80,7 +80,7 @@ export default async function handler(req, res) {
           await envoyerEmail({
             to: email,
             subject: 'Invitation à AménagActif',
-            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${lien}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p>Ce lien est personnel, ne le transférez pas.</p>`,
+            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${lien}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien n'est valable que 24 heures.</strong> Passé ce délai, la page de définition du mot de passe vous permettra d'en redemander un directement avec votre adresse e-mail. Ce lien est personnel, ne le transférez pas.</p>`,
           });
         } catch (e3) {
           res.status(502).json({ error: `Compte créé, mais l'envoi de l'email d'invitation a échoué (${e3.message}). Réessayez l'invitation.` });

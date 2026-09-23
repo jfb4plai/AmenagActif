@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase.js';
+import ChampMotDePasse from '../components/ChampMotDePasse.jsx';
 
 /**
  * Cible des liens d'invitation et de « mot de passe oublié ».
@@ -14,6 +15,9 @@ export default function NouveauMotDePasse() {
   const [mdp2, setMdp2] = useState('');
   const [erreur, setErreur] = useState(null);
   const [envoi, setEnvoi] = useState(false);
+  const [emailSecours, setEmailSecours] = useState('');
+  const [secoursInfo, setSecoursInfo] = useState(null);
+  const [secoursEnvoi, setSecoursEnvoi] = useState(false);
 
   useEffect(() => {
     let vivant = true;
@@ -52,11 +56,38 @@ export default function NouveauMotDePasse() {
   }
 
   if (statut === 'invalide') {
+    async function renvoyer(e) {
+      e.preventDefault();
+      setSecoursInfo(null);
+      if (!emailSecours.trim()) return;
+      setSecoursEnvoi(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(emailSecours.trim(), {
+        redirectTo: `${window.location.origin}/nouveau-mot-de-passe`,
+      });
+      setSecoursEnvoi(false);
+      if (error) setSecoursInfo("Envoi impossible, réessayez plus tard.");
+      else setSecoursInfo("Si un compte existe pour cette adresse, un nouveau lien vient d'être envoyé — pensez aux indésirables.");
+    }
+
     return (
-      <div className="plai-section max-w-md mx-auto">
-        <p className="plai-error">Ce lien a expiré ou n'est pas valide.</p>
-        <Link to="/connexion" className="plai-btn inline-block mt-3">Retour à la connexion</Link>
-        <p className="text-sm text-[color:var(--text3)] mt-2">Depuis la page de connexion, « Mot de passe oublié ? » renvoie un nouveau lien.</p>
+      <div className="plai-section max-w-md mx-auto space-y-4">
+        <div>
+          <p className="plai-error">Ce lien a expiré (il n'est valable que 24 heures) ou a déjà été utilisé.</p>
+          <p className="text-sm text-[color:var(--text3)] mt-1">
+            Rien n'est perdu : indiquez ci-dessous l'adresse e-mail exacte sur laquelle vous avez été invité·e, pour recevoir un nouveau lien.
+          </p>
+        </div>
+        <form onSubmit={renvoyer} className="space-y-2">
+          <label htmlFor="email-secours" className="block font-medium text-sm">Adresse e-mail</label>
+          <input id="email-secours" type="email" required className="plai-input w-full"
+            placeholder="prenom.nom@ecole.be" value={emailSecours} onChange={(e) => setEmailSecours(e.target.value)} />
+          <button type="submit" className="plai-btn" disabled={secoursEnvoi}>{secoursEnvoi ? 'Envoi…' : 'Recevoir un nouveau lien'}</button>
+          {secoursInfo && <p className="plai-success text-sm">{secoursInfo}</p>}
+        </form>
+        <p className="text-sm text-[color:var(--text3)]">
+          Toujours bloqué·e ? Contactez l'administrateur PLAI qui a créé votre compte — il peut vérifier l'adresse exacte utilisée pour l'invitation.
+        </p>
+        <Link to="/connexion" className="text-sm underline text-teal inline-block">Retour à la connexion</Link>
       </div>
     );
   }
@@ -77,14 +108,12 @@ export default function NouveauMotDePasse() {
       <form onSubmit={soumettre} className="space-y-4">
         <div>
           <label htmlFor="mdp" className="block font-medium">Nouveau mot de passe</label>
-          <input id="mdp" type="password" required minLength={8} className="plai-input w-full"
-            value={mdp} onChange={(e) => setMdp(e.target.value)} />
+          <ChampMotDePasse id="mdp" required minLength={8} autoComplete="new-password" value={mdp} onChange={(e) => setMdp(e.target.value)} />
           <p className="text-sm text-[color:var(--text3)]">8 caractères minimum.</p>
         </div>
         <div>
           <label htmlFor="mdp2" className="block font-medium">Confirmer</label>
-          <input id="mdp2" type="password" required className="plai-input w-full"
-            value={mdp2} onChange={(e) => setMdp2(e.target.value)} />
+          <ChampMotDePasse id="mdp2" required autoComplete="new-password" value={mdp2} onChange={(e) => setMdp2(e.target.value)} />
         </div>
         {erreur && <p className="plai-error">{erreur}</p>}
         <button type="submit" className="plai-btn" disabled={envoi}>{envoi ? 'Enregistrement…' : 'Enregistrer'}</button>

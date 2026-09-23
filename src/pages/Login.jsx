@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase.js';
 import { useAuth } from '../lib/auth.jsx';
+import ChampMotDePasse from '../components/ChampMotDePasse.jsx';
 
 export default function Login() {
   const { session, ready } = useAuth();
@@ -47,8 +48,7 @@ export default function Login() {
         </div>
         <div>
           <label htmlFor="mdp" className="block font-medium">Mot de passe</label>
-          <input id="mdp" type="password" required className="plai-input w-full"
-            value={mdp} onChange={(e) => setMdp(e.target.value)} />
+          <ChampMotDePasse id="mdp" required autoComplete="current-password" value={mdp} onChange={(e) => setMdp(e.target.value)} />
         </div>
         {erreur && <p className="plai-error">{erreur}</p>}
         {info && <p className="plai-success">{info}</p>}
