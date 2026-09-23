@@ -35,8 +35,8 @@ export default function FicheClasseView({ vm, showStatutEleve = false }) {
           {vm.parAmenagement.length === 0 && <tr><td className="border border-black p-2 text-gray-500">Aucun.</td></tr>}
           {vm.parAmenagement.map((row) => (
             <tr key={row.libelle}>
-              <td className="border border-black p-2 align-top w-1/2">{row.libelle}</td>
-              <td className="border border-black p-2">
+              <td className="border border-black p-2 align-top w-3/4">{row.libelle}</td>
+              <td className="border border-black p-2 w-1/4">
                 <ul className="list-disc pl-5">
                   {row.eleves.map((e, i) => (
                     <li key={i}>
