@@ -16,6 +16,7 @@ export default function SaisieEcole() {
   const [classeId, setClasseId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [recherche, setRecherche] = useState('');
+  const [eleveSurvole, setEleveSurvole] = useState(null);
   const { data: cat } = useCatalogue();
   const { data: grid, isLoading, error } = useEcoleGrid(ctx.ecoleId, ctx.anneeId);
   const mut = useGridMutations(ctx.ecoleId, ctx.anneeId);
@@ -122,7 +123,8 @@ export default function SaisieEcole() {
             <table className="border-collapse text-sm">
               <EnTeteEleves eleves={eleves}
                 onSaveEleve={(v) => mut.upsertEleve.mutateAsync(v)}
-                onDeleteEleve={(v) => mut.deleteEleve.mutateAsync(v)} />
+                onDeleteEleve={(v) => mut.deleteEleve.mutateAsync(v)}
+                eleveSurvole={eleveSurvole} onHoverEleve={setEleveSurvole} />
               <tbody>
                 {chapitres.map((ch) => (
                   <ChapitreAR key={ch.id} chapitre={ch}
@@ -133,7 +135,8 @@ export default function SaisieEcole() {
                     filtre={recherche}
                     onToggle={(v) => mut.toggleAR.mutate(v)}
                     onAddLibre={(v) => mut.addLibre.mutate(v)}
-                    onRemoveLibre={(v) => mut.removeLibre.mutate(v)} />
+                    onRemoveLibre={(v) => mut.removeLibre.mutate(v)}
+                    eleveSurvole={eleveSurvole} onHoverEleve={setEleveSurvole} />
                 ))}
               </tbody>
             </table>

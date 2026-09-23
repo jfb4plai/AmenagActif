@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import EleveEditor from './EleveEditor.jsx';
 
-export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve }) {
+export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve, eleveSurvole, onHoverEleve }) {
   const [editId, setEditId] = useState(null);
 
   return (
@@ -9,7 +9,8 @@ export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve }) {
       <tr>
         <th className="text-left align-bottom p-1 min-w-[16rem]"></th>
         {eleves.map((e) => (
-          <th key={e.id} className="relative p-1 align-bottom min-w-[3rem] border-l border-[color:var(--border)]">
+          <th key={e.id} className={`relative p-1 align-bottom min-w-[3rem] border-l border-[color:var(--border)] ${e.id === eleveSurvole ? 'bg-[color:var(--teal-bg)]' : ''}`}
+            onMouseEnter={() => onHoverEleve?.(e.id)} onMouseLeave={() => onHoverEleve?.(null)}>
             <button className="text-xs hover:underline" onClick={() => setEditId(editId === e.id ? null : e.id)}
               style={{ writingMode: 'vertical-rl' }} title="Modifier l'élève">
               {e.prenom} {e.initiale_nom}
