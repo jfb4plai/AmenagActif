@@ -52,7 +52,8 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
         <tr key={a.id} className="border-b border-[color:var(--border)] hover:bg-white/60">
           <td className="p-1 align-top">{a.libelle}</td>
           {cols.map((e) => (
-            <td key={e.id} className={`text-center border-l border-[color:var(--border)] ${e.id === eleveSurvole ? 'bg-[color:var(--teal-bg)]' : ''}`}
+            <td key={e.id} className={`cell-eleve text-center border-l border-[color:var(--border)] ${e.id === eleveSurvole ? 'bg-[color:var(--teal-bg)]' : ''}`}
+              data-eleve={`${e.prenom} ${e.initiale_nom}`}
               onMouseEnter={() => onHoverEleve?.(e.id)} onMouseLeave={() => onHoverEleve?.(null)}>
               <input type="checkbox" checked={estCoche(e.id, a.id)}
                 aria-label={`${a.libelle} — ${e.prenom} ${e.initiale_nom}`}
