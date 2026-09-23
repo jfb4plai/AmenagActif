@@ -3,7 +3,7 @@ import { envoyerEmail } from './_lib/email.js';
 
 const ROLES = ['admin', 'referent_plai', 'direction', 'agent_plai'];
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai'];
-const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai']; // rôles pouvant être rattachés à PLUSIEURS écoles
+const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai', 'admin']; // rôles pouvant être rattachés à PLUSIEURS écoles (admin : identification "Mon école" seulement, aucun droit en plus)
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const APP_URL = 'https://amenagactif.jfb4plai.com';
 
