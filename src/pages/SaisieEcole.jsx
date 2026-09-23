@@ -55,11 +55,24 @@ export default function SaisieEcole() {
         </>
       ) : (
         <>
-          <div className="flex items-center justify-between">
-            <p className="text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">{classe.nom}{classe.niveau ? <span className="text-[color:var(--text3)] font-normal"> — {classe.niveau}</span> : null}</h2>
+            <div className="flex items-center gap-3 text-sm shrink-0">
               <button className="underline text-teal" onClick={() => { setClasseId(null); setEditId(null); }}>← Changer de classe</button>
-            </p>
+              {peutEditerStructure && (
+                <button className="underline text-red-600" onClick={() => {
+                  const avertissement = eleves.length > 0
+                    ? `Supprimer la classe ${classe.nom} ? Ses ${eleves.length} élève(s) et tous leurs aménagements cochés seront supprimés définitivement. Cette action est irréversible.`
+                    : `Supprimer la classe ${classe.nom} ? Cette action est irréversible.`;
+                  if (!confirm(avertissement)) return;
+                  mut.deleteClasse.mutate({ id: classeId }, { onSuccess: () => { setClasseId(null); setEditId(null); } });
+                }} disabled={mut.deleteClasse.isPending}>
+                  {mut.deleteClasse.isPending ? 'Suppression…' : 'Supprimer la classe'}
+                </button>
+              )}
+            </div>
           </div>
+          {mut.deleteClasse.isError && <p className="plai-error text-sm">Échec de la suppression, réessayez.</p>}
 
           <div className="plai-card p-3 text-sm space-y-1">
             <label className="font-medium block" htmlFor="referent-plai-classe">Référent(s) PLAI de la classe</label>

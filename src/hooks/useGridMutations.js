@@ -66,6 +66,14 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
+  const deleteClasse = useMutation({
+    mutationFn: async ({ id }) => {
+      const { error } = await supabase.from('ar_classes').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: invalider,
+  });
+
   const majReferentPlaiClasse = useMutation({
     mutationFn: async ({ classeId, referentPlaiNom }) => {
       const { error } = await supabase.from('ar_classes').update({ referent_plai_nom: referentPlaiNom ?? '' }).eq('id', classeId);
@@ -90,5 +98,5 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
-  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, majReferentPlaiClasse, addLibre, removeLibre };
+  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, addLibre, removeLibre };
 }
