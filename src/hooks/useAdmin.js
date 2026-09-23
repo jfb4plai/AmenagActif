@@ -64,22 +64,27 @@ export function useAdminMutations() {
   return { ajouterAnnee, activerAnnee, ajouterEcole, majEcole };
 }
 
-/** Équipe d'une implantation : comptes référent PLAI + direction (lecture, via RLS). */
+/** Équipe d'une implantation : référent PLAI + direction (multi-écoles, table de
+ * liaison) et agents accompagnants (rattachement direct, une seule école) —
+ * lecture, via RLS. */
 export function useEquipeEcole(ecoleId) {
   return useQuery({
     queryKey: ['equipe-ecole', ecoleId],
     enabled: !!ecoleId,
     queryFn: async () => {
-      const { data: liens, error: e1 } = await supabase
-        .from('ar_profils_acces_ecoles').select('user_id').eq('ecole_id', ecoleId);
+      const [{ data: liens, error: e1 }, { data: directs, error: e1b }] = await Promise.all([
+        supabase.from('ar_profils_acces_ecoles').select('user_id').eq('ecole_id', ecoleId),
+        supabase.from('ar_profils_acces').select('user_id').eq('ecole_id', ecoleId),
+      ]);
       if (e1) throw e1;
-      const userIds = liens.map((l) => l.user_id);
+      if (e1b) throw e1b;
+      const userIds = [...new Set([...liens.map((l) => l.user_id), ...directs.map((d) => d.user_id)])];
       if (userIds.length === 0) return [];
       const { data, error: e2 } = await supabase
         .from('ar_profils_acces')
         .select('user_id, nom, role')
         .in('user_id', userIds)
-        .in('role', ['referent_plai', 'direction'])
+        .in('role', ['referent_plai', 'direction', 'agent_plai'])
         .order('role');
       if (e2) throw e2;
       return data;

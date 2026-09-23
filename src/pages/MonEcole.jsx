@@ -2,7 +2,7 @@ import { useEcoles } from '../hooks/useEcoleGrid.js';
 import { useEquipeEcole } from '../hooks/useAdmin.js';
 import { useRole } from '../lib/auth.jsx';
 
-const LABEL = { referent_plai: 'Référent PLAI', direction: 'Direction' };
+const LABEL = { referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 
 export default function MonEcole() {
   const { isAdmin } = useRole();
@@ -44,8 +44,9 @@ function SectionEcole({ ecole }) {
       <h2 className="text-lg font-semibold">{ecole.nom}</h2>
       <h3 className="font-semibold text-sm">Équipe de l'implantation</h3>
       <p className="text-sm text-[color:var(--text3)]">
-        Ces noms alimentent les colonnes « Référent(s) PLAI » et « PAR (Direction) » des fiches.
-        Pour ajouter ou retirer une personne, ou corriger un nom, contactez l'administrateur.
+        Les noms Référent PLAI et Direction alimentent les colonnes « Référent(s) PLAI » et « PAR (Direction) » des fiches.
+        Les agents accompagnants sont listés ici pour information. Pour ajouter, retirer une personne, ou corriger un nom,
+        signalez le changement à l'administrateur — c'est lui qui édite ces listes, école par école.
       </p>
       <ul className="divide-y divide-[color:var(--border)] border border-[color:var(--border)] rounded">
         {equipe.length === 0 && <li className="px-3 py-2 text-sm text-[color:var(--text3)]">Aucun membre enregistré.</li>}
