@@ -10,8 +10,11 @@ import AjoutEleve from '../components/saisie/AjoutEleve.jsx';
 import { useCatalogue } from '../hooks/useCatalogue.js';
 import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import { useGridMutations } from '../hooks/useGridMutations.js';
+import { useRole } from '../lib/auth.jsx';
 
 export default function SaisieEcole() {
+  const { role } = useRole();
+  const peutEditerStructure = role !== 'agent_plai';
   const [ctx, setCtx] = useState({ ecoleId: null, anneeId: null });
   const [classeId, setClasseId] = useState(null);
   const [editId, setEditId] = useState(null);
@@ -47,6 +50,7 @@ export default function SaisieEcole() {
             classes={grid.classes}
             onSelect={setClasseId}
             onCreate={({ nom, niveau }) => mut.ensureClasse.mutateAsync({ nom, niveau })}
+            peutCreer={peutEditerStructure}
           />
         </>
       ) : (
@@ -106,7 +110,8 @@ export default function SaisieEcole() {
           </div>
 
           <BandeauAU classe={classe} auCatalogue={auCat} chapitres={chapitres}
-            auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)} onToggle={(v) => mut.toggleAU.mutate(v)} />
+            auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)} onToggle={(v) => mut.toggleAU.mutate(v)}
+            peutRetirer={peutEditerStructure} />
 
           <div>
             <h2 className="font-semibold mb-1">Aménagements raisonnables — {classe.nom}</h2>

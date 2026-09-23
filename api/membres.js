@@ -3,7 +3,7 @@ import { envoyerEmail } from './_lib/email.js';
 
 const ROLES = ['admin', 'referent_plai', 'direction', 'agent_plai'];
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai'];
-const ROLE_SCOPE_MULTI = ['referent_plai', 'direction']; // rôles pouvant être rattachés à PLUSIEURS écoles (pas agent_plai)
+const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai']; // rôles pouvant être rattachés à PLUSIEURS écoles
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const APP_URL = 'https://amenagactif.jfb4plai.com';
 
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
       if (action === 'addEcole') {
         if (!userId || !ecoleId) { res.status(400).json({ error: 'userId et ecoleId requis.' }); return; }
         const { data: cible } = await db.from('ar_profils_acces').select('role').eq('user_id', userId).maybeSingle();
-        if (!cible || !ROLE_SCOPE_MULTI.includes(cible.role)) { res.status(400).json({ error: 'Seuls les référents PLAI et directions peuvent être rattachés à plusieurs écoles.' }); return; }
+        if (!cible || !ROLE_SCOPE_MULTI.includes(cible.role)) { res.status(400).json({ error: 'Ce rôle ne peut pas être rattaché à plusieurs écoles.' }); return; }
         const { error } = await db.from('ar_profils_acces_ecoles').insert({ user_id: userId, ecole_id: ecoleId });
         if (error && error.code !== '23505') throw error;
         res.status(200).json({ ok: true });

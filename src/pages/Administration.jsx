@@ -7,7 +7,7 @@ import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles rattachés à une école
-const ROLE_SCOPE_MULTI = ['referent_plai', 'direction']; // rôles pouvant être rattachés à PLUSIEURS écoles (pas agent_plai)
+const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai']; // rôles pouvant être rattachés à PLUSIEURS écoles
 
 export default function Administration() {
   return (
@@ -40,9 +40,10 @@ function SectionMembres() {
       <h2 className="font-semibold">Membres &amp; accès</h2>
       <p className="text-sm text-[color:var(--text3)]">
         <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, sur une ou plusieurs écoles (classes, élèves, AR/AU, fiches).
+        <strong>Agent accompagnant</strong> : sur une ou plusieurs écoles comme référent/direction, peut créer/modifier/supprimer des élèves et leurs AR, et ajouter (pas retirer) un AU — mais ne peut pas créer de classe.
         Le <strong>nom</strong> figure sur les fiches (colonnes « Référent(s) PLAI » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
         Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : le champ <strong>Niveaux</strong> limite l'apparition de chacun aux classes concernées — vide, il apparaît sur toutes.
-        Ci-dessous, la liste est groupée par implantation — un référent ou une direction multi-écoles apparaît dans chacune des siennes.
+        Ci-dessous, la liste est groupée par implantation — un référent, une direction ou un agent multi-écoles apparaît dans chacune des siennes.
       </p>
 
       <form

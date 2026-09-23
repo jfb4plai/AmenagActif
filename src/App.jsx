@@ -16,8 +16,8 @@ import Administration from './pages/Administration.jsx';
 import MonEcole from './pages/MonEcole.jsx';
 import NotFound from './pages/NotFound.jsx';
 
-const EDITEURS = ['admin', 'referent_plai', 'direction'];
-const LECTEURS = [...EDITEURS, 'agent_plai']; // + accès lecture seule (fiches, mon école)
+const EDITEURS = ['admin', 'referent_plai', 'direction', 'agent_plai']; // accès à la saisie (agent : élèves/AR, pas de création de classe ni retrait d'AU — géré en RLS)
+const LECTEURS = EDITEURS; // fiches accessibles aux mêmes rôles
 
 function Shell({ children }) {
   return (
@@ -30,8 +30,7 @@ function Shell({ children }) {
   );
 }
 
-/** Racine : les éditeurs (admin/référent/direction) vont vers la saisie, les rôles
- * lecture seule (agent accompagnant) vers la fiche vue école. */
+/** Racine : tout éditeur (admin/référent/direction/agent) va vers la saisie. */
 function Accueil() {
   const { loading, editeurEcole } = useRole();
   if (loading) return <div className="plai-section">Chargement…</div>;

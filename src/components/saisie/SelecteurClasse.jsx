@@ -5,7 +5,7 @@ import { useState } from 'react';
  * remplace la saisie libre du nom de classe pour fiabiliser le flux
  * (plus de correspondance texte hasardeuse entre "5LA" et "5 LA").
  */
-export default function SelecteurClasse({ classes = [], onSelect, onCreate }) {
+export default function SelecteurClasse({ classes = [], onSelect, onCreate, peutCreer = true }) {
   const [creation, setCreation] = useState(false);
   const [nom, setNom] = useState('');
   const [niveau, setNiveau] = useState('');
@@ -53,7 +53,10 @@ export default function SelecteurClasse({ classes = [], onSelect, onCreate }) {
           {classes.map((c) => <option key={c.id} value={c.id}>{c.nom}{c.niveau ? ` — ${c.niveau}` : ''}</option>)}
         </select>
       </label>
-      <button type="button" className="plai-btn" onClick={() => setCreation(true)}>+ Nouvelle classe</button>
+      {peutCreer && <button type="button" className="plai-btn" onClick={() => setCreation(true)}>+ Nouvelle classe</button>}
+      {!peutCreer && classes.length === 0 && (
+        <p className="text-sm text-[color:var(--text3)]">Aucune classe créée pour l'instant dans cette école — demandez au référent PLAI, à la direction ou à l'administrateur d'en créer une.</p>
+      )}
     </div>
   );
 }

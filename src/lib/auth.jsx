@@ -47,7 +47,7 @@ export function useRole() {
     role,
     ecoleId: data?.ecole_id ?? null,
     isAdmin: role === 'admin',
-    editeurEcole: role === 'admin' || role === 'referent_plai' || role === 'direction',
+    editeurEcole: role === 'admin' || role === 'referent_plai' || role === 'direction' || role === 'agent_plai',
     loading: !ready || (!!session && isLoading),
   };
 }
