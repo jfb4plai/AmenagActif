@@ -1,8 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase.js';
 import { computeFicheClasse } from '../domain/projections/ficheClasse.js';
+import { fusionnerDonneesClasses } from '../domain/projections/fusionClasses.js';
 
-async function chargerClasse(classeId) {
+/** Charge les données brutes d'une classe (sans les projeter) — réutilisé par
+ * chargerClasse() (fiche seule) et useFicheGroupe() (aperçu multi-classes). */
+export async function chargerDonneesClasse(classeId) {
   const { data: classe, error } = await supabase
     .from('ar_classes')
     .select('id, nom, niveau, referent_plai_nom, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)')
@@ -34,7 +37,7 @@ async function chargerClasse(classeId) {
     .filter((r) => r.ecole_id === classe.ecole_id || userIdsMultiEcoles.includes(r.user_id))
     .map((r) => ({ nom: r.nom, fonction: r.role, niveaux: r.niveaux ?? null }));
 
-  return computeFicheClasse({
+  return {
     classe,
     contexte: { classeNom: classe.nom, ecoleNom: classe.ar_ecoles?.nom ?? '', anneeLibelle: classe.ar_annees?.libelle ?? '' },
     eleves,
@@ -44,9 +47,29 @@ async function chargerClasse(classeId) {
     selectionsAR: sel.data,
     libres: lib.data,
     referents,
-  });
+  };
 }
 
 export function useFicheClasse(classeId) {
-  return useQuery({ queryKey: ['fiche-classe', classeId], enabled: !!classeId, queryFn: () => chargerClasse(classeId) });
+  return useQuery({
+    queryKey: ['fiche-classe', classeId],
+    enabled: !!classeId,
+    queryFn: async () => computeFicheClasse(await chargerDonneesClasse(classeId)),
+  });
+}
+
+/** Aperçu authentifié d'une fiche groupée (plusieurs classes fusionnées) —
+ * avant de générer le lien public à envoyer. */
+export function useFicheGroupe(classeIds, nomGroupe) {
+  return useQuery({
+    queryKey: ['fiche-groupe', classeIds, nomGroupe],
+    enabled: Array.isArray(classeIds) && classeIds.length >= 2,
+    queryFn: async () => {
+      const parties = await Promise.all(classeIds.map(chargerDonneesClasse));
+      const fusion = fusionnerDonneesClasses(parties, nomGroupe);
+      const vm = computeFicheClasse(fusion);
+      vm.classesSources = fusion.classesSources;
+      return vm;
+    },
+  });
 }

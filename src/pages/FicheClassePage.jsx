@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useFicheClasse } from '../hooks/useFicheClasse.js';
+import { useFicheClasse, useFicheGroupe } from '../hooks/useFicheClasse.js';
 import { useEcoles, useAnnees, useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche } from '../lib/imprimerFiche.js';
@@ -16,9 +16,11 @@ function Picker() {
   const [anneeId, setAnneeId] = useState('');
   const [selection, setSelection] = useState(new Set());
   const [nomGroupe, setNomGroupe] = useState('');
+  const [valide, setValide] = useState(null); // { classeIds, nomGroupe } une fois "Valider" cliqué
   const [genere, setGenere] = useState(null); // { url } | { erreur }
   const [enCours, setEnCours] = useState(false);
   const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction';
+  const apercu = useFicheGroupe(valide?.classeIds, valide?.nomGroupe);
 
   useEffect(() => {
     if (ecoleUnique && ecoleId !== ecoleUnique.id) setEcoleId(ecoleUnique.id);
@@ -37,6 +39,13 @@ function Picker() {
       n.has(classeId) ? n.delete(classeId) : n.add(classeId);
       return n;
     });
+    setValide(null); // toute modification de la sélection invalide l'aperçu déjà confirmé
+    setGenere(null);
+  }
+
+  function changerNomGroupe(v) {
+    setNomGroupe(v);
+    setValide(null);
     setGenere(null);
   }
 
@@ -48,7 +57,7 @@ function Picker() {
       const res = await fetch('/api/fiche-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token ?? ''}` },
-        body: JSON.stringify({ classeIds: [...selection], nomGroupe: nomGroupe.trim() || undefined }),
+        body: JSON.stringify({ classeIds: valide.classeIds, nomGroupe: valide.nomGroupe || undefined }),
       });
       if (!res.ok) { const b = await res.json().catch(() => ({})); setGenere({ erreur: b.error || 'Échec de la génération.' }); return; }
       const { url } = await res.json();
@@ -98,16 +107,38 @@ function Picker() {
             AU et AR fusionnés, sans doublon. L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule.
           </p>
           <label className="text-sm block">Nom du groupe (optionnel)
-            <input className="plai-input w-full" placeholder="Atelier cuisine 3e" value={nomGroupe} onChange={(e) => setNomGroupe(e.target.value)} />
+            <input className="plai-input w-full" placeholder="Atelier cuisine 3e" value={nomGroupe} onChange={(e) => changerNomGroupe(e.target.value)} />
             <span className="block text-xs text-[color:var(--text3)] font-normal">Affiché en titre de la fiche. Vide : les noms des classes sont concatenés (« 3LA + 3LB »).</span>
           </label>
-          <button className="plai-btn" onClick={genererLienGroupe} disabled={enCours}>{enCours ? 'Génération…' : 'Générer le lien groupé'}</button>
-          {genere?.url && (
-            <p className="text-sm break-all">
-              <a className="text-teal underline" href={genere.url} target="_blank" rel="noopener noreferrer">{genere.url}</a>
-            </p>
+          <button className="plai-btn" onClick={() => setValide({ classeIds: [...selection], nomGroupe: nomGroupe.trim() })}>
+            Valider la sélection — voir la fiche
+          </button>
+        </div>
+      )}
+
+      {valide && (
+        <div className="space-y-2 max-w-3xl">
+          {apercu.isLoading && <p className="text-sm">Chargement de l'aperçu…</p>}
+          {apercu.error && <p className="plai-error text-sm">{apercu.error.message}</p>}
+          {apercu.data && (
+            <>
+              <div className="plai-card p-3 space-y-2 max-w-md">
+                <p className="text-sm">
+                  Aperçu confirmé pour <strong>{apercu.data.classeNom}</strong> — vérifiez le contenu ci-dessous avant de générer le lien à envoyer.
+                </p>
+                <button className="plai-btn" onClick={genererLienGroupe} disabled={enCours}>{enCours ? 'Génération…' : 'Générer le lien groupé'}</button>
+                {genere?.url && (
+                  <p className="text-sm break-all">
+                    <a className="text-teal underline" href={genere.url} target="_blank" rel="noopener noreferrer">{genere.url}</a>
+                  </p>
+                )}
+                {genere?.erreur && <p className="plai-error text-sm">{genere.erreur}</p>}
+              </div>
+              <div className="border border-[color:var(--border)] rounded overflow-auto max-h-[70vh]">
+                <FicheClasseView vm={apercu.data} />
+              </div>
+            </>
           )}
-          {genere?.erreur && <p className="plai-error text-sm">{genere.erreur}</p>}
         </div>
       )}
     </div>
