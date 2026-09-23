@@ -12,8 +12,8 @@ export default function FicheClasseView({ vm, showStatutEleve = false }) {
 
       <table className="w-full border border-black mb-4 text-sm">
         <thead><tr>
-          <th className="border border-black p-1">Référent(s) PLAI de votre classe</th>
-          <th className="border border-black p-1">PAR (Direction)</th>
+          <th className="border border-black p-1 w-1/2">Référent(s) PLAI de votre classe</th>
+          <th className="border border-black p-1 w-1/2">PAR (Direction)</th>
         </tr></thead>
         <tbody><tr>
           <td className="border border-black p-2 align-top">{vm.tableauReferents.pia.join(', ') || '—'}</td>
