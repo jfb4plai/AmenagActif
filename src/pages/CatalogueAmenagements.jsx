@@ -1,13 +1,19 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../lib/auth.jsx';
 
 /**
  * Page publique et statique — aucune connexion requise, aucun lien vers le
- * reste de l'app (voir App.jsx : pas de Shell/Nav). Liste de référence des
- * AU/AR actifs, sans aucune donnée élève. Non indexée (robots ici +
- * en-tête X-Robots-Tag posé dans vercel.json).
+ * reste de l'app pour un visiteur anonyme (voir App.jsx : pas de Shell/Nav).
+ * Liste de référence des AU/AR actifs, sans aucune donnée élève. Non indexée
+ * (robots ici + en-tête X-Robots-Tag posé dans vercel.json).
+ * Accessible aussi depuis le menu de l'app (utilisateur connecté) : dans ce
+ * cas seulement, un lien de retour apparaît — rien de plus pour un visiteur
+ * anonyme (enseignant sans compte via la fiche classe publique).
  */
 export default function CatalogueAmenagements() {
+  const { session } = useAuth();
   useEffect(() => {
     const meta = document.createElement('meta');
     meta.name = 'robots';
@@ -33,6 +39,7 @@ export default function CatalogueAmenagements() {
   return (
     <div className="min-h-screen bg-[color:var(--bg)] py-8 px-4">
       <div className="max-w-3xl mx-auto space-y-6">
+        {session && <Link to="/" className="text-sm text-teal underline">← Retour à l'app</Link>}
         <header className="space-y-1">
           <h1 className="text-xl font-semibold">Aménagements universels et raisonnables — liste complète</h1>
           <p className="text-sm text-[color:var(--text3)]">
