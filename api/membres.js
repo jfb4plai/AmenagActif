@@ -139,6 +139,9 @@ export default async function handler(req, res) {
       if (action === 'revoke') {
         if (!userId) { res.status(400).json({ error: 'userId requis.' }); return; }
         if (userId === moi.id) { res.status(400).json({ error: 'Vous ne pouvez pas retirer votre propre accès.' }); return; }
+        // Écoles d'abord (défense en profondeur : la FK ar_pae_profil_fk cascade aussi), puis le profil.
+        const { error: eEcoles } = await db.from('ar_profils_acces_ecoles').delete().eq('user_id', userId);
+        if (eEcoles) throw eEcoles;
         const { error } = await db.from('ar_profils_acces').delete().eq('user_id', userId);
         if (error) throw error;
         res.status(200).json({ ok: true });
