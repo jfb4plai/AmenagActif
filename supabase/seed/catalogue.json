@@ -97,6 +97,11 @@
         "ordre": 19,
         "type": "AR",
         "libelle": "Cours uniquement en recto"
+      },
+      {
+        "ordre": 20,
+        "type": "AR",
+        "libelle": "Imprimer les documents en police Arial 14 (à la place de l'Arial 12 par défaut)"
       }
     ]
   },

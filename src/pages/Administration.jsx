@@ -237,6 +237,10 @@ function SectionCatalogue() {
                             {chapitres.map((c) => <option key={c.id} value={c.id}>{c.titre}</option>)}
                           </select>
                         </label>
+                        <span className="flex items-center gap-1" title="Code stable, non modifiable : il reste identique même si le libellé change.">
+                          Code
+                          <code className="px-1 rounded bg-[color:var(--bg)] border border-[color:var(--border)]">{a.code ?? 'aucun'}</code>
+                        </span>
                         <label className="flex items-center gap-1">
                           <input type="checkbox" checked={a.actif}
                             onChange={(e) => majAmenagement.mutate({ id: a.id, actif: e.target.checked })} />
@@ -261,9 +265,11 @@ function SectionCatalogue() {
 function AjoutAmenagement({ chapitreId, onAdd }) {
   const [libelle, setLibelle] = useState('');
   const [type, setType] = useState('AR');
+  const [code, setCode] = useState('');
+  const codeValide = code.trim() === '' || /^ar_[a-z0-9]+(_[a-z0-9]+)+$/.test(code.trim());
   return (
     <form className="border border-dashed border-teal rounded p-2 space-y-2"
-      onSubmit={(e) => { e.preventDefault(); if (libelle.trim()) { onAdd({ chapitreId, libelle, type }); setLibelle(''); setType('AR'); } }}>
+      onSubmit={(e) => { e.preventDefault(); if (libelle.trim() && codeValide) { onAdd({ chapitreId, libelle, type, code: code.trim() || undefined }); setLibelle(''); setType('AR'); setCode(''); } }}>
       <textarea className="plai-input text-sm w-full" rows={2} placeholder="Nouvel aménagement pour ce chapitre"
         value={libelle} onChange={(e) => setLibelle(e.target.value)} />
       <div className="flex items-center gap-3 text-xs">
@@ -274,8 +280,17 @@ function AjoutAmenagement({ chapitreId, onAdd }) {
             <option value="AR">AR — raisonnable</option>
           </select>
         </label>
-        <button className="plai-btn" type="submit" disabled={!libelle.trim()}>Ajouter</button>
+        <label className="flex items-center gap-1">
+          Code (optionnel)
+          <input className="plai-input !w-56 !py-1" placeholder="ar_lecture_mon_amenagement" value={code} onChange={(e) => setCode(e.target.value)} />
+        </label>
+        <button className="plai-btn" type="submit" disabled={!libelle.trim() || !codeValide}>Ajouter</button>
       </div>
+      <p className="text-xs text-[color:var(--text3)]">
+        Le code sert de repère stable pour d'autres outils PLAI (minuscules, chiffres et _ ; commence par ar_). Laissez vide si vous ne savez pas :
+        il pourra être posé plus tard. <strong>Une fois posé, il ne peut plus être modifié.</strong>
+        {!codeValide && <span className="plai-error block">Format attendu : ar_chapitre_mot (ex. ar_lecture_loupe).</span>}
+      </p>
     </form>
   );
 }

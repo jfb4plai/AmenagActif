@@ -10,6 +10,7 @@
  * @property {number} ordre
  * @property {string} libelle
  * @property {'AU'|'AR'} type
+ * @property {string|null} [code]   // code stable, immuable (contrat inter-apps)
  *
  * @typedef {Object} Eleve
  * @property {string} id

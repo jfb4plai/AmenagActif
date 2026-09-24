@@ -8,8 +8,8 @@
 
 export const COLONNES_CLASSE = 'id, nom, niveau, referent_plai_nom, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)';
 export const COLONNES_ELEVES = 'id, classe_id, prenom, initiale_nom, commentaire, statut, created_at';
-export const COLONNES_AMENAGEMENTS = 'id, chapitre_id, ordre, libelle, type';
-export const COLONNES_CHAPITRES = 'id, ordre, titre';
+export const COLONNES_AMENAGEMENTS = 'id, chapitre_id, ordre, libelle, type, code';
+export const COLONNES_CHAPITRES = 'id, ordre, titre, code';
 export const COLONNES_AU_CLASSE = 'amenagement_id, cree_le';
 export const COLONNES_SELECTIONS = 'eleve_id, amenagement_id, cree_le';
 export const COLONNES_LIBRES = 'id, eleve_id, chapitre_id, texte, cree_le';

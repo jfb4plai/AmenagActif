@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "chapitres": [
+    {
+      "ordre": 1,
+      "code": "supports",
+      "items": [
+        {
+          "ordre": 1,
+          "code": "ar_supports_mise_en_page"
+        },
+        {
+          "ordre": 2,
+          "code": "ar_supports_doubler_espaces_reponse"
+        },
+        {
+          "ordre": 3,
+          "code": "ar_supports_carte_mentale_non"
+        },
+        {
+          "ordre": 4,
+          "code": "ar_supports_carte_mentale_oui"
+        },
+        {
+          "ordre": 5,
+          "code": "ar_supports_cours_jdc_temoins"
+        },
+        {
+          "ordre": 6,
+          "code": "ar_supports_noter_tableau_tout"
+        },
+        {
+          "ordre": 7,
+          "code": "ar_supports_photos_tableau"
+        },
+        {
+          "ordre": 8,
+          "code": "ar_supports_consignes_epurees"
+        },
+        {
+          "ordre": 9,
+          "code": "ar_supports_consignes_en_evidence"
+        },
+        {
+          "ordre": 10,
+          "code": "ar_supports_consignes_sequencees"
+        },
+        {
+          "ordre": 11,
+          "code": "ar_supports_consigne_avant_support"
+        },
+        {
+          "ordre": 12,
+          "code": "ar_supports_verif_comprehension_consignes"
+        },
+        {
+          "ordre": 13,
+          "code": "ar_supports_reformuler_consignes"
+        },
+        {
+          "ordre": 14,
+          "code": "ar_supports_cours_a3"
+        },
+        {
+          "ordre": 15,
+          "code": "ar_supports_tableaux_ligne_sur_deux"
+        },
+        {
+          "ordre": 16,
+          "code": "ar_supports_dictionnaire_annote"
+        },
+        {
+          "ordre": 17,
+          "code": "ar_supports_outils_personnels"
+        },
+        {
+          "ordre": 18,
+          "code": "ar_supports_liste_materiel"
+        },
+        {
+          "ordre": 19,
+          "code": "ar_supports_cours_recto_seul"
+        },
+        {
+          "ordre": 20,
+          "code": "ar_supports_arial_14"
+        }
+      ]
+    },
+    {
+      "ordre": 5,
+      "code": "lecture",
+      "items": [
+        {
+          "ordre": 1,
+          "code": "ar_lecture_livres_audio"
+        },
+        {
+          "ordre": 2,
+          "code": "ar_lecture_stylo_lecture"
+        },
+        {
+          "ordre": 3,
+          "code": "ar_lecture_preparer_textes_longs"
+        },
+        {
+          "ordre": 4,
+          "code": "ar_lecture_cache_latte"
+        },
+        {
+          "ordre": 5,
+          "code": "ar_lecture_chuchoteur"
+        },
+        {
+          "ordre": 6,
+          "code": "ar_lecture_lire_voix_haute"
+        },
+        {
+          "ordre": 7,
+          "code": "ar_lecture_fluorer_lignes"
+        },
+        {
+          "ordre": 8,
+          "code": "ar_lecture_voix_haute_sans_preparation_non"
+        },
+        {
+          "ordre": 9,
+          "code": "ar_lecture_voix_haute_jamais"
+        },
+        {
+          "ordre": 10,
+          "code": "ar_lecture_numeroter_lignes"
+        },
+        {
+          "ordre": 11,
+          "code": "ar_lecture_loupe"
+        },
+        {
+          "ordre": 12,
+          "code": "ar_lecture_fluo_oui"
+        },
+        {
+          "ordre": 13,
+          "code": "ar_lecture_fluo_non"
+        }
+      ]
+    },
+    {
+      "ordre": 7,
+      "code": "sciences",
+      "items": [
+        {
+          "ordre": 1,
+          "code": "ar_sciences_calculatrice"
+        },
+        {
+          "ordre": 2,
+          "code": "ar_sciences_calculs_colonnes"
+        },
+        {
+          "ordre": 3,
+          "code": "ar_sciences_outils_geometrie"
+        },
+        {
+          "ordre": 4,
+          "code": "ar_sciences_traces_non_evalues"
+        },
+        {
+          "ordre": 5,
+          "code": "ar_sciences_problemes_epures"
+        }
+      ]
+    },
+    {
+      "ordre": 9,
+      "code": "numerique",
+      "items": [
+        {
+          "ordre": 1,
+          "code": "ar_numerique_dictionnaire_image"
+        },
+        {
+          "ordre": 2,
+          "code": "ar_numerique_filmer_ou_tutoriels"
+        },
+        {
+          "ordre": 3,
+          "code": "ar_numerique_outil_informatise"
+        },
+        {
+          "ordre": 4,
+          "code": "ar_numerique_cours_numerise_pdf"
+        }
+      ]
+    }
+  ]
+}
