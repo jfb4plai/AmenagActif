@@ -37,20 +37,25 @@ export function joursProfil() {
   return Number.isFinite(n) && n >= 1 && n <= 365 ? Math.floor(n) : JOURS_PROFIL_DEFAUT;
 }
 
-/** Jeton passerelle « profil de classe » : audience distincte du jeton de fiche, jti unique. */
-export async function signProfilToken({ classeId, joursValide = joursProfil() }) {
-  return new SignJWT({ classeId })
+/**
+ * Jeton passerelle « profil de classe » : audience distincte du jeton de fiche, jti unique.
+ * lid (optionnel) : id du lien enseignant d'origine ; le GET revérifie alors ce lien à chaque lecture.
+ * expSecondes (optionnel) : expiration absolue (epoch, secondes), prioritaire sur joursValide.
+ */
+export async function signProfilToken({ classeId, joursValide = joursProfil(), lid, expSecondes }) {
+  const payload = lid ? { classeId, lid } : { classeId };
+  return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setAudience(AUDIENCE_PROFIL)
     .setJti(randomUUID())
     .setIssuedAt()
-    .setExpirationTime(`${joursValide}d`)
+    .setExpirationTime(expSecondes ?? `${joursValide}d`)
     .sign(secret());
 }
 
-/** @returns {Promise<{ classeId: string, jti: string, exp: number }>} Lève si signature, aud ou exp invalide. */
+/** @returns {Promise<{ classeId: string, jti: string, exp: number, lid: string|null }>} Lève si signature, aud ou exp invalide. */
 export async function verifyProfilToken(token) {
   const { payload } = await jwtVerify(token, secret(), { audience: AUDIENCE_PROFIL, algorithms: ['HS256'] });
   if (typeof payload.classeId !== 'string' || !payload.jti) throw new errors.JWTClaimValidationFailed('claims manquants', payload, 'classeId', 'missing');
-  return { classeId: payload.classeId, jti: payload.jti, exp: payload.exp };
+  return { classeId: payload.classeId, jti: payload.jti, exp: payload.exp, lid: typeof payload.lid === 'string' ? payload.lid : null };
 }

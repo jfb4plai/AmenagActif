@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fakeDb } from './fakeDb.js';
 
 process.env.AMENAG_TOKEN_SECRET = 'secret-de-test-au-moins-32-caracteres-xx';
 
@@ -10,9 +11,10 @@ const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   verifierAccesClasses: vi.fn(),
   loadClasseData: vi.fn(),
+  db: null,
 }));
 
-vi.mock('../../api/_lib/supabaseAdmin.js', () => ({ supabaseAdmin: () => ({ auth: { getUser: mocks.getUser } }) }));
+vi.mock('../../api/_lib/supabaseAdmin.js', () => ({ supabaseAdmin: () => mocks.db }));
 vi.mock('../../api/_lib/ficheData.js', () => ({
   verifierAccesClasses: mocks.verifierAccesClasses,
   loadClasseData: mocks.loadClasseData,
@@ -44,6 +46,11 @@ const donnees = () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.db = fakeDb({
+    ar_annees: [{ id: 'an1', libelle: '2098-2099' }],
+    ar_classes: [{ id: CLASSE, ecole_id: 'ec1', annee_id: 'an1' }],
+  });
+  mocks.db.auth.getUser = mocks.getUser;
   mocks.getUser.mockResolvedValue({ data: { user: { id: USER } }, error: null });
   mocks.verifierAccesClasses.mockResolvedValue(true);
   mocks.loadClasseData.mockResolvedValue(donnees());
@@ -156,7 +163,7 @@ describe('api/fiche-token : un jeton de profil ne sert pas de jeton de fiche (in
 describe('api/fiche-token : validation des entrées (POST)', () => {
   const post = async (body) => {
     const r = reponse();
-    await ficheHandler({ method: 'POST', headers: { authorization: 'Bearer x' }, body }, r);
+    await ficheHandler({ method: 'POST', headers: { authorization: 'Bearer x' }, body: { destinataire: 'Mme Dupont, français, 3e TQ B', ...body } }, r);
     return r;
   };
   it('plus de 10 classes : 400', async () => {
@@ -169,10 +176,12 @@ describe('api/fiche-token : validation des entrées (POST)', () => {
   it('nomGroupe > 60 caractères : 400', async () => {
     expect((await post({ classeIds: [CLASSE, '33333333-3333-4333-8333-333333333333'], nomGroupe: 'x'.repeat(61) })).statusCode).toBe(400);
   });
-  it('cas valide : 200 avec un jeton de fiche', async () => {
+  it('cas valide : 200 avec un lien opaque (pas un JWT)', async () => {
     const r = await post({ classeId: CLASSE });
     expect(r.statusCode).toBe(200);
     expect(r.body.url).toContain('/fiche/');
+    expect(r.body.token).not.toContain('.');
+    expect(r.body.expire_le).toBe('2099-08-31');
   });
   it("panne de l'auth : 500, pas 401", async () => {
     mocks.getUser.mockResolvedValue({ data: { user: null }, error: { name: 'AuthRetryableFetchError' } });
