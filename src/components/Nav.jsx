@@ -24,6 +24,7 @@ export default function Nav() {
         {editeurEcole && <NavLink to="/saisie" className={lien}>Saisie</NavLink>}
         <NavLink to="/catalogue-amenagements" className={lien}>Catalogue</NavLink>
         <NavLink to="/fiches" className={lien}>Fiches</NavLink>
+        {['admin', 'referent_plai', 'direction'].includes(role) && <NavLink to="/liens" className={lien}>Liens enseignants</NavLink>}
         {!isAdmin && role && <NavLink to="/mon-ecole" className={lien}>Mon école</NavLink>}
         {isAdmin && <NavLink to="/administration" className={lien}>Administration</NavLink>}
       </nav>

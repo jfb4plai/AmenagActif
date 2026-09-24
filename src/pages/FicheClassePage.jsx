@@ -5,7 +5,7 @@ import { useEcoles, useAnnees, useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche } from '../lib/imprimerFiche.js';
 import { useRole } from '../lib/auth.jsx';
-import { supabase } from '../lib/supabase.js';
+import GenerateurLien from '../components/GenerateurLien.jsx';
 
 function Picker() {
   const { data: ecoles = [] } = useEcoles();
@@ -17,8 +17,6 @@ function Picker() {
   const [selection, setSelection] = useState(new Set());
   const [nomGroupe, setNomGroupe] = useState('');
   const [valide, setValide] = useState(null); // { classeIds, nomGroupe } une fois "Valider" cliqué
-  const [genere, setGenere] = useState(null); // { url } | { erreur }
-  const [enCours, setEnCours] = useState(false);
   const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction';
   const apercu = useFicheGroupe(valide?.classeIds, valide?.nomGroupe);
 
@@ -40,33 +38,11 @@ function Picker() {
       return n;
     });
     setValide(null); // toute modification de la sélection invalide l'aperçu déjà confirmé
-    setGenere(null);
   }
 
   function changerNomGroupe(v) {
     setNomGroupe(v);
     setValide(null);
-    setGenere(null);
-  }
-
-  async function genererLienGroupe() {
-    setEnCours(true);
-    setGenere(null);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch('/api/fiche-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token ?? ''}` },
-        body: JSON.stringify({ classeIds: valide.classeIds, nomGroupe: valide.nomGroupe || undefined }),
-      });
-      if (!res.ok) { const b = await res.json().catch(() => ({})); setGenere({ erreur: b.error || 'Échec de la génération.' }); return; }
-      const { url } = await res.json();
-      setGenere({ url });
-    } catch {
-      setGenere({ erreur: 'Échec de la génération.' });
-    } finally {
-      setEnCours(false);
-    }
   }
 
   return (
@@ -122,18 +98,14 @@ function Picker() {
           {apercu.error && <p className="plai-error text-sm">{apercu.error.message}</p>}
           {apercu.data && (
             <>
-              <div className="plai-card p-3 space-y-2 max-w-md">
-                <p className="text-sm">
-                  Aperçu confirmé pour <strong>{apercu.data.classeNom}</strong> — vérifiez le contenu ci-dessous avant de générer le lien à envoyer.
-                </p>
-                <button className="plai-btn" onClick={genererLienGroupe} disabled={enCours}>{enCours ? 'Génération…' : 'Générer le lien groupé'}</button>
-                {genere?.url && (
-                  <p className="text-sm break-all">
-                    <a className="text-teal underline" href={genere.url} target="_blank" rel="noopener noreferrer">{genere.url}</a>
-                  </p>
-                )}
-                {genere?.erreur && <p className="plai-error text-sm">{genere.erreur}</p>}
-              </div>
+              <p className="text-base">
+                Aperçu confirmé pour <strong>{apercu.data.classeNom}</strong> : vérifiez le contenu ci-dessous avant de générer le lien à envoyer.
+              </p>
+              <GenerateurLien
+                classeIds={valide.classeIds}
+                nomGroupe={valide.nomGroupe}
+                libelle={`Aménagements à mettre en place — ${apercu.data.classeNom}`}
+              />
               <div className="border border-[color:var(--border)] rounded overflow-auto max-h-[70vh]">
                 <FicheClasseView vm={apercu.data} />
               </div>
@@ -155,34 +127,7 @@ function FicheClasseContenu({ classeId }) {
   const { data: vm, isLoading, error } = useFicheClasse(classeId);
   const { role } = useRole();
 
-  async function copierLien() {
-    const { data: { session } } = await supabase.auth.getSession();
-    const res = await fetch('/api/fiche-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token ?? ''}` },
-      body: JSON.stringify({ classeId }),
-    });
-    if (!res.ok) { alert('Impossible de générer le lien.'); return; }
-    const { url } = await res.json();
-    const libelle = `Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`;
-
-    if (navigator.clipboard?.write && window.ClipboardItem) {
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            'text/html': new Blob([`<a href="${url}">${libelle}</a>`], { type: 'text/html' }),
-            'text/plain': new Blob([`${libelle} : ${url}`], { type: 'text/plain' }),
-          }),
-        ]);
-        alert('Lien enseignant copié — collez-le dans votre e-mail, il apparaîtra sous forme de texte cliquable (« Aménagements à mettre en place… ») plutôt que l\'adresse brute.');
-        return;
-      } catch {
-        // navigateur sans support du presse-papier riche : repli plein texte
-      }
-    }
-    await navigator.clipboard.writeText(`${libelle} : ${url}`);
-    alert('Lien enseignant copié dans le presse-papier.');
-  }
+  const [lienOuvert, setLienOuvert] = useState(false);
 
   if (isLoading) return <div className="plai-section">Chargement…</div>;
   if (error) return <div className="plai-section"><p className="plai-error">{error.message}</p></div>;
@@ -190,8 +135,15 @@ function FicheClasseContenu({ classeId }) {
     <div className="plai-section space-y-3">
       <div className="flex gap-3 no-print">
         <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
-        {role !== 'agent_plai' && <button className="plai-btn" onClick={copierLien}>Copier le lien enseignant</button>}
+        {role !== 'agent_plai' && (
+          <button className="plai-btn" style={{ fontSize: 16 }} aria-expanded={lienOuvert} onClick={() => setLienOuvert((o) => !o)}>
+            Copier le lien enseignant
+          </button>
+        )}
       </div>
+      {role !== 'agent_plai' && lienOuvert && (
+        <GenerateurLien classeIds={[classeId]} libelle={`Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`} />
+      )}
       <FicheClasseView vm={vm} />
     </div>
   );

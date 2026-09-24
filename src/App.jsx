@@ -15,9 +15,11 @@ import FichePublique from './pages/FichePublique.jsx';
 import CatalogueAmenagements from './pages/CatalogueAmenagements.jsx';
 import Administration from './pages/Administration.jsx';
 import MonEcole from './pages/MonEcole.jsx';
+import LiensEnseignants from './pages/LiensEnseignants.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const EDITEURS = ['admin', 'referent_plai', 'direction', 'agent_plai']; // accès à la saisie (agent : élèves/AR, pas de création de classe ni retrait d'AU — géré en RLS)
+const GESTIONNAIRES_LIENS = ['admin', 'referent_plai', 'direction']; // pas agent_plai (lecture seule sur les liens)
 const LECTEURS = EDITEURS; // fiches accessibles aux mêmes rôles
 
 function Shell({ children }) {
@@ -48,6 +50,7 @@ export default function App() {
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />
       <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />
       <Route path="/mon-ecole" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><MonEcole /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/liens" element={<RequireAuth><Shell><RequireRole roles={GESTIONNAIRES_LIENS}><LiensEnseignants /></RequireRole></Shell></RequireAuth>} />
       <Route path="/administration" element={<RequireAuth><Shell><RequireRole roles={['admin']}><Administration /></RequireRole></Shell></RequireAuth>} />
       <Route path="/fiches" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><FicheClassePage picker /></RequireRole></Shell></RequireAuth>} />
       <Route path="/fiches/ecole" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><FicheEcolePage /></RequireRole></Shell></RequireAuth>} />

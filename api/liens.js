@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       const ecoleIds = gerables === null && !demandee ? null : (demandee ? [demandee] : gerables);
       const [{ data: liensClasses, error: eC }, { data: ecoles, error: eE }] = await Promise.all([
         ids.length ? db.from('ar_liens_classes').select('lien_id, ar_classes(nom)').in('lien_id', ids) : { data: [], error: null },
-        ecoleIds === null ? db.from('ar_ecoles').select('id, nom, implantation').order('nom') : db.from('ar_ecoles').select('id, nom, implantation').in('id', ecoleIds).order('nom'),
+        ecoleIds === null ? db.from('ar_ecoles').select('id, nom, implantation, implantation_nom').order('nom') : db.from('ar_ecoles').select('id, nom, implantation, implantation_nom').in('id', ecoleIds).order('nom'),
       ]);
       if (eC) throw eC;
       if (eE) throw eE;

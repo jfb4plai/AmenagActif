@@ -10,13 +10,23 @@ export default function FichePublique() {
     retry: false,
     queryFn: async () => {
       const res = await fetch(`/api/fiche-token?token=${encodeURIComponent(token)}`);
-      if (!res.ok) throw new Error('lien invalide');
+      if (!res.ok) throw new Error(res.status >= 500 ? 'panne' : 'lien inactif');
       return res.json();
     },
   });
 
   if (isLoading) return <div className="plai-section">Chargement…</div>;
-  if (error || !data?.vm) return <div className="plai-section"><p className="plai-error">Ce lien est invalide ou a expiré. Demandez un lien à jour à l'équipe PLAI.</p></div>;
+  if (error?.message === 'panne') {
+    return <div className="plai-section text-base" role="alert"><p className="plai-error" style={{ fontSize: 16 }}>Le service est momentanément indisponible. Réessayez dans quelques minutes.</p></div>;
+  }
+  if (error || !data?.vm) {
+    return (
+      <div className="plai-section text-base" role="alert">
+        <h1 className="text-lg font-semibold mb-2">Ce lien n'est plus actif</h1>
+        <p style={{ fontSize: 16 }}>Le lien a été désactivé, il est arrivé à échéance ou il est incorrect. Demandez un nouveau lien à votre référent PLAI ou à la direction de votre école.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[color:var(--bg)] py-6">
