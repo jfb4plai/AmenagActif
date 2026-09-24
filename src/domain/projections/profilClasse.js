@@ -59,12 +59,13 @@ const jour = (d) => d.toISOString().slice(0, 10);
  *  selectionsAR: { eleve_id: string, amenagement_id: string, cree_le?: string }[],
  *  libres: { eleve_id: string, cree_le?: string }[],
  * }} input
- * @param {{ now?: Date, dureeJours?: number, k?: number, chapitresPerimetre?: number[], regles?: string[][] }} [options]
+ * @param {{ now?: Date, dureeJours?: number, expireAt?: Date, k?: number, chapitresPerimetre?: number[], regles?: string[][] }} [options]
  */
 export function computeProfilClasse(input, options = {}) {
   const {
     now = new Date(),
     dureeJours = DUREE_JOURS_DEFAUT,
+    expireAt = null, // si fourni (ex. exp du jeton), prime sur dureeJours
     k = K_SEUIL_DEFAUT,
     chapitresPerimetre = CHAPITRES_PERIMETRE,
     regles = REGLES_CONFLIT,
@@ -135,7 +136,7 @@ export function computeProfilClasse(input, options = {}) {
     ...libres.map((l) => l.cree_le),
   ].filter(Boolean).sort();
   const ficheDu = dates.length ? String(dates[dates.length - 1]).slice(0, 10) : (input.classe?.created_at ? String(input.classe.created_at).slice(0, 10) : jour(now));
-  const expire = new Date(now.getTime() + dureeJours * 86400000);
+  const expire = expireAt ?? new Date(now.getTime() + dureeJours * 86400000);
 
   return {
     schema: SCHEMA,
