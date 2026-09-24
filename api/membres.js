@@ -7,6 +7,8 @@ const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai', 'admin']; 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const APP_URL = 'https://amenagactif.jfb4plai.com';
 
+const echapperHtml = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 /** Retourne l'utilisateur appelant s'il est administrateur, sinon null. */
 async function exigerAdmin(req) {
   const jwt = (req.headers.authorization || '').replace('Bearer ', '');
@@ -63,7 +65,8 @@ export default async function handler(req, res) {
             res.status(409).json({ error: "Ce compte existe déjà dans le projet Supabase. Ajoutez-le via SQL (ar_profils_acces) — voir README." });
             return;
           }
-          throw error;
+          console.error('membres invite :', error?.code ?? error?.name ?? 'erreur');
+          throw new Error('invite');
         }
         const { error: e2 } = await db.from('ar_profils_acces')
           .upsert({ user_id: data.user.id, nom: (nom || '').trim(), role, ecole_id: ecolePour() }, { onConflict: 'user_id' });
@@ -80,20 +83,21 @@ export default async function handler(req, res) {
           await envoyerEmail({
             to: email,
             subject: 'Invitation à AménagActif',
-            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${lien}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien n'est valable que 24 heures.</strong> Passé ce délai, la page de définition du mot de passe vous permettra d'en redemander un directement avec votre adresse e-mail. Ce lien est personnel, ne le transférez pas.</p>`,
+            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${echapperHtml(lien)}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien n'est valable que 24 heures.</strong> Passé ce délai, la page de définition du mot de passe vous permettra d'en redemander un directement avec votre adresse e-mail. Ce lien est personnel, ne le transférez pas.</p>`,
           });
         } catch (e3) {
-          res.status(502).json({ error: `Compte créé, mais l'envoi de l'email d'invitation a échoué (${e3.message}). Réessayez l'invitation.` });
+          console.error("Envoi de l'invitation échoué :", e3?.name, e3?.status ?? '');
+          res.status(502).json({ error: "Compte créé, mais l'envoi de l'email d'invitation a échoué. Réessayez l'invitation." });
           return;
         }
         try {
           await envoyerEmail({
             to: moi.email,
-            subject: `AménagActif — invitation envoyée à ${email}`,
-            html: `<p>Confirmation : vous venez d'inviter <strong>${email}</strong> avec le rôle <strong>${roleLabel}</strong>${scoped ? ' (école rattachée)' : ''}, le ${new Date().toLocaleString('fr-BE')}.</p>`,
+            subject: `AménagActif — invitation envoyée à ${String(email).replace(/[\r\n]/g, ' ')}`,
+            html: `<p>Confirmation : vous venez d'inviter <strong>${echapperHtml(email)}</strong> avec le rôle <strong>${roleLabel}</strong>${scoped ? ' (école rattachée)' : ''}, le ${new Date().toLocaleString('fr-BE')}.</p>`,
           });
         } catch (e4) {
-          console.error("Notification admin (invitation) échouée :", e4);
+          console.error("Notification admin (invitation) échouée :", e4?.name, e4?.status ?? '');
         }
         res.status(200).json({ ok: true });
         return;
@@ -104,6 +108,7 @@ export default async function handler(req, res) {
         const patch = {};
         if (role !== undefined) {
           if (!ROLES.includes(role)) { res.status(400).json({ error: 'Rôle invalide.' }); return; }
+          if (userId === moi.id && role !== 'admin') { res.status(400).json({ error: 'Vous ne pouvez pas modifier votre propre rôle administrateur.' }); return; }
           patch.role = role;
           patch.ecole_id = ROLE_SCOPE.includes(role) ? (ecoleId || null) : null;
         } else if (ecoleId !== undefined) {
@@ -154,6 +159,8 @@ export default async function handler(req, res) {
 
     res.status(405).json({ error: 'Méthode non supportée.' });
   } catch (e) {
-    res.status(500).json({ error: String(e.message || e) });
+    // Détail seulement dans les logs serveur (code/nom, sans donnée personnelle) ; message générique au client.
+    console.error('membres :', e?.code ?? e?.name ?? 'erreur');
+    res.status(500).json({ error: 'Erreur serveur. Réessayez ou contactez le PLAI.' });
   }
 }

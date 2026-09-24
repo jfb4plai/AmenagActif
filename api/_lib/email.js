@@ -11,7 +11,7 @@ export async function envoyerEmail({ to, subject, html }) {
     body: JSON.stringify({ sender: EXPEDITEUR, to: [{ email: to }], subject, htmlContent: html }),
   });
   if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`Envoi email Brevo échoué (${res.status}) : ${detail}`);
+    // Le corps de la réponse Brevo peut contenir l'adresse du destinataire : on ne garde que le statut.
+    throw Object.assign(new Error('Envoi email échoué'), { status: res.status });
   }
 }

@@ -23,7 +23,8 @@ export async function loadClassesData(classeIds) {
  * @returns {Promise<boolean>}
  */
 export async function verifierAccesClasses(db, userId, classeIds) {
-  const { data: profil } = await db.from('ar_profils_acces').select('role, ecole_id').eq('user_id', userId).maybeSingle();
+  const { data: profil, error: eProfil } = await db.from('ar_profils_acces').select('role, ecole_id').eq('user_id', userId).maybeSingle();
+  if (eProfil) throw eProfil; // panne base : le handler répond 500, pas un faux refus
   if (!profil) return false;
   if (profil.role === 'admin') return true;
   // Génération de lien enseignant réservée à referent_plai/direction (comme le
@@ -31,9 +32,11 @@ export async function verifierAccesClasses(db, userId, classeIds) {
   if (!['referent_plai', 'direction'].includes(profil.role)) return false;
 
   const { data: classes, error: ec } = await db.from('ar_classes').select('id, ecole_id').in('id', classeIds);
-  if (ec || !classes || classes.length !== classeIds.length) return false;
+  if (ec) throw ec;
+  if (!classes || classes.length !== new Set(classeIds).size) return false;
 
-  const { data: liens } = await db.from('ar_profils_acces_ecoles').select('ecole_id').eq('user_id', userId);
+  const { data: liens, error: eLiens } = await db.from('ar_profils_acces_ecoles').select('ecole_id').eq('user_id', userId);
+  if (eLiens) throw eLiens;
   const mesEcoles = new Set([profil.ecole_id, ...(liens ?? []).map((l) => l.ecole_id)].filter(Boolean));
   return classes.every((c) => mesEcoles.has(c.ecole_id));
 }

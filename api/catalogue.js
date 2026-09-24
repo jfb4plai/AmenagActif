@@ -14,6 +14,7 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'public, max-age=300');
     res.status(200).json({ chapitres, amenagements });
   } catch (e) {
-    res.status(500).json({ error: String(e.message || e) });
+    console.error('catalogue :', e?.code ?? e?.name ?? 'erreur');
+    res.status(500).json({ error: 'Erreur serveur.' });
   }
 }
