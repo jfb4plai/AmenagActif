@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { besoinBasculeAnnee } from '../../src/hooks/useAdmin.js';
+import { besoinBasculeAnnee } from '../../src/domain/basculeAnnee.js';
 
 const A = (libelle) => ({ libelle, active: true });
 
