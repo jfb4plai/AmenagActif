@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth.jsx';
+
+// Insensible à la casse et aux accents.
+const normaliser = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 /**
  * Page publique et statique — aucune connexion requise, aucun lien vers le
@@ -14,6 +17,7 @@ import { useAuth } from '../lib/auth.jsx';
  */
 export default function CatalogueAmenagements() {
   const { session } = useAuth();
+  const [recherche, setRecherche] = useState('');
   useEffect(() => {
     const meta = document.createElement('meta');
     meta.name = 'robots';
@@ -31,10 +35,14 @@ export default function CatalogueAmenagements() {
     },
   });
 
+  const termes = useMemo(() => normaliser(recherche).split(/\s+/).filter(Boolean), [recherche]);
+
   if (isLoading) return <div className="plai-section max-w-3xl mx-auto">Chargement…</div>;
   if (error || !data) return <div className="plai-section max-w-3xl mx-auto"><p className="plai-error">{error?.message ?? 'Chargement impossible.'}</p></div>;
 
   const { chapitres, amenagements } = data;
+  const correspond = (a) => termes.every((t) => normaliser(a.libelle).includes(t));
+  const visibles = termes.length ? amenagements.filter(correspond) : amenagements;
 
   return (
     <div className="min-h-screen bg-[color:var(--bg)] py-8 px-4">
@@ -49,8 +57,35 @@ export default function CatalogueAmenagements() {
           </p>
         </header>
 
+        <div className="space-y-1">
+          <label htmlFor="recherche-amenagement" className="block text-base font-medium">Rechercher un aménagement</label>
+          <div className="flex gap-2">
+            <input
+              id="recherche-amenagement"
+              type="search"
+              className="plai-input block flex-1"
+              placeholder="Ex. : espaces de réponse, police, consignes"
+              value={recherche}
+              onChange={(e) => setRecherche(e.target.value)}
+            />
+            {recherche && (
+              <button type="button" className="plai-btn" onClick={() => setRecherche('')}>Effacer</button>
+            )}
+          </div>
+          <p className="text-sm text-[color:var(--text3)]" aria-live="polite">
+            {termes.length
+              ? `${visibles.length} aménagement${visibles.length > 1 ? 's' : ''} trouvé${visibles.length > 1 ? 's' : ''}. `
+              : ''}
+            Tapez un ou plusieurs mots : seuls les aménagements qui les contiennent tous restent affichés. Les accents et les majuscules sont ignorés.
+          </p>
+        </div>
+
+        {termes.length > 0 && visibles.length === 0 && (
+          <p className="plai-empty">Aucun aménagement ne correspond. Essayez un mot plus court ou un seul mot.</p>
+        )}
+
         {chapitres.map((ch) => {
-          const items = amenagements.filter((a) => a.chapitre_id === ch.id);
+          const items = visibles.filter((a) => a.chapitre_id === ch.id);
           if (items.length === 0) return null;
           return (
             <section key={ch.id} className="plai-card p-4 space-y-2">
