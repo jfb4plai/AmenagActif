@@ -59,7 +59,8 @@ const input = {
   libres: [{ id: U(300), eleve_id: U(200), chapitre_id: CH.supports, texte: 'Vérifier oralement la consigne avant de commencer', cree_le: '2026-09-10T08:00:00Z' }],
 };
 const NOW = new Date('2026-09-24T10:00:00Z');
-const calc = (over = {}, opts = {}) => computeProfilClasse({ ...input, ...over }, { now: NOW, ...opts });
+// k = 3 explicite : ces scénarios exercent le mécanisme de seuil (le défaut est k = 1).
+const calc = (over = {}, opts = {}) => computeProfilClasse({ ...input, ...over }, { now: NOW, k: 3, ...opts });
 
 describe('computeProfilClasse : contrat', () => {
   it('produit le schéma, la version et les dates', () => {
@@ -67,7 +68,7 @@ describe('computeProfilClasse : contrat', () => {
     expect(p.schema).toBe('plai.profil-classe');
     expect(p.version).toBe(1);
     expect(p.emis_le).toBe('2026-09-24T10:00:00.000Z');
-    expect(p.expire_le).toBe('2027-01-22'); // + 120 jours
+    expect(p.expire_le).toBe('2026-10-24'); // + 30 jours
     expect(p.fiche_du).toBe('2026-09-10');
     expect(p.contexte).toEqual({ classe_libelle: '3LA', niveau: '3e', annee: '2026-2027', ecole: 'Athénée de test' });
   });
@@ -132,8 +133,13 @@ describe('computeProfilClasse : contrat', () => {
     expect(chap1.ar_hors_perimetre_present).toBe(true);
   });
 
+  it('par défaut (k = 1), aucun AR du périmètre n est supprimé, même porté par un seul élève', () => {
+    const p = computeProfilClasse(input, { now: NOW });
+    expect(p.ar_mecanisables.find((x) => x.code === 'ar_sciences_calculatrice')?.effectif).toBe('1-2');
+  });
+
   it('constantes documentées', () => {
-    expect(K_SEUIL_DEFAUT).toBe(3);
+    expect(K_SEUIL_DEFAUT).toBe(1);
     expect(CHAPITRES_PERIMETRE).toEqual([1, 5, 7, 9]);
     expect(REGLES_CONFLIT.length).toBeGreaterThan(0);
   });

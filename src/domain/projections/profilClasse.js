@@ -16,13 +16,16 @@ export const CHAPITRES_PERIMETRE = [1, 5, 7, 9];
  * (il est absorbé par `ar_hors_perimetre_present = true`), pour éviter de désigner
  * indirectement un élève dans une petite classe.
  *
- * HYPOTHÈSE À VALIDER PAR L'ENSEIGNANT-CONCEPTEUR : k = 3 est une valeur par défaut
- * de travail, la décision n'est pas encore prise.
+ * DÉCISION (Jean-François, 2026-09-24) : k = 1, donc aucune suppression par défaut.
+ * Motif : un AR masqué n'est pas appliqué par l'app cible, et l'élève concerné recevrait
+ * un support non adapté. Risque accepté : en petite classe, un AR porté par un seul élève
+ * peut désigner indirectement cet élève pour quelqu'un qui connaît la classe.
+ * Le mécanisme reste actif et configurable (option `k`) si la décision est révisée.
  */
-export const K_SEUIL_DEFAUT = 3;
+export const K_SEUIL_DEFAUT = 1;
 
-/** Durée de validité par défaut du profil émis (jours). À valider (même durée que les liens de fiche). */
-export const DUREE_JOURS_DEFAUT = 120;
+/** Durée de validité par défaut du profil émis (jours). DÉCISION 2026-09-24 : 30 jours, sans révocation ; renouvellement en repartant de la fiche. */
+export const DUREE_JOURS_DEFAUT = 30;
 
 /**
  * Règles de conflit : paires de codes qui ne peuvent pas être satisfaites ensemble

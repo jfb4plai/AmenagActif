@@ -30,7 +30,7 @@ export async function verifyFicheToken(token) {
 }
 
 export const AUDIENCE_PROFIL = 'profil';
-export const JOURS_PROFIL_DEFAUT = 120; // À valider ; surchargeable par AMENAG_PROFIL_JOURS (non secret)
+export const JOURS_PROFIL_DEFAUT = 30; // Décision 2026-09-24 : 30 jours, sans révocation ; surchargeable par AMENAG_PROFIL_JOURS (non secret)
 
 export function joursProfil() {
   const n = Number(process.env.AMENAG_PROFIL_JOURS);
