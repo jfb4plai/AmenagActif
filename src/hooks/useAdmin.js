@@ -120,7 +120,7 @@ export function useCatalogueAdmin() {
     queryFn: async () => {
       const [{ data: chapitres, error: e1 }, { data: amenagements, error: e2 }] = await Promise.all([
         supabase.from('ar_chapitres').select('id, ordre, titre, code').order('ordre'),
-        supabase.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type, actif, code').order('ordre'),
+        supabase.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type, actif, code, partage_profil').order('ordre'),
       ]);
       if (e1) throw e1;
       if (e2) throw e2;
@@ -151,8 +151,10 @@ export function useCatalogueMutations() {
   };
 
   const majAmenagement = useMutation({
-    mutationFn: async ({ id, libelle, type, actif, chapitreId }) => {
+    // Ne JAMAIS y mettre `code` : immuable (trigger SQL), généré automatiquement à la création.
+    mutationFn: async ({ id, libelle, type, actif, chapitreId, partageProfil }) => {
       const patch = {};
+      if (partageProfil !== undefined) patch.partage_profil = partageProfil;
       if (libelle !== undefined) patch.libelle = libelle.trim();
       if (type !== undefined) patch.type = type;
       if (actif !== undefined) patch.actif = actif;
@@ -167,11 +169,13 @@ export function useCatalogueMutations() {
   });
 
   const ajouterAmenagement = useMutation({
-    mutationFn: async ({ chapitreId, libelle, type, code }) => {
+    // Le code est généré par la base (déclencheur BEFORE INSERT) : il n'est plus saisi.
+    // partage_profil vaut true par défaut côté base ; on ne l'envoie que pour poser l'exception.
+    mutationFn: async ({ chapitreId, libelle, type, partageProfil = true }) => {
       const ordre = await prochainOrdre(chapitreId);
       const { error } = await supabase.from('ar_amenagements').insert({
         chapitre_id: chapitreId, ordre, libelle: libelle.trim(), type, actif: true,
-        ...(code ? { code } : {}), // code optionnel, immuable une fois posé (trigger SQL)
+        ...(partageProfil === false ? { partage_profil: false } : {}),
       });
       if (error) throw error;
     },
@@ -187,7 +191,22 @@ export function useCatalogueMutations() {
     onSuccess: inval,
   });
 
-  return { majAmenagement, ajouterAmenagement, ajouterChapitre };
+  // Écran de revue « Transmission aux autres apps » : un aménagement (id) ou tout un chapitre (chapitreId).
+  // Ne touche qu'à partage_profil. Vérifie qu'au moins une ligne a été modifiée : une RLS qui refuse
+  // un UPDATE renvoie 0 ligne sans erreur, ce qui serait un échec silencieux.
+  const majPartageProfil = useMutation({
+    mutationFn: async ({ id, chapitreId, valeur }) => {
+      let q = supabase.from('ar_amenagements').update({ partage_profil: valeur });
+      q = id ? q.eq('id', id) : q.eq('chapitre_id', chapitreId);
+      const { data, error } = await q.select('id');
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Aucune ligne modifiée (droits insuffisants ou élément introuvable).");
+      return data.length;
+    },
+    onSuccess: inval,
+  });
+
+  return { majAmenagement, ajouterAmenagement, ajouterChapitre, majPartageProfil };
 }
 
 // Fonction pure déplacée dans src/domain/basculeAnnee.js ; ré-exportée pour compatibilité.

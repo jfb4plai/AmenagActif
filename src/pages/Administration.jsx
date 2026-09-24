@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   useAnnees, useEcoles, useEcolesAdmin, useAdminMutations,
   useCatalogueAdmin, useCatalogueMutations,
@@ -192,10 +193,16 @@ function SectionCatalogue() {
   return (
     <section className="space-y-3">
       <h2 className="font-semibold">Catalogue des aménagements</h2>
-      <p className="text-sm text-[color:var(--text3)]">
+      <p className="text-base text-[color:var(--text2)]">
         Repris du classeur source. <strong>AU</strong> = universel (coché par classe, bloc « Pour tous »). <strong>AR</strong> = raisonnable (coché par élève).
         Changer un type ne touche pas aux cases déjà cochées, mais celles-ci peuvent devenir sans effet sur la fiche — vérifiez ensuite les classes concernées.
         Désactiver retire l'aménagement des écrans sans le supprimer.
+        Le code de chaque aménagement est généré automatiquement à la création et ne change plus.
+      </p>
+      <p className="text-base">
+        <Link className="underline text-teal font-medium" to="/administration/transmission">
+          Revoir la transmission aux autres apps (tout le catalogue, chapitre par chapitre)
+        </Link>
       </p>
       <div className="border border-[color:var(--border)] rounded divide-y divide-[color:var(--border)]">
         {chapitres.map((ch) => {
@@ -216,12 +223,13 @@ function SectionCatalogue() {
                   {items.map((a) => (
                     <div key={a.id} className={`border rounded p-2 space-y-2 ${a.actif ? 'border-[color:var(--border)]' : 'border-dashed border-[color:var(--border)] opacity-60'}`}>
                       <textarea
-                        className="plai-input text-sm w-full"
+                        className="plai-input w-full"
+                        style={{ fontSize: 16 }}
                         rows={2}
                         defaultValue={a.libelle}
                         onBlur={(e) => { if (e.target.value.trim() && e.target.value !== a.libelle) majAmenagement.mutate({ id: a.id, libelle: e.target.value }); }}
                       />
-                      <div className="flex flex-wrap items-center gap-3 text-xs">
+                      <div className="flex flex-wrap items-center gap-3 text-base">
                         <label className="flex items-center gap-1">
                           Type
                           <select className="plai-input !w-auto !py-1" value={a.type}
@@ -239,13 +247,22 @@ function SectionCatalogue() {
                         </label>
                         <span className="flex items-center gap-1" title="Code stable, non modifiable : il reste identique même si le libellé change.">
                           Code
-                          <code className="px-1 rounded bg-[color:var(--bg)] border border-[color:var(--border)]">{a.code ?? 'aucun'}</code>
+                          <code className="px-1 rounded bg-[color:var(--bg)] border border-[color:var(--border)]">{a.code ?? 'en cours de génération'}</code>
                         </span>
                         <label className="flex items-center gap-1">
                           <input type="checkbox" checked={a.actif}
                             onChange={(e) => majAmenagement.mutate({ id: a.id, actif: e.target.checked })} />
                           actif
                         </label>
+                      </div>
+                      <div>
+                        <label htmlFor={`np-${a.id}`} className="flex items-center gap-2 font-medium">
+                          <input id={`np-${a.id}`} type="checkbox" className="w-5 h-5" checked={!a.partage_profil}
+                            aria-describedby={`np-aide-${a.id}`}
+                            onChange={(e) => majAmenagement.mutate({ id: a.id, partageProfil: !e.target.checked })} />
+                          Ne pas transmettre aux autres apps
+                        </label>
+                        <p id={`np-aide-${a.id}`} className="text-base text-[color:var(--text2)] mt-1">{AIDE_NE_PAS_TRANSMETTRE}</p>
                       </div>
                     </div>
                   ))}
@@ -257,40 +274,49 @@ function SectionCatalogue() {
         })}
       </div>
       <AjoutChapitre onAdd={ajouterChapitre.mutate} />
-      {(majAmenagement.isError || ajouterAmenagement.isError || ajouterChapitre.isError) && <p className="plai-error">Action impossible, réessayez.</p>}
+      {[majAmenagement, ajouterAmenagement, ajouterChapitre].filter((m) => m.isError).map((m, i) => (
+        <p key={i} role="alert" className="plai-error" style={{ fontSize: 16 }}>Action impossible : {m.error?.message ?? 'erreur inconnue'}. Réessayez.</p>
+      ))}
     </section>
   );
 }
 
+const AIDE_NE_PAS_TRANSMETTRE = "Par défaut, un aménagement est transmis aux autres apps PLAI qui reçoivent le profil d'une classe. Cochez pour que celui-ci ne soit pas envoyé ; il reste visible dans la fiche AménagActif. Exemple : « Rédiger le cours en braille » révèle une déficience visuelle ; cochez pour ne pas l'envoyer aux autres apps. Dans l'écran « Transmission aux autres apps », cette même exception apparaît comme « Non transmis ».";
+
 function AjoutAmenagement({ chapitreId, onAdd }) {
   const [libelle, setLibelle] = useState('');
   const [type, setType] = useState('AR');
-  const [code, setCode] = useState('');
-  const codeValide = code.trim() === '' || /^ar_[a-z0-9]+(_[a-z0-9]+)+$/.test(code.trim());
+  const [nePasTransmettre, setNePasTransmettre] = useState(false);
+  const idp = `ajout-${chapitreId}`;
   return (
-    <form className="border border-dashed border-teal rounded p-2 space-y-2"
-      onSubmit={(e) => { e.preventDefault(); if (libelle.trim() && codeValide) { onAdd({ chapitreId, libelle, type, code: code.trim() || undefined }); setLibelle(''); setType('AR'); setCode(''); } }}>
-      <textarea className="plai-input text-sm w-full" rows={2} placeholder="Nouvel aménagement pour ce chapitre"
+    <form className="border border-dashed border-teal rounded p-2 space-y-2 text-base"
+      onSubmit={(e) => { e.preventDefault(); if (libelle.trim()) { onAdd({ chapitreId, libelle, type, partageProfil: !nePasTransmettre }); setLibelle(''); setType('AR'); setNePasTransmettre(false); } }}>
+      <label htmlFor={`${idp}-libelle`} className="block font-medium">Nouvel aménagement pour ce chapitre</label>
+      <textarea id={`${idp}-libelle`} className="plai-input w-full" style={{ fontSize: 16 }} rows={2}
+        placeholder="Ex. : Rédiger le cours en Arial 14"
+        aria-describedby={`${idp}-libelle-aide`}
         value={libelle} onChange={(e) => setLibelle(e.target.value)} />
-      <div className="flex items-center gap-3 text-xs">
-        <label className="flex items-center gap-1">
+      <p id={`${idp}-libelle-aide`} className="text-base text-[color:var(--text2)]">
+        Ce texte s'affiche tel quel sur les fiches et dans les autres apps. Son code est généré automatiquement et ne changera plus, même si vous reformulez le libellé.
+      </p>
+      <div className="flex flex-wrap items-center gap-3">
+        <label htmlFor={`${idp}-type`} className="flex items-center gap-2">
           Type
-          <select className="plai-input !w-auto !py-1" value={type} onChange={(e) => setType(e.target.value)}>
+          <select id={`${idp}-type`} className="plai-input !w-auto !py-1" style={{ fontSize: 16 }} value={type} onChange={(e) => setType(e.target.value)}>
             <option value="AU">AU — universel</option>
             <option value="AR">AR — raisonnable</option>
           </select>
         </label>
-        <label className="flex items-center gap-1">
-          Code (optionnel)
-          <input className="plai-input !w-56 !py-1" placeholder="ar_lecture_mon_amenagement" value={code} onChange={(e) => setCode(e.target.value)} />
-        </label>
-        <button className="plai-btn" type="submit" disabled={!libelle.trim() || !codeValide}>Ajouter</button>
       </div>
-      <p className="text-xs text-[color:var(--text3)]">
-        Le code sert de repère stable pour d'autres outils PLAI (minuscules, chiffres et _ ; commence par ar_). Laissez vide si vous ne savez pas :
-        il pourra être posé plus tard. <strong>Une fois posé, il ne peut plus être modifié.</strong>
-        {!codeValide && <span className="plai-error block">Format attendu : ar_chapitre_mot (ex. ar_lecture_loupe).</span>}
-      </p>
+      <div>
+        <label htmlFor={`${idp}-np`} className="flex items-center gap-2 font-medium">
+          <input id={`${idp}-np`} type="checkbox" className="w-5 h-5" checked={nePasTransmettre}
+            aria-describedby={`${idp}-np-aide`} onChange={(e) => setNePasTransmettre(e.target.checked)} />
+          Ne pas transmettre aux autres apps
+        </label>
+        <p id={`${idp}-np-aide`} className="text-base text-[color:var(--text2)] mt-1">{AIDE_NE_PAS_TRANSMETTRE}</p>
+      </div>
+      <button className="plai-btn" style={{ fontSize: 16 }} type="submit" disabled={!libelle.trim()}>Ajouter</button>
     </form>
   );
 }

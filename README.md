@@ -32,6 +32,7 @@ Supabase : projet partagé `dfoaumjleqtxjeaplnna`, toutes les tables préfixées
 
 - `supabase/migrations/20260903_amenagactif_core.sql` — schéma + RLS, à exécuter dans le SQL Editor Supabase (pas de CLI).
 - `supabase/seed/seed_catalogue.sql` — 12 chapitres, 132 aménagements (généré).
+- `supabase/migrations/20260924e_amenagactif_partage_profil.sql` — codes automatiques + drapeau `partage_profil` (ordre : b, c, d, puis e ; voir `docs/contrat-profil-classe.md`).
 - `supabase/seed/seed_ecoles.sql` — implantations + année active (à adapter aux 11 implantations réelles).
 
 Rôles (`ar_profils_acces`) : `plai` (sans `ecole_id` → accès global, saisie + fiches + liens + administration) ; `direction` (`ecole_id` → lecture seule des fiches de son école). Les enseignants n'ont pas de compte : ils reçoivent un lien `/fiche/<token>` en lecture seule.

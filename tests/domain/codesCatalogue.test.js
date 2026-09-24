@@ -65,3 +65,26 @@ describe('codes stables du catalogue (chapitres 1, 5, 7, 9)', () => {
     }
   });
 });
+
+describe('codes automatiques et partage_profil (migration 20260924e, écrans)', () => {
+  const e = readFileSync('supabase/migrations/20260924e_amenagactif_partage_profil.sql', 'utf8');
+  const hook = readFileSync('src/hooks/useAdmin.js', 'utf8');
+
+  it('la migration pose les deux déclencheurs BEFORE INSERT et le drapeau avec rattrapage unique', () => {
+    expect(e).toMatch(/create trigger ar_chapitres_code_auto before insert on ar_chapitres/);
+    expect(e).toMatch(/create trigger ar_amenagements_code_auto before insert on ar_amenagements/);
+    expect(e).toMatch(/partage_profil boolean not null default true/);
+    // le rattrapage false est dans le bloc conditionnel « colonne absente »
+    const bloc = e.slice(e.indexOf('if not exists ('), e.indexOf('end if;', e.indexOf('if not exists (')));
+    expect(bloc).toMatch(/set partage_profil = false/);
+    expect(bloc).toMatch(/ordre not in \(1, 5, 7, 9\)/);
+  });
+
+  it('le catalogue admin ne transmet jamais code dans un UPDATE ni dans un INSERT', () => {
+    const maj = hook.slice(hook.indexOf('const majAmenagement'), hook.indexOf('const ajouterAmenagement'));
+    expect(maj).not.toMatch(/patch\.code|code:/);
+    const ajout = hook.slice(hook.indexOf('const ajouterAmenagement'), hook.indexOf('const ajouterChapitre'));
+    expect(ajout).not.toMatch(/\bcode\b\s*[:,}]/);
+    expect(hook).toContain('partage_profil');
+  });
+});

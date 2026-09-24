@@ -1,6 +1,8 @@
 // Génère supabase/seed/codes_catalogue.json (source de vérité des codes stables)
 // puis la migration 20260924c. Usage : node scripts/build-codes.mjs
 // Les codes sont IMMUABLES : ne jamais en changer un après mise en production.
+// Ne couvre que les 45 éléments existants ; les nouveaux éléments et chapitres reçoivent leur code
+// par déclencheur SQL (migration 20260924e). Le périmètre transmis = ar_amenagements.partage_profil.
 import { writeFileSync, readFileSync } from 'fs';
 
 const slugs = {

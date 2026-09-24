@@ -85,3 +85,7 @@ Incidents corrigés :
 - `20260923_amenagactif_fix_rls_recursion_pae.sql` — fix récursion RLS.
 - `20260923b_amenagactif_lecture_agents_multi_ecoles.sql` — fix lecture croisée multi-écoles.
 - `20260924_amenagactif_agent_plai_editeur.sql` — agent devient éditeur (élèves/AR/AU-ajout), multi-écoles, avec les deux restrictions décrites plus haut.
+
+## Catalogue : codes et transmission aux autres apps (admin)
+
+Chaque aménagement et chaque chapitre du catalogue reçoit un code automatique à la création (déclencheur SQL, migration `20260924e`) ; un code posé ne change plus. Le drapeau `partage_profil` de chaque aménagement décide s'il est inclus dans le profil de classe envoyé aux autres apps (défaut : oui). Il se règle par la case « Ne pas transmettre aux autres apps » dans Administration, ou en revue dans `/administration/transmission` (admin uniquement). Le périmètre ne dépend plus du numéro d'ordre des chapitres. Contrat : `docs/contrat-profil-classe.md`.
