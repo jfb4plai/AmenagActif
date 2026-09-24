@@ -194,7 +194,7 @@ function SectionCatalogue() {
     <section className="space-y-3">
       <h2 className="font-semibold">Catalogue des aménagements</h2>
       <p className="text-base text-[color:var(--text2)]">
-        Repris du classeur source. <strong>AU</strong> = universel (coché par classe, bloc « AU applicables à toute la classe »). <strong>AR</strong> = raisonnable (coché par élève).
+        Repris du classeur source. <strong>AU</strong> = universel (coché par classe, bloc « AU applicable(s) à toute la classe »). <strong>AR</strong> = raisonnable (coché par élève).
         Changer un type ne touche pas aux cases déjà cochées, mais celles-ci peuvent devenir sans effet sur la fiche — vérifiez ensuite les classes concernées.
         Désactiver retire l'aménagement des écrans sans le supprimer.
         Le code de chaque aménagement est généré automatiquement à la création et ne change plus.

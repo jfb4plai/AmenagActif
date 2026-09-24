@@ -1,6 +1,6 @@
 /**
  * Aménagements universels : cochés UNE fois par classe (pas par élève).
- * Alimentent le bloc « AU applicables à toute la classe » de la fiche. Affiché en carte, au-dessus
+ * Alimentent le bloc « AU applicable(s) à toute la classe » de la fiche. Affiché en carte, au-dessus
  * de la grille des AR (qui, elle, est par élève). Scopé à la classe
  * sélectionnée dans le flux de saisie.
  */
@@ -21,7 +21,7 @@ export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, on
     <section className="plai-card p-4" style={{ borderColor: 'var(--teal)', background: 'rgba(10,147,112,0.05)' }}>
       <h2 className="font-semibold text-teal">Aménagements universels de la classe</h2>
       <p className="text-sm text-[color:var(--text3)] mb-3">
-        S'appliquent à <strong>tous les élèves</strong> de la classe. Cochés ici une seule fois — ils forment le bloc « AU applicables à toute la classe » de la fiche.
+        S'appliquent à <strong>tous les élèves</strong> de la classe. Cochés ici une seule fois — ils forment le bloc « AU applicable(s) à toute la classe » de la fiche.
         Les aménagements <strong>par élève</strong> sont dans les chapitres ci-dessous.
       </p>
       {!peutRetirer && (

@@ -26,7 +26,7 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
         </tr></tbody>
       </table>
 
-      <h2 className="font-bold underline mb-1">AU applicables à toute la classe :</h2>
+      <h2 className="font-bold underline mb-1">AU applicable(s) à toute la classe :</h2>
       <ul className="list-disc pl-6 mb-4">
         {vm.pourTous.length === 0 && <li className="list-none text-gray-500">Aucun aménagement universel retenu pour la classe.</li>}
         {vm.pourTous.map((x, i) => (
