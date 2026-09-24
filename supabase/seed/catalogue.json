@@ -101,7 +101,22 @@
       {
         "ordre": 20,
         "type": "AR",
-        "libelle": "Imprimer les documents en police Arial 14 (à la place de l'Arial 12 par défaut)"
+        "libelle": "Rédiger le cours en braille"
+      },
+      {
+        "ordre": 21,
+        "type": "AR",
+        "libelle": "Rédiger le cours en Arial 14"
+      },
+      {
+        "ordre": 22,
+        "type": "AR",
+        "libelle": "Remplacer les codes couleurs par des codes graphiques (croix, pointillés, hachures,...)"
+      },
+      {
+        "ordre": 23,
+        "type": "AU",
+        "libelle": "Construire le cours de manière à ce que le recto/verso soit \"intelligent\" (un contenu et les questions qui s'y rapportent ne doivent pas être scindés entre le recto et le verso d'une même page)"
       }
     ]
   },

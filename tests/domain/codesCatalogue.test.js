@@ -40,13 +40,22 @@ describe('codes stables du catalogue (chapitres 1, 5, 7, 9)', () => {
     }
   });
 
-  it('Arial 14 existe comme AR du chapitre 1', () => {
+  it('« Rédiger le cours en Arial 14 » (déjà en production) porte le code ar_supports_arial_14', () => {
     const chap = catalogue.find((c) => c.ordre === 1);
     const m = codes.chapitres.find((c) => c.ordre === 1).items.find((i) => i.code === 'ar_supports_arial_14');
     expect(m).toBeTruthy();
     const item = chap.items.find((i) => i.ordre === m.ordre);
     expect(item.type).toBe('AR');
-    expect(item.libelle).toMatch(/Arial 14/);
+    expect(item.libelle).toBe('Rédiger le cours en Arial 14');
+  });
+
+  it('la migration ne crée aucun aménagement (pas de doublon avec la production)', () => {
+    expect(migration).not.toMatch(/insert into ar_amenagements/i);
+  });
+
+  it('45 aménagements codés, comme la garde de la migration', () => {
+    expect(codes.chapitres.flatMap((c) => c.items).length).toBe(45);
+    expect(migration).toContain('<> 45');
   });
 
   it('la migration contient tous les codes (pas de dérive entre JSON et SQL)', () => {

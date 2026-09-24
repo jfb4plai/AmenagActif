@@ -1,10 +1,13 @@
--- AménagActif : codes stables du catalogue (chapitres 1, 5, 7, 9) + AR « Arial 14 ».
+-- AménagActif : codes stables du catalogue (chapitres 1, 5, 7, 9). Aucun élément n'est créé.
 -- Généré par scripts/build-codes.mjs à partir de supabase/seed/codes_catalogue.json.
 -- Les codes servent de clé de contrat vers d'autres apps : ils sont IMMUABLES (trigger)
 -- même si le libellé est renommé dans l'écran Administration.
 --
 -- Appariement des lignes existantes : (ordre du chapitre, ordre de l'aménagement), pas le
 -- libellé, car un libellé a pu être modifié via l'écran Administration depuis le seed.
+-- Positions et libellés vérifiés contre la production le 2026-09-24 (export CSV de
+-- ar_amenagements par JF) : ch.1 = 23 éléments, ch.5 = 13, ch.7 = 5, ch.9 = 4, soit 45.
+-- Le bloc de garde en fin de transaction annule tout si ce total n'est pas atteint.
 -- Après exécution, lancer les requêtes de contrôle en bas de fichier.
 -- À exécuter à la main dans le SQL Editor Supabase, AVANT de fusionner le code applicatif
 -- qui sélectionne la colonne code (sinon les écrans fiche et Administration échouent).
@@ -69,6 +72,10 @@ from (values
   (1, 17, 'ar_supports_outils_personnels'),
   (1, 18, 'ar_supports_liste_materiel'),
   (1, 19, 'ar_supports_cours_recto_seul'),
+  (1, 20, 'ar_supports_cours_braille'),
+  (1, 21, 'ar_supports_arial_14'),
+  (1, 22, 'ar_supports_codes_graphiques'),
+  (1, 23, 'ar_supports_recto_verso_intelligent'),
   (5, 1, 'ar_lecture_livres_audio'),
   (5, 2, 'ar_lecture_stylo_lecture'),
   (5, 3, 'ar_lecture_preparer_textes_longs'),
@@ -95,22 +102,21 @@ from (values
 join ar_chapitres c on c.ordre = v.chap_ordre
 where a.chapitre_id = c.id and a.ordre = v.ordre and a.code is null;
 
--- Nouvel AR « Arial 14 » (chapitre 1). Arial 12 = AU par défaut (bloc « Mise en page »),
--- Arial 14 = AR, l'AR l'emporte. Ajouté seulement s'il n'existe pas déjà.
-insert into ar_amenagements (chapitre_id, ordre, libelle, type, actif, code)
-select c.id,
-       coalesce((select max(a.ordre) from ar_amenagements a where a.chapitre_id = c.id), 0) + 1,
-       'Imprimer les documents en police Arial 14 (à la place de l''Arial 12 par défaut)',
-       'AR', true, 'ar_supports_arial_14'
-from ar_chapitres c
-where c.ordre = 1
-  and not exists (select 1 from ar_amenagements where code = 'ar_supports_arial_14');
+-- Garde : les 45 positions attendues doivent toutes avoir reçu un code, sinon le catalogue de
+-- cet environnement diffère de la production vérifiée : tout est annulé (aucune écriture).
+do $$
+begin
+  if (select count(*) from ar_amenagements a join ar_chapitres c on c.id = a.chapitre_id
+        where c.ordre in (1, 5, 7, 9) and a.code is not null) <> 45 then
+    raise exception 'Catalogue inattendu : 45 aménagements codés attendus (ch. 1, 5, 7, 9). Aucune modification appliquée.';
+  end if;
+end $$;
 
 commit;
 
 -- ===== Contrôles à lancer après exécution =====
--- 1) Aménagements des chapitres 1/5/7/9 SANS code (attendu : aucune ligne ; sinon corriger à la main
---    ou décider du code, jamais par renommage) :
+-- 1) Aménagements des chapitres 1/5/7/9 SANS code (attendu : aucune ligne ; un élément ajouté plus
+--    tard via l'Administration reste sans code : il sera « non appliqué automatiquement ») :
 --   select c.ordre as chap, a.ordre, a.libelle from ar_amenagements a join ar_chapitres c on c.id = a.chapitre_id
 --   where c.ordre in (1,5,7,9) and a.code is null order by 1,2;
 -- 2) Codes attribués, à relire contre le libellé (détecte un décalage d'ordre) :

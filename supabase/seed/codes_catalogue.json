@@ -83,7 +83,19 @@
         },
         {
           "ordre": 20,
+          "code": "ar_supports_cours_braille"
+        },
+        {
+          "ordre": 21,
           "code": "ar_supports_arial_14"
+        },
+        {
+          "ordre": 22,
+          "code": "ar_supports_codes_graphiques"
+        },
+        {
+          "ordre": 23,
+          "code": "ar_supports_recto_verso_intelligent"
         }
       ]
     },
