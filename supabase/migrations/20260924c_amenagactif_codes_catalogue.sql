@@ -116,7 +116,7 @@ commit;
 
 -- ===== Contrôles à lancer après exécution =====
 -- 1) Aménagements des chapitres 1/5/7/9 SANS code (attendu : aucune ligne ; un élément ajouté plus
---    tard via l'Administration reste sans code : il sera « non appliqué automatiquement ») :
+--    tard reçoit un code automatique depuis la migration 20260924e) :
 --   select c.ordre as chap, a.ordre, a.libelle from ar_amenagements a join ar_chapitres c on c.id = a.chapitre_id
 --   where c.ordre in (1,5,7,9) and a.code is null order by 1,2;
 -- 2) Codes attribués, à relire contre le libellé (détecte un décalage d'ordre) :
