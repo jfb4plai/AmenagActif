@@ -125,6 +125,9 @@ export default function LiensEnseignants() {
         <p>
           « Ouvertures » compte au plus une ouverture par heure et par lien : c'est un indicateur d'usage, pas un décompte exact.
         </p>
+        <p>
+          <strong>Conseil pour la colonne « Destinataire » :</strong> évitez le nom complet de l'enseignant (données personnelles, RGPD). Préférez le prénom et l'initiale du nom (Virginie D.), ou seulement la matière et la classe (français, 3e TQ B).
+        </p>
       </div>
 
       <fieldset className="flex flex-wrap items-end gap-6">
