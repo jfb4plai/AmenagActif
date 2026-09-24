@@ -36,7 +36,7 @@ const donnees = () => ({
   classe: { niveau: '3e' },
   contexte: { classeNom: '3LA', ecoleNom: 'Athénée de test', anneeLibelle: '2026-2027' },
   eleves: [{ id: 'e1', prenom: 'Emilie', initiale_nom: 'D', commentaire: 'secret', statut: 'IPT' }],
-  amenagements: [{ id: 'a1', chapitre_id: 'c1', ordre: 1, libelle: 'Mise en page', type: 'AU', code: 'ar_supports_mise_en_page' }],
+  amenagements: [{ id: 'a1', chapitre_id: 'c1', ordre: 1, libelle: 'Mise en page', type: 'AU', code: 'ar_supports_mise_en_page', partage_profil: true }],
   chapitres: [{ id: 'c1', ordre: 1, titre: '1. SUPPORTS', code: 'supports' }],
   auClasse: [{ amenagement_id: 'a1', cree_le: '2026-09-01T08:00:00Z' }],
   selectionsAR: [],

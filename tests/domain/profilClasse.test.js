@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  computeProfilClasse, trancheEffectif, K_SEUIL_DEFAUT, CHAPITRES_PERIMETRE, REGLES_CONFLIT,
+  computeProfilClasse, trancheEffectif, K_SEUIL_DEFAUT, REGLES_CONFLIT,
 } from '../../src/domain/projections/profilClasse.js';
 
 const U = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -9,18 +9,18 @@ const CH = { supports: U(1), lecture: U(5), autre: U(6), sciences: U(7) };
 const chapitres = [
   { id: CH.supports, ordre: 1, titre: '1. SUPPORTS', code: 'supports' },
   { id: CH.lecture, ordre: 5, titre: '5. LECTURE', code: 'lecture' },
-  { id: CH.autre, ordre: 6, titre: '6. ÉCRITURE', code: null },
+  { id: CH.autre, ordre: 6, titre: '6. ÉCRITURE', code: 'ecriture' },
   { id: CH.sciences, ordre: 7, titre: '7. NOTIONS SCIENTIFIQUES', code: 'sciences' },
 ];
 
-const A = (n, chapitre_id, ordre, libelle, type, code) => ({ id: U(100 + n), chapitre_id, ordre, libelle, type, code });
+const A = (n, chapitre_id, ordre, libelle, type, code, partage_profil = true) => ({ id: U(100 + n), chapitre_id, ordre, libelle, type, code, partage_profil });
 const amenagements = [
   A(1, CH.supports, 1, 'Mise en page', 'AU', 'ar_supports_mise_en_page'),
   A(2, CH.supports, 3, 'Ne pas utiliser de carte mentale', 'AR', 'ar_supports_carte_mentale_non'),
   A(3, CH.supports, 4, 'Utiliser des cartes mentales', 'AR', 'ar_supports_carte_mentale_oui'),
   A(4, CH.lecture, 1, 'Utiliser les livres audio pour la lecture', 'AR', 'ar_lecture_livres_audio'),
   A(5, CH.lecture, 20, 'AR de catalogue sans code', 'AR', null),
-  A(6, CH.autre, 1, 'AR hors périmètre', 'AR', null),
+  A(6, CH.autre, 1, 'AR non transmis', 'AR', 'ar_ecriture_non_transmis', false),
   A(7, CH.supports, 30, 'AU sans code', 'AU', null),
   A(8, CH.sciences, 1, 'Utiliser la calculatrice', 'AR', 'ar_sciences_calculatrice'),
 ];
@@ -53,7 +53,7 @@ const input = {
     sel(0, 8), sel(1, 8),
     // AR de catalogue sans code, 3 élèves -> non_codes
     ...[2, 3, 4].map((e) => sel(e, 5)),
-    // hors périmètre
+    // non transmis
     sel(6, 6),
   ],
   libres: [{ id: U(300), eleve_id: U(200), chapitre_id: CH.supports, texte: 'Vérifier oralement la consigne avant de commencer', cree_le: '2026-09-10T08:00:00Z' }],
@@ -79,33 +79,33 @@ describe('computeProfilClasse : contrat', () => {
     expect(p.non_codes).toContainEqual({ chapitre: 'supports', libelle: 'AU sans code' });
   });
 
-  it('détaille les AR des chapitres du périmètre avec un effectif en tranches', () => {
+  it('détaille les AR transmis avec un effectif en tranches', () => {
     const p = calc();
-    expect(p.ar_mecanisables).toEqual([
+    expect(p.ar).toEqual([
+      { code: 'ar_lecture_livres_audio', chapitre: 'lecture', libelle: 'Utiliser les livres audio pour la lecture', effectif: '6+' },
       { code: 'ar_supports_carte_mentale_non', chapitre: 'supports', libelle: 'Ne pas utiliser de carte mentale', effectif: '3-5' },
       { code: 'ar_supports_carte_mentale_oui', chapitre: 'supports', libelle: 'Utiliser des cartes mentales', effectif: '3-5' },
-      { code: 'ar_lecture_livres_audio', chapitre: 'lecture', libelle: 'Utiliser les livres audio pour la lecture', effectif: '6+' },
     ]);
   });
 
-  it('un AR sans code (dans le périmètre, assez porté) va dans non_codes, jamais omis', () => {
+  it('un AR sans code (transmis, assez porté) va dans non_codes, jamais omis', () => {
     expect(calc().non_codes).toContainEqual({ chapitre: 'lecture', libelle: 'AR de catalogue sans code' });
   });
 
-  it('AR hors périmètre et AR sous le seuil k : réduits au booléen', () => {
+  it('AR non transmis et AR sous le seuil k : réduits au booléen', () => {
     const p = calc();
-    expect(p.ar_hors_perimetre_present).toBe(true);
-    expect(p.ar_mecanisables.some((x) => x.code === 'ar_sciences_calculatrice')).toBe(false);
+    expect(p.elements_non_transmis_present).toBe(true);
+    expect(p.ar.some((x) => x.code === 'ar_sciences_calculatrice')).toBe(false);
     expect(JSON.stringify(p)).not.toContain('calculatrice');
-    expect(JSON.stringify(p)).not.toContain('AR hors périmètre');
+    expect(JSON.stringify(p)).not.toContain('AR non transmis');
   });
 
-  it('sans AR hors périmètre ni sous le seuil, le booléen est faux', () => {
+  it('sans élément non transmis ni sous le seuil, le booléen est faux', () => {
     const p = calc({
       selectionsAR: [0, 1, 2].map((e) => sel(e, 4)),
       libres: [],
     });
-    expect(p.ar_hors_perimetre_present).toBe(false);
+    expect(p.elements_non_transmis_present).toBe(false);
     expect(p.libres_present).toBe(false);
   });
 
@@ -122,25 +122,21 @@ describe('computeProfilClasse : contrat', () => {
       selectionsAR: [...[0, 1, 2].map((e) => sel(e, 2)), sel(3, 3)], // « oui » porté par 1 seul élève
     });
     expect(p.conflits).toEqual([]);
-    expect(p.ar_mecanisables.map((x) => x.code)).toEqual(['ar_supports_carte_mentale_non']);
+    expect(p.ar.map((x) => x.code)).toEqual(['ar_supports_carte_mentale_non']);
   });
 
-  it('le périmètre et le seuil sont configurables', () => {
+  it('le seuil k est configurable', () => {
     const k1 = calc({}, { k: 1 });
-    expect(k1.ar_mecanisables.find((x) => x.code === 'ar_sciences_calculatrice')?.effectif).toBe('1-2');
-    const chap1 = calc({}, { chapitresPerimetre: [1] });
-    expect(chap1.ar_mecanisables.some((x) => x.code === 'ar_lecture_livres_audio')).toBe(false);
-    expect(chap1.ar_hors_perimetre_present).toBe(true);
+    expect(k1.ar.find((x) => x.code === 'ar_sciences_calculatrice')?.effectif).toBe('1-2');
   });
 
-  it('par défaut (k = 1), aucun AR du périmètre n est supprimé, même porté par un seul élève', () => {
+  it('par défaut (k = 1), aucun AR transmis n est supprimé, même porté par un seul élève', () => {
     const p = computeProfilClasse(input, { now: NOW });
-    expect(p.ar_mecanisables.find((x) => x.code === 'ar_sciences_calculatrice')?.effectif).toBe('1-2');
+    expect(p.ar.find((x) => x.code === 'ar_sciences_calculatrice')?.effectif).toBe('1-2');
   });
 
   it('constantes documentées', () => {
     expect(K_SEUIL_DEFAUT).toBe(1);
-    expect(CHAPITRES_PERIMETRE).toEqual([1, 5, 7, 9]);
     expect(REGLES_CONFLIT.length).toBeGreaterThan(0);
   });
 
@@ -160,7 +156,61 @@ describe('computeProfilClasse : contrat', () => {
 
   it('un élève absent de la classe est ignoré', () => {
     const p = calc({ selectionsAR: [...[0, 1].map((e) => sel(e, 4)), { eleve_id: U(999), amenagement_id: id(4) }] });
-    expect(p.ar_mecanisables).toEqual([]); // 2 élèves de la classe < k
+    expect(p.ar).toEqual([]); // 2 élèves de la classe < k
+  });
+});
+
+describe('computeProfilClasse : partage_profil', () => {
+  it('un AR partage_profil = false n est jamais publié : son libellé et son code sont absents de la sortie', () => {
+    const sortie = JSON.stringify(calc());
+    expect(sortie).not.toContain('AR non transmis');
+    expect(sortie).not.toContain('ar_ecriture_non_transmis');
+    expect(calc().elements_non_transmis_present).toBe(true);
+  });
+
+  it('un AU partage_profil = false n est jamais publié et fait passer le booléen à vrai', () => {
+    const ams = amenagements.map((a) => (a.id === id(1) ? { ...a, partage_profil: false } : a));
+    const p = calc({ amenagements: ams, selectionsAR: [] });
+    expect(JSON.stringify(p)).not.toContain('Mise en page');
+    expect(p.au).toEqual([]);
+    expect(p.elements_non_transmis_present).toBe(true);
+  });
+
+  it('un élément non transmis mais non coché ne change rien (booléen faux)', () => {
+    const p = calc({ selectionsAR: [], auClasse: [] });
+    expect(p.elements_non_transmis_present).toBe(false);
+  });
+
+  it('renuméroter ou permuter les ordre des chapitres ne change pas le profil', () => {
+    const permutes = chapitres.map((c, i) => ({ ...c, ordre: 100 - i * 7 }));
+    const decales = chapitres.map((c) => ({ ...c, ordre: c.ordre + 40 }));
+    const ref = JSON.stringify(calc());
+    expect(JSON.stringify(calc({ chapitres: permutes }))).toBe(ref);
+    expect(JSON.stringify(calc({ chapitres: decales }))).toBe(ref);
+    expect(JSON.stringify(calc({ chapitres: [...permutes].reverse() }))).toBe(ref);
+  });
+
+  it('le champ chapitre est le code du chapitre, jamais son ordre', () => {
+    const p = calc();
+    for (const x of [...p.au, ...p.ar]) expect(x.chapitre).toMatch(/^[a-z][a-z0-9_]*$/);
+  });
+
+  it('un nouvel AR (drapeau par défaut vrai, code présent) est publié sans autre action', () => {
+    const nouveau = { id: U(150), chapitre_id: CH.autre, ordre: 2, libelle: 'Rédiger le cours en gros caractères', type: 'AR', code: 'ar_ecriture_gros_caracteres', partage_profil: true };
+    const p = calc({ amenagements: [...amenagements, nouveau], selectionsAR: [sel(0, 50)] }, { k: 1 });
+    expect(p.ar).toEqual([{ code: 'ar_ecriture_gros_caracteres', chapitre: 'ecriture', libelle: 'Rédiger le cours en gros caractères', effectif: '1-2' }]);
+  });
+
+  it('un élément sans code mais transmis va dans non_codes (filet de sécurité)', () => {
+    expect(calc().non_codes).toContainEqual({ chapitre: 'lecture', libelle: 'AR de catalogue sans code' });
+  });
+
+  it('colonne partage_profil absente (undefined) : rien n est publié (échec fermé)', () => {
+    const sans = amenagements.map(({ partage_profil, ...r }) => r);
+    const p = calc({ amenagements: sans });
+    expect(p.au).toEqual([]);
+    expect(p.ar).toEqual([]);
+    expect(p.elements_non_transmis_present).toBe(true);
   });
 });
 
@@ -193,9 +243,9 @@ describe('computeProfilClasse : NON-FUITE', () => {
 
   it('aucun effectif exact ni clé de regroupement par élève', () => {
     const p = JSON.parse(sortie);
-    for (const x of p.ar_mecanisables) expect(['1-2', '3-5', '6+']).toContain(x.effectif);
+    for (const x of p.ar) expect(['1-2', '3-5', '6+']).toContain(x.effectif);
     expect(Object.keys(p).sort()).toEqual([
-      'ar_hors_perimetre_present', 'ar_mecanisables', 'au', 'conflits', 'contexte', 'emis_le',
+      'ar', 'au', 'conflits', 'contexte', 'elements_non_transmis_present', 'emis_le',
       'expire_le', 'fiche_du', 'libres_present', 'non_codes', 'schema', 'version',
     ]);
   });

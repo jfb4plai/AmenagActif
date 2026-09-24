@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { chargerDonneesClasseAvec, COLONNES_ELEVES } from '../../src/domain/chargeurFiche.js';
+import { chargerDonneesClasseAvec, COLONNES_ELEVES, COLONNES_AMENAGEMENTS } from '../../src/domain/chargeurFiche.js';
 
 /** Faux client Supabase : enregistre (table, colonnes) et renvoie des données de fixture. */
 function fauxDb(tables, erreurs = {}) {
@@ -37,6 +37,21 @@ describe('chargeur de fiche partagé', () => {
     await chargerDonneesClasseAvec(db, 'c1');
     expect(db.selects.find((s) => s.table === 'ar_eleves').cols).toContain('statut');
     expect(COLONNES_ELEVES).toContain('statut');
+  });
+
+  it('sélectionne code ET partage_profil du catalogue, côté client comme côté serveur', async () => {
+    const db = fauxDb(tables);
+    await chargerDonneesClasseAvec(db, 'c1');
+    const cols = db.selects.find((s) => s.table === 'ar_amenagements').cols;
+    for (const c of ['code', 'partage_profil']) {
+      expect(cols).toContain(c);
+      expect(COLONNES_AMENAGEMENTS).toContain(c);
+    }
+    // Le client (useFicheClasse) et le serveur (ficheData) passent tous deux par ce chargeur unique :
+    // aucune autre lecture de ar_amenagements ne doit alimenter la projection profil.
+    for (const f of ['api/_lib/ficheData.js', 'src/hooks/useFicheClasse.js']) {
+      expect(readFileSync(f, 'utf8')).not.toMatch(/from\('ar_amenagements'\)/);
+    }
   });
 
   it('inclut les référents multi-écoles et exclut les autres écoles (I2)', async () => {
