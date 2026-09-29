@@ -59,7 +59,6 @@
  * @property {string} eleve
  * @property {string} classeNom
  * @property {string} ecoleNom
- * @property {string} ecoleFase
  * @property {string} statut
  * @property {{ chapitreTitre: string, amenagements: string[] }[]} parChapitre
  * @property {string} commentaire

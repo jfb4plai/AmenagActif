@@ -3,7 +3,6 @@
  *  eleve: import('../types.js').Eleve,
  *  classeNom: string,
  *  ecoleNom: string,
- *  ecoleFase: string,
  *  amenagements: import('../types.js').Amenagement[],
  *  chapitres: import('../types.js').Chapitre[],
  *  selectionsAR: import('../types.js').SelectionAR[],
@@ -12,7 +11,7 @@
  * @returns {import('../types.js').FicheEleveVM}
  */
 export function computeFicheEleve(input) {
-  const { eleve, classeNom, ecoleNom, ecoleFase, amenagements, chapitres, selectionsAR, libres } = input;
+  const { eleve, classeNom, ecoleNom, amenagements, chapitres, selectionsAR, libres } = input;
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const chapById = new Map(chapitres.map((c) => [c.id, c]));
 
@@ -44,5 +43,5 @@ export function computeFicheEleve(input) {
     .sort((a, b) => a.ordre - b.ordre)
     .map(({ chapitreTitre, amenagements }) => ({ chapitreTitre, amenagements }));
 
-  return { eleve: nomEleve, classeNom, ecoleNom, ecoleFase, statut: eleve.statut, parChapitre, commentaire: (eleve.commentaire ?? '').trim() };
+  return { eleve: nomEleve, classeNom, ecoleNom, statut: eleve.statut, parChapitre, commentaire: (eleve.commentaire ?? '').trim() };
 }

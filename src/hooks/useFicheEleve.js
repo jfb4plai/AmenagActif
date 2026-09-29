@@ -5,7 +5,7 @@ import { computeFicheEleve } from '../domain/projections/ficheEleve.js';
 async function charger(eleveId) {
   const { data: eleve, error } = await supabase
     .from('ar_eleves')
-    .select('id, prenom, initiale_nom, commentaire, statut, classe_id, ar_classes(nom, ar_ecoles(nom, implantation))')
+    .select('id, prenom, initiale_nom, commentaire, statut, classe_id, ar_classes(nom, ar_ecoles(nom, implantation_nom))')
     .eq('id', eleveId).single();
   if (error) throw error;
   const [cat, chap, sel, lib] = await Promise.all([
@@ -17,9 +17,7 @@ async function charger(eleveId) {
   return computeFicheEleve({
     eleve,
     classeNom: eleve.ar_classes?.nom ?? '',
-    ecoleNom: eleve.ar_classes?.ar_ecoles?.nom ?? '',
-    // ecoleFase = numéro FASE = colonne `implantation` (PAS `implantation_nom`, qui est le nom de l'implantation, admin only).
-    ecoleFase: eleve.ar_classes?.ar_ecoles?.implantation ?? '',
+    ecoleNom: eleve.ar_classes?.ar_ecoles?.implantation_nom || eleve.ar_classes?.ar_ecoles?.nom || '',
     amenagements: cat.data,
     chapitres: chap.data,
     selectionsAR: sel.data,

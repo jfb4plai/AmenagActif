@@ -6,7 +6,6 @@ const args = (eleveId) => ({
   eleve: f.eleves.find((e) => e.id === eleveId),
   classeNom: '5LA',
   ecoleNom: f.contexte.ecoleNom,
-  ecoleFase: f.contexte.ecoleFase,
   amenagements: f.amenagements,
   chapitres: f.chapitres,
   selectionsAR: f.selectionsAR,
@@ -40,10 +39,9 @@ describe('computeFicheEleve', () => {
     expect(computeFicheEleve(args('e1')).commentaire).toBe('');
   });
 
-  it('expose le nom de l\'école, le numéro FASE et le statut IPT/PAR de l\'élève', () => {
+  it('expose le nom de l\'école et le statut IPT/PAR de l\'élève', () => {
     const vm = computeFicheEleve(args('e1'));
     expect(vm.ecoleNom).toBe('Athénée X');
-    expect(vm.ecoleFase).toBe('482');
     expect(vm.statut).toBe('PAR');
   });
 });

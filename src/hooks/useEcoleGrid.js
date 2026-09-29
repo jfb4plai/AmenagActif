@@ -5,7 +5,7 @@ export function useEcoles() {
   return useQuery({
     queryKey: ['ecoles'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('ar_ecoles').select('id, nom, implantation').eq('actif', true).order('nom');
+      const { data, error } = await supabase.from('ar_ecoles').select('id, nom, implantation, implantation_nom').eq('actif', true).order('nom');
       if (error) throw error;
       return data;
     },

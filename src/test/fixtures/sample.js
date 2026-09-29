@@ -38,4 +38,4 @@ export const referents = [
   { nom: 'Mona', fonction: 'referent_plai', niveaux: null },
 ];
 
-export const contexte = { classeNom: '5LA', ecoleNom: 'Athénée X', anneeLibelle: '2025-2026', ecoleFase: '482' };
+export const contexte = { classeNom: '5LA', ecoleNom: 'Athénée X', anneeLibelle: '2025-2026' };
