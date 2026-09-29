@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AménagActif — mode d'emploi accompagnants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f7; --surface: #ffffff; --surface2: #f4f2ee;
+  --border: #e8e4dd; --border2: #d4cfc6;
+  --text: #1a1814; --text2: #5a564f; --text3: #9a958c;
+  --teal: #0f6e56; --teal-bg: #e1f5ee; --teal-border: #1d9e75;
+  --orange: #f97316; --orange-bg: #fef1e7; --orange-border: #f97316;
+  --radius: 10px; --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
+.plai-nav {
+  background: rgba(250,249,247,0.95); border-bottom: 1px solid var(--border);
+  padding: 0.9rem 2rem; display: flex; align-items: center; gap: 12px;
+}
+.plai-nav img { height: 32px; width: auto; }
+.plai-nav span { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+.plai-container { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+.plai-badge {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 2rem;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--teal); background: var(--teal-bg); border: 1px solid var(--teal-border);
+  padding: 5px 14px; border-radius: 20px;
+}
+h1 { font-family: 'DM Serif Display', serif; font-size: 30px; margin: 0.85rem 0 0.4rem; color: var(--text); }
+.byline { font-size: 14px; color: var(--text3); margin-bottom: 1.75rem; }
+.lead { font-size: 17px; color: var(--text2); margin-bottom: 0.5rem; }
+.plai-section { padding: 2rem 0 1.75rem; border-top: 1px solid var(--border); }
+.plai-section h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 1rem; color: var(--text); }
+.plai-section p { margin-bottom: 0.9rem; }
+.plai-section ol, .plai-section ul { margin: 0 0 0.9rem 1.4rem; }
+.plai-section li { margin-bottom: 0.6rem; }
+.plai-section li::marker { color: var(--teal); font-weight: 700; }
+strong { color: var(--text); font-weight: 700; }
+.limite { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.5rem 1.5rem 1rem; }
+.plai-footer {
+  text-align: center; padding: 2.5rem 0 2.5rem; font-size: 13px; color: var(--text3);
+  border-top: 1px solid var(--border); margin-top: 1rem;
+}
+.plai-footer p + p { margin-top: 6px; }
+@media print { .plai-nav { position: static; } body { font-size: 12.5pt; } }
+</style>
+</head>
+<body>
+<header class="plai-nav">
+  <img src="https://amenagactif.jfb4plai.com/plai-logo.jpg" alt="PLAI">
+  <span>AménagActif</span>
+</header>
+
+<div class="plai-container">
+  <div class="plai-badge">Mode d'emploi · Accompagnants</div>
+  <h1>AménagActif — mode d'emploi accompagnants</h1>
+  <p class="byline">Pôle Territorial de la Ville de Liège (PLAI) · 29 septembre 2026</p>
+  <p class="lead">Ce mode d'emploi s'adresse aux <strong>agents accompagnants</strong> intervenant dans une ou plusieurs implantations. AménagActif est l'outil où sont recensés les aménagements (AU/AR) des élèves ; en tant qu'accompagnant, vous pouvez consulter les fiches et mettre à jour les informations des élèves que vous suivez.</p>
+
+  <section class="plai-section">
+    <h2>Se connecter</h2>
+    <p>Votre compte est créé par un administrateur PLAI (il y en a plusieurs) — vous ne créez pas de compte vous-même. Vous recevez un e-mail avec un lien à usage unique pour définir votre mot de passe, puis vous vous connectez sur <strong>amenagactif.jfb4plai.com</strong> avec votre e-mail et ce mot de passe. Mot de passe oublié : « Mot de passe oublié ? » sur la page de connexion.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Saisir et mettre à jour les aménagements</h2>
+    <p>Menu <strong>Saisie</strong>.</p>
+    <ol>
+      <li>Choisissez l'école et l'année scolaire, puis la classe.</li>
+      <li>Vous pouvez <strong>créer, modifier ou supprimer un élève</strong>, et gérer ses <strong>AR</strong> (cocher/décocher les aménagements par chapitre, ajouter un aménagement libre si besoin).</li>
+      <li>Vous pouvez <strong>ajouter</strong> un AU au bloc « Pour tous » de la classe, mais pas en retirer un déjà posé (ça reste au référent PLAI ou à la direction).</li>
+      <li>Le champ commentaire par élève est éditable depuis la liste des élèves.</li>
+      <li>Le <strong>commentaire de la classe</strong> (sous le champ Référent PLAI) est aussi modifiable par vous — contexte utile à l'enseignant, jamais de nom d'élève ni de diagnostic.</li>
+    </ol>
+    <p>Tout est enregistré automatiquement dès que vous cochez ou tapez — pas de bouton « valider ».</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Consulter et imprimer les fiches</h2>
+    <p>Menu <strong>Fiches</strong> : fiche classe, fiche élève (clic sur le nom depuis la fiche classe), fiche école complète. Bouton <strong>« Imprimer / Enregistrer en PDF »</strong> sur chaque fiche.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Ce que vous ne pouvez pas faire</h2>
+    <div class="limite">
+      <ul>
+        <li><strong>Créer une nouvelle classe</strong> : réservé au référent PLAI, à la direction ou à l'administrateur.</li>
+        <li><strong>Retirer un AU</strong> déjà coché pour la classe : même raison — un AU concerne toute la classe, sa suppression n'est pas une décision d'un seul accompagnant.</li>
+        <li><strong>Générer un lien enseignant</strong> : le bouton « Copier le lien enseignant » n'apparaît pas pour votre rôle. Créer et gérer ces liens (destinataire, révocation) relève du référent PLAI ou de la direction, pour des raisons de RGPD (savoir qui a accès aux données d'élèves et pouvoir le couper).</li>
+        <li><strong>Inviter un compte</strong> : ce sont les administrateurs PLAI qui gèrent les invitations, pas les accompagnants eux-mêmes.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="plai-footer">
+    <p>AménagActif · amenagactif.jfb4plai.com</p>
+    <p>Pôle Territorial de la Ville de Liège — Pôle Liégeois d'Accompagnement vers une École Inclusive (PLAI)</p>
+  </footer>
+</div>
+</body>
+</html>
