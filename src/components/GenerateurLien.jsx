@@ -53,11 +53,11 @@ export default function GenerateurLien({ classeIds, nomGroupe, libelle }) {
           maxLength={MAX_DESTINATAIRE}
           required
           aria-describedby={`${id}-aide`}
-          placeholder="Virginie D., français, 3e TQ B"
+          placeholder="A., français 5PA, Pitteurs"
         />
         <p id={`${id}-aide`} className="mt-1 text-[color:var(--text2)]" style={{ fontSize: 16 }}>
           Ce texte sert à retrouver ce lien plus tard dans « Liens enseignants » et à le révoquer si l'enseignant change ou quitte l'école.
-          Pour limiter les données personnelles (RGPD), indiquez le prénom et l'initiale du nom (Virginie D.), ou seulement la matière et la classe : évitez le nom complet.
+          Pour limiter les données personnelles (RGPD), utilisez un repère sans nom complet : initiale du prénom, matière, classe et implantation (ex. « A., français 5PA, Pitteurs ») — jamais le nom complet.
           Il n'est jamais montré aux élèves ni sur la fiche.
         </p>
       </div>

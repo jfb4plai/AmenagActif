@@ -126,7 +126,10 @@ export default function LiensEnseignants() {
           « Ouvertures » compte au plus une ouverture par heure et par lien : c'est un indicateur d'usage, pas un décompte exact.
         </p>
         <p>
-          <strong>Conseil pour la colonne « Destinataire » :</strong> évitez le nom complet de l'enseignant (données personnelles, RGPD). Préférez le prénom et l'initiale du nom (Virginie D.), ou seulement la matière et la classe (français, 3e TQ B).
+          <strong>Conseil pour la colonne « Destinataire » :</strong> évitez le nom complet de l'enseignant (données personnelles, RGPD). Préférez un repère sans équivoque mais sans nom complet : initiale du prénom, matière, classe et implantation (ex. « A., français 5PA, Pitteurs »).
+        </p>
+        <p>
+          <strong>Un enseignant, un lien :</strong> s'il a plusieurs classes, regroupez-les en une seule fiche (page Fiches, sélectionnez ses classes puis « Fiche groupée ») plutôt que de générer un lien par classe — plus simple à retrouver et à révoquer.
         </p>
       </div>
 
