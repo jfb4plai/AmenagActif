@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AménagActif — en 2 minutes pour les enseignants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f7; --surface: #ffffff; --surface2: #f4f2ee;
+  --border: #e8e4dd; --border2: #d4cfc6;
+  --text: #1a1814; --text2: #5a564f; --text3: #9a958c;
+  --teal: #0f6e56; --teal-bg: #e1f5ee; --teal-border: #1d9e75;
+  --orange: #f97316; --orange-bg: #fef1e7; --orange-border: #f97316;
+  --radius: 10px; --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
+.plai-nav {
+  background: rgba(250,249,247,0.95); border-bottom: 1px solid var(--border);
+  padding: 0.9rem 2rem; display: flex; align-items: center; gap: 12px;
+}
+.plai-nav img { height: 32px; width: auto; }
+.plai-nav span { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+.plai-container { max-width: 640px; margin: 0 auto; padding: 0 1.5rem 1rem; }
+.plai-badge {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 2rem;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: #9a3f0a; background: var(--orange-bg); border: 1px solid var(--orange-border);
+  padding: 5px 14px; border-radius: 20px;
+}
+h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0.85rem 0 1.25rem; color: var(--text); }
+.hook { font-size: 18px; color: var(--text2); margin-bottom: 1.75rem; }
+.benefices { list-style: none; margin: 0 0 1.75rem; display: grid; gap: 0.75rem; }
+.benefices li {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+.benefices strong { display: block; font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--teal); margin-bottom: 2px; }
+.cta {
+  background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: var(--radius);
+  padding: 1.25rem 1.5rem; font-size: 15px;
+}
+.plai-footer {
+  text-align: center; padding: 2.5rem 0 2.5rem; font-size: 13px; color: var(--text3);
+  border-top: 1px solid var(--border); margin-top: 1rem;
+}
+.plai-footer p + p { margin-top: 6px; }
+</style>
+</head>
+<body>
+<header class="plai-nav">
+  <img src="https://amenagactif.jfb4plai.com/plai-logo.jpg" alt="PLAI">
+  <span>AménagActif</span>
+</header>
+
+<div class="plai-container">
+  <div class="plai-badge">En 2 minutes · Enseignants</div>
+  <h1>AménagActif, la fiche de votre classe à jour</h1>
+  <p class="hook">Combien de fois avez-vous cherché, en début d'année ou avant un conseil de classe, quels aménagements sont prévus pour tel élève — dans un classeur papier ou un tableau Excel partagé, jamais tout à fait à jour ? AménagActif, c'est ce classeur, mais toujours à jour et à un clic.</p>
+
+  <ul class="benefices">
+    <li><strong>Une seule fiche, votre classe</strong>Les AU (pour tous) et les AR (par élève, prénom + initiale) sur une page, lisible, imprimable.</li>
+    <li><strong>Toujours à jour</strong>C'est le référent PLAI de votre école qui la tient à jour — vous n'avez rien à remplir.</li>
+    <li><strong>Rien à installer, pas de compte à créer</strong>Un lien reçu par e-mail suffit, ouvrez-le dans votre navigateur.</li>
+    <li><strong>Imprimable en un clic</strong>Si vous préférez l'avoir sur papier ou en PDF pour un conseil de classe.</li>
+  </ul>
+
+  <div class="cta">
+    <p>Vous n'avez rien à faire : votre référent PLAI vous envoie le lien de votre fiche de classe par e-mail. Gardez-le précieusement — c'est votre accès direct, sans mot de passe. Une question sur un aménagement ? Contactez le référent PLAI de votre école.</p>
+  </div>
+
+  <footer class="plai-footer">
+    <p>AménagActif · amenagactif.jfb4plai.com</p>
+    <p>Pôle Territorial de la Ville de Liège — Pôle Liégeois d'Accompagnement vers une École Inclusive (PLAI)</p>
+  </footer>
+</div>
+</body>
+</html>
