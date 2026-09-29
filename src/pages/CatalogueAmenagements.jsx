@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth.jsx';
+import { imprimerFiche } from '../lib/imprimerFiche.js';
 
 // Insensible à la casse et aux accents.
 const normaliser = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -47,9 +48,14 @@ export default function CatalogueAmenagements() {
   return (
     <div className="min-h-screen bg-[color:var(--bg)] py-8 px-4">
       <div className="max-w-3xl mx-auto space-y-6">
-        {session && <Link to="/" className="text-sm text-teal underline">← Retour à l'app</Link>}
+        {session && <Link to="/" className="text-sm text-teal underline no-print">← Retour à l'app</Link>}
         <header className="space-y-1">
-          <h1 className="text-xl font-semibold">Aménagements universels et raisonnables — liste complète</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-xl font-semibold">Aménagements universels et raisonnables — liste complète</h1>
+            <button type="button" className="plai-btn no-print shrink-0" onClick={imprimerFiche}>
+              Imprimer / Enregistrer en PDF
+            </button>
+          </div>
           <p className="text-sm text-[color:var(--text3)]">
             Référence de tous les aménagements proposés par le Pôle Territorial de la Ville de Liège (PLAI) dans AménagActif —
             <strong> AU</strong> = universel (concerne toute une classe), <strong>AR</strong> = raisonnable (propre à un élève).
@@ -57,7 +63,7 @@ export default function CatalogueAmenagements() {
           </p>
         </header>
 
-        <div className="space-y-1">
+        <div className="space-y-1 no-print">
           <label htmlFor="recherche-amenagement" className="block text-base font-medium">Rechercher un aménagement</label>
           <div className="flex gap-2">
             <input
