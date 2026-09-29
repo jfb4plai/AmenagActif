@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AménagActif — mode d'emploi complet pour les directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f7; --surface: #ffffff; --surface2: #f4f2ee;
+  --border: #e8e4dd; --border2: #d4cfc6;
+  --text: #1a1814; --text2: #5a564f; --text3: #9a958c;
+  --teal: #0f6e56; --teal-bg: #e1f5ee; --teal-border: #1d9e75;
+  --orange: #f97316; --orange-bg: #fef1e7; --orange-border: #f97316;
+  --radius: 10px; --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
+.plai-nav {
+  background: rgba(250,249,247,0.95); border-bottom: 1px solid var(--border);
+  padding: 0.9rem 2rem; display: flex; align-items: center; gap: 12px;
+}
+.plai-nav img { height: 32px; width: auto; }
+.plai-nav span { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+.plai-container { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+.plai-badge {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 2rem;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--teal); background: var(--teal-bg); border: 1px solid var(--teal-border);
+  padding: 5px 14px; border-radius: 20px;
+}
+h1 { font-family: 'DM Serif Display', serif; font-size: 30px; margin: 0.85rem 0 0.4rem; color: var(--text); }
+.byline { font-size: 14px; color: var(--text3); margin-bottom: 1.75rem; }
+.lead { font-size: 17px; color: var(--text2); margin-bottom: 0.5rem; }
+.plai-section { padding: 2rem 0 1.75rem; border-top: 1px solid var(--border); }
+.plai-section h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 1rem; color: var(--text); }
+.plai-section h3 { font-family: 'DM Serif Display', serif; font-size: 17px; margin: 1.25rem 0 0.6rem; color: var(--text); }
+.plai-section p { margin-bottom: 0.9rem; }
+.plai-section ol, .plai-section ul { margin: 0 0 0.9rem 1.4rem; }
+.plai-section li { margin-bottom: 0.6rem; }
+.plai-section li::marker { color: var(--teal); font-weight: 700; }
+strong { color: var(--text); font-weight: 700; }
+.plai-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1.5rem; margin: 1rem 0;
+}
+.transition {
+  background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: var(--radius);
+  padding: 1.1rem 1.4rem; margin: 1.25rem 0;
+}
+.transition p { margin-bottom: 0; color: var(--text); }
+.rgpd {
+  background: var(--orange-bg); border: 1px solid var(--orange-border); border-radius: var(--radius);
+  padding: 1.1rem 1.4rem; margin: 1rem 0;
+}
+.rgpd h3 { margin-top: 0; color: #9a3f0a; }
+.plai-footer {
+  text-align: center; padding: 2.5rem 0 2.5rem; font-size: 13px; color: var(--text3);
+  border-top: 1px solid var(--border); margin-top: 1rem;
+}
+.plai-footer p + p { margin-top: 6px; }
+@media print {
+  .plai-nav { position: static; }
+  body { font-size: 12.5pt; }
+  .plai-section { break-inside: avoid-page; }
+}
+</style>
+</head>
+<body>
+<header class="plai-nav">
+  <img src="https://amenagactif.jfb4plai.com/plai-logo.jpg" alt="PLAI">
+  <span>AménagActif</span>
+</header>
+
+<div class="plai-container">
+  <div class="plai-badge">Mode d'emploi complet · Directions</div>
+  <h1>AménagActif — mode d'emploi complet pour les directions</h1>
+  <p class="byline">Pôle Territorial de la Ville de Liège (PLAI) · 29 septembre 2026</p>
+  <p class="lead">Ce mode d'emploi complet s'adresse aux <strong>directions</strong> appelées à reprendre, à terme, les mêmes tâches que le référent PLAI de leur implantation : saisie des AU/AR, gestion des liens enseignants, suivi de l'équipe. Vous avez déjà les mêmes droits que lui dans l'app — ce document détaille chaque écran pour vous permettre de prendre le relais quand ce sera utile.</p>
+
+  <div class="transition">
+    <p><strong>Vous n'êtes pas seul·e dans cette transition</strong> : le référent PLAI de votre implantation reste présent pour vous épauler — que ce soit pour prendre en main un écran la première fois, répondre à une question, ou continuer à assurer la saisie au quotidien tant que vous préférez déléguer. Ce mode d'emploi est là pour que vous puissiez, le jour où c'est nécessaire, faire vous-même tout ce qu'il fait.</p>
+  </div>
+
+  <section class="plai-section">
+    <h2>Votre rôle et votre responsabilité</h2>
+    <p>Dans votre implantation, vous pouvez gérer : les classes et les élèves, la saisie des AU (par classe) et des AR (par élève), la consultation et l'impression des fiches, et la <strong>transmission des fiches aux enseignants par lien</strong>. En pratique, c'est souvent le référent PLAI qui assure la saisie au quotidien ; ce document vous permet de faire de même si besoin, ou de vérifier et compléter son travail.</p>
+    <p>La transmission des fiches aux enseignants est un point de responsabilité partagée avec le référent PLAI. Un lien enseignant donne accès à des données d'élèves (prénom + initiale, aménagements) <strong>sans compte ni mot de passe</strong> : quiconque possède le lien peut l'ouvrir. Quelle que soit la personne qui le génère, il faut savoir à qui il a été envoyé, et pouvoir le couper (le révoquer) le jour où ce n'est plus nécessaire — enseignant qui change de classe, qui quitte l'école, etc. C'est la section « Générer, nommer et révoquer un lien enseignant » ci-dessous qui détaille comment.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Se connecter</h2>
+    <ol>
+      <li>Vous recevez un e-mail d'invitation d'un administrateur PLAI, avec un lien à usage unique pour créer votre mot de passe.</li>
+      <li>Cliquez le lien, choisissez votre mot de passe, puis rendez-vous sur <strong>amenagactif.jfb4plai.com</strong>.</li>
+      <li>Connectez-vous avec votre adresse e-mail et ce mot de passe.</li>
+    </ol>
+    <p>Ce lien d'invitation ne sert <strong>qu'une seule fois</strong>. Si vous le recliquez plus tard (par exemple le lendemain), il ne fonctionnera plus — ce n'est pas un bug. Pour vous reconnecter ensuite, utilisez toujours la page de connexion normale (e-mail + mot de passe).</p>
+    <p>Mot de passe oublié ou lien déjà utilisé ? Sur la page de connexion, cliquez <strong>« Mot de passe oublié ? »</strong> — vous recevrez un nouveau lien pour en choisir un.</p>
+    <p>En cas de doute sur l'app ouverte : vérifiez que vous êtes bien sur AménagActif et non sur une autre app du portail PLAI (par exemple AccèsActif) — les noms se ressemblent et vos droits ne sont pas les mêmes d'une app à l'autre.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Saisir les aménagements AU et AR</h2>
+    <p>Menu <strong>Saisie</strong>. L'écran reproduit la grille Excel que le référent PLAI connaît déjà : une vue école, chapitres repliables.</p>
+    <ol>
+      <li><strong>Choisissez l'école et l'année scolaire</strong> (en haut de l'écran).</li>
+      <li><strong>Choisissez une classe</strong> dans la liste.</li>
+      <li><strong>Bloc AU (« AU applicable(s) à toute la classe »)</strong> : coché une fois pour toute la classe, en dehors du tableau par chapitre. Pourquoi à part : un AU s'applique à tous les élèves de la classe, il ne se coche donc pas élève par élève.</li>
+      <li><strong>AR par élève</strong> : dépliez un chapitre, cochez la case à l'intersection élève × aménagement. Pourquoi par élève : un AR répond à un besoin individuel (ex. un élève dyslexique), il ne concerne pas ses camarades.</li>
+      <li><strong>Aménagement « libre »</strong> (le « + » de l'Excel) : si l'aménagement nécessaire n'est pas dans le catalogue, ajoutez-le en texte libre pour cet élève.</li>
+      <li><strong>Commentaire par élève</strong> : zone de texte libre, éditable depuis la liste des élèves.</li>
+      <li><strong>Commentaire de la classe</strong> : zone de texte libre commune à toute la classe (500 caractères), sous le champ « Référent(s) PLAI ». Contexte utile à l'enseignant (ex. « classe en contrat discipline »). Comme le commentaire d'élève : jamais de nom d'élève ni de diagnostic, à mettre à jour ou vider quand la situation change.</li>
+      <li>Un champ de recherche au-dessus de la grille filtre à la fois le bloc AU et les AR de tous les chapitres, sans devoir les déplier un par un.</li>
+    </ol>
+    <p>Tout est enregistré automatiquement à chaque coche — pas de bouton « valider » à chercher.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Consulter et imprimer les fiches</h2>
+    <p>Menu <strong>Fiches</strong>. Trois vues :</p>
+    <ul>
+      <li><strong>Fiche classe</strong> : les AU de la classe + le tableau AR (une ligne par aménagement, une colonne par élève concerné) — c'est celle qui est envoyée aux enseignants.</li>
+      <li><strong>Fiche élève</strong> : synthèse individuelle, accessible depuis la fiche classe en cliquant le nom d'un élève.</li>
+      <li><strong>Fiche vue école complète</strong> : toutes les classes de l'école à la suite, lecture seule — accessible via le lien « Voir la fiche vue école complète » depuis la page Fiches.</li>
+    </ul>
+    <p>Sur chaque fiche, le bouton <strong>« Imprimer / Enregistrer en PDF »</strong> ouvre l'impression du navigateur (mise en page A4 déjà prévue) : choisissez « Enregistrer en PDF » comme imprimante si vous voulez un fichier plutôt qu'une impression papier. Le catalogue complet des AU/AR (accessible depuis la fiche classe) a le même bouton, pour une version imprimable de la liste de référence.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Générer, nommer et révoquer un lien enseignant</h2>
+    <p>Les enseignants n'ont pas de compte AménagActif : ils reçoivent un <strong>lien</strong> qui ouvre directement la fiche de leur classe, sans mot de passe. C'est pratique, mais ça veut dire que le lien lui-même est la seule barrière d'accès — d'où l'importance de savoir qui l'a reçu et de pouvoir le couper.</p>
+
+    <h3>Créer un lien</h3>
+    <ol>
+      <li>Ouvrez la <strong>fiche classe</strong> concernée (menu Fiches).</li>
+      <li>Cliquez <strong>« Copier le lien enseignant »</strong>.</li>
+      <li>Remplissez le champ <strong>« Destinataire du lien (obligatoire) »</strong>. Ce champ n'est jamais montré aux élèves ni sur la fiche : il sert uniquement, plus tard, à retrouver ce lien dans la liste et à le révoquer si besoin.</li>
+      <li>Cliquez <strong>« Générer et copier le lien »</strong> : le lien est copié, collez-le dans votre e-mail à l'enseignant.</li>
+    </ol>
+
+    <div class="rgpd">
+      <h3>Règle RGPD pour le champ Destinataire</h3>
+      <p style="margin-bottom:0">N'écrivez jamais le nom complet de l'enseignant. Utilisez un repère sans équivoque mais sans nom complet : initiale du prénom, matière, classe et implantation — par exemple <strong>« A., français 5PA, Pitteurs »</strong>. Nommer l'implantation aide aussi les administrateurs (il y en a plusieurs, chacun sur plusieurs écoles) à retrouver et révoquer le bon lien si besoin. Pourquoi : ce champ reste stocké dans l'app tant que le lien existe — moins il contient de données identifiantes, moins il y a de risque en cas de fuite ou d'accès non voulu à l'écran de gestion des liens.</p>
+    </div>
+
+    <h3>Retrouver et révoquer un lien</h3>
+    <p>Menu <strong>« Liens enseignants »</strong> : un tableau par implantation, avec pour chaque lien le destinataire, les classes concernées, la date de création, la date d'expiration, la dernière ouverture, le nombre d'ouvertures et le statut (actif / expiré / révoqué).</p>
+    <ul>
+      <li>Cliquez <strong>« Révoquer »</strong> sur la ligne du lien concerné, puis confirmez dans la fenêtre qui s'ouvre.</li>
+      <li><strong>Effet immédiat</strong> : l'enseignant ne peut plus ouvrir la fiche, et tout export déjà fait à partir de ce lien vers un autre outil est coupé aussi.</li>
+      <li><strong>C'est définitif</strong> : pour redonner l'accès, il faut générer un nouveau lien (étape précédente). La ligne reste visible avec le statut « Révoqué », pour la traçabilité.</li>
+    </ul>
+    <p><strong>Quand révoquer</strong> : dès qu'un enseignant change de classe, quitte l'école, ou n'a manifestement plus besoin d'accéder à la fiche. Astuce : cochez la case <strong>« Inactifs depuis plus de »</strong> et indiquez un nombre de jours pour repérer les liens dont personne ne s'est plus servi depuis longtemps, et faites un tri périodique.</p>
+    <p><strong>À défaut de révocation manuelle</strong>, tout lien expire de toute façon automatiquement à la fin de l'année scolaire de la classe — mais n'attendez pas cette échéance par défaut : un enseignant qui part en cours d'année ne doit pas garder l'accès jusqu'en juin.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Gérer l'équipe de l'implantation</h2>
+    <p>Menu <strong>« Mon école »</strong> : vous voyez, en lecture seule, l'équipe de votre implantation — référent(s) PLAI, direction, agents accompagnants.</p>
+    <p>Vous ne pouvez pas ajouter, retirer ou renommer un compte vous-même. Si un changement d'équipe survient (nouveau référent, agent qui part, nom mal orthographié), <strong>signalez-le</strong> aux administrateurs PLAI (il y en a plusieurs) : ce sont eux qui invitent les comptes et éditent ces listes, école par école.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Bonnes pratiques</h2>
+    <ul>
+      <li><strong>Jamais de nom complet</strong> dans un champ texte libre (commentaire élève, destinataire de lien) — l'identité élève affichée sur les fiches (prénom + initiale) est déjà gérée par l'app, inutile de la répéter.</li>
+      <li><strong>Toujours nommer le destinataire</strong> avant de copier un lien enseignant — un lien sans destinataire clair est un lien qu'on ne pourra plus identifier pour le révoquer le jour venu.</li>
+      <li><strong>Révoquez sans attendre</strong> dès qu'un enseignant quitte la classe ou l'école, plutôt que de compter sur l'expiration automatique de fin d'année.</li>
+      <li><strong>En cas de confusion à la connexion</strong> (« pas de classe attitrée », écran vide), vérifiez d'abord que vous êtes sur <strong>amenagactif.jfb4plai.com</strong> et non sur une autre app du portail PLAI — les comptes sont partagés entre apps, mais pas les droits.</li>
+      <li><strong>Coordonnez-vous avec le référent PLAI</strong> avant de reprendre une tâche qu'il assurait jusque-là (saisie, liens), pour éviter les doublons ou les oublis pendant la transition.</li>
+      <li>Un doute, une question, un blocage : contactez le référent PLAI de votre implantation, ou un administrateur PLAI.</li>
+    </ul>
+  </section>
+
+  <footer class="plai-footer">
+    <p>AménagActif · amenagactif.jfb4plai.com</p>
+    <p>Pôle Territorial de la Ville de Liège — Pôle Liégeois d'Accompagnement vers une École Inclusive (PLAI)</p>
+  </footer>
+</div>
+</body>
+</html>
