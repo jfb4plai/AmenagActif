@@ -122,19 +122,20 @@ export default function SaisieEcole() {
             />
           </div>
 
+          <div className="mb-2">
+            <input type="search" className="plai-input w-full max-w-sm" placeholder="Rechercher un AU ou un AR par mot-clé (ex : bruit, temps, oral)…"
+              value={recherche} onChange={(e) => setRecherche(e.target.value)} />
+            <p className="text-xs text-[color:var(--text3)]">
+              Filtre les aménagements universels ci-dessous et les aménagements raisonnables dans tous les chapitres, sans devoir les déplier un par un. Videz le champ pour revenir à la vue normale.
+            </p>
+          </div>
+
           <BandeauAU classe={classe} auCatalogue={auCat} chapitres={chapitres}
             auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)} onToggle={(v) => mut.toggleAU.mutate(v)}
-            peutRetirer={peutEditerStructure} />
+            peutRetirer={peutEditerStructure} filtre={recherche} />
 
           <div>
             <h2 className="font-semibold mb-1">Aménagements raisonnables — {classe.nom}</h2>
-            <div className="mb-2">
-              <input type="search" className="plai-input w-full max-w-sm" placeholder="Rechercher un AR par mot-clé (ex : bruit, temps, oral)…"
-                value={recherche} onChange={(e) => setRecherche(e.target.value)} />
-              <p className="text-xs text-[color:var(--text3)]">
-                Filtre les aménagements dans tous les chapitres, sans devoir les déplier un par un. Videz le champ pour revenir à la vue normale.
-              </p>
-            </div>
             <BarreSaut chapitres={chapitres} />
           </div>
           <div className="overflow-x-auto border border-[color:var(--border)] rounded">

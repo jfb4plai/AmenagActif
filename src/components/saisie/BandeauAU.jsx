@@ -1,10 +1,17 @@
+function normaliser(s) {
+  return String(s ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
+}
+
 /**
  * Aménagements universels : cochés UNE fois par classe (pas par élève).
  * Alimentent le bloc « AU applicable(s) à toute la classe » de la fiche. Affiché en carte, au-dessus
  * de la grille des AR (qui, elle, est par élève). Scopé à la classe
  * sélectionnée dans le flux de saisie.
  */
-export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, onToggle, peutRetirer = true }) {
+export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, onToggle, peutRetirer = true, filtre }) {
   const estCoche = (amId) => auClasse.some((x) => x.amenagement_id === amId);
 
   const chapOrdre = new Map(chapitres.map((c) => [c.id, c.ordre]));
@@ -16,6 +23,12 @@ export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, on
     (a, b) => (chapOrdre.get(a.chapitre_id) ?? 99) - (chapOrdre.get(b.chapitre_id) ?? 99) || a.ordre - b.ordre
   );
   const nbCoches = auTries.filter((a) => estCoche(a.id)).length;
+
+  // Même recherche par mots-clés que les AR (voir ChapitreAR.jsx) : ne masque pas la carte,
+  // seulement les items qui ne correspondent pas — le bloc AU est unique, pas une liste de chapitres.
+  const recherche = normaliser(filtre ?? '').trim();
+  const enRecherche = recherche.length > 0;
+  const auAffiches = enRecherche ? auTries.filter((a) => normaliser(a.libelle).includes(recherche)) : auTries;
 
   return (
     <section className="plai-card p-4" style={{ borderColor: 'var(--teal)', background: 'rgba(10,147,112,0.05)' }}>
@@ -31,10 +44,15 @@ export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, on
         </p>
       )}
       <div className="font-medium mb-1">
-        {classe.nom} <span className="text-[color:var(--text3)] font-normal">— {nbCoches} AU coché(s)</span>
+        {classe.nom} <span className="text-[color:var(--text3)] font-normal">
+          — {enRecherche ? `${auAffiches.length} résultat(s)` : `${nbCoches} AU coché(s)`}
+        </span>
       </div>
+      {enRecherche && auAffiches.length === 0 && (
+        <p className="text-sm text-[color:var(--text3)]">Aucun aménagement universel ne correspond.</p>
+      )}
       <ul className="space-y-1">
-        {auTries.map((a) => (
+        {auAffiches.map((a) => (
           <li key={a.id}>
             <label className="flex items-start gap-2 text-sm">
               <input
