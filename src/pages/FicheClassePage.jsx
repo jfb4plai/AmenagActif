@@ -79,9 +79,8 @@ function Picker() {
         <div className="plai-card p-3 space-y-2 max-w-md">
           <p className="font-medium text-sm">Fiche groupée — {selection.size} classes sélectionnées</p>
           <p className="text-xs text-[color:var(--text3)]">
-            Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…), ou simplement pour un enseignant
-            qui a plusieurs classes ordinaires : une seule fiche, AU et AR fusionnés, sans doublon — <strong>un enseignant, un lien</strong>,
-            plus simple à retrouver et à révoquer qu'un lien par classe. L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule.
+            Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…) : une seule fiche,
+            AU et AR fusionnés, sans doublon. L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule.
           </p>
           <label className="text-sm block">Nom du groupe (optionnel)
             <input className="plai-input w-full" placeholder="Atelier cuisine 3e" value={nomGroupe} onChange={(e) => changerNomGroupe(e.target.value)} />
@@ -143,12 +142,7 @@ function FicheClasseContenu({ classeId }) {
         )}
       </div>
       {role !== 'agent_plai' && lienOuvert && (
-        <>
-          <p className="text-sm text-[color:var(--text3)] no-print">
-            Cet enseignant a d'autres classes ? Générez plutôt un seul lien pour toutes via « Fiches » → sélectionnez ses classes → « Fiche groupée » (un enseignant, un lien).
-          </p>
-          <GenerateurLien classeIds={[classeId]} libelle={`Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`} />
-        </>
+        <GenerateurLien classeIds={[classeId]} libelle={`Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`} />
       )}
       <FicheClasseView vm={vm} />
     </div>

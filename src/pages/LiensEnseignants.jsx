@@ -129,7 +129,7 @@ export default function LiensEnseignants() {
           <strong>Conseil pour la colonne « Destinataire » :</strong> évitez le nom complet de l'enseignant (données personnelles, RGPD). Préférez un repère sans équivoque mais sans nom complet : initiale du prénom, matière, classe et implantation (ex. « A., français 5PA, Pitteurs »).
         </p>
         <p>
-          <strong>Un enseignant, un lien :</strong> s'il a plusieurs classes, regroupez-les en une seule fiche (page Fiches, sélectionnez ses classes puis « Fiche groupée ») plutôt que de générer un lien par classe — plus simple à retrouver et à révoquer.
+          <strong>Un lien, un seul enseignant :</strong> la classe reste l'unité de tri d'un lien (un lien par classe, y compris pour un enseignant qui en a plusieurs). Mais s'il y a plusieurs enseignants sur une même classe, ne partagez jamais le même lien entre eux : générez-en un distinct pour chacun.
         </p>
       </div>
 
