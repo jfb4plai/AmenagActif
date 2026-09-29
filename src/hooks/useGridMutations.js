@@ -82,6 +82,15 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
+  const majCommentaireClasse = useMutation({
+    mutationFn: async ({ classeId, commentaire }) => {
+      // Vide -> null (le trigger tient aussi la date de dernière modification).
+      const { error } = await supabase.from('ar_classes').update({ commentaire: commentaire.trim() || null }).eq('id', classeId);
+      if (error) throw error;
+    },
+    onSuccess: invalider,
+  });
+
   const addLibre = useMutation({
     mutationFn: async ({ eleveId, chapitreId, texte }) => {
       const { error } = await supabase.from('ar_amenagements_libres').insert({ eleve_id: eleveId, chapitre_id: chapitreId ?? null, texte });
@@ -98,5 +107,5 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
-  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, addLibre, removeLibre };
+  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, majCommentaireClasse, addLibre, removeLibre };
 }

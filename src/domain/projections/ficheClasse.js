@@ -34,6 +34,12 @@ export function computeFicheClasse(input) {
       surligne: normaliseLibelle(a.libelle) === LIBELLE_MISE_EN_PAGE,
     }));
 
+  // Commentaire(s) de classe : un seul pour une fiche de classe ; un par classe source pour une
+  // fiche groupée (fournis alors par fusionnerDonneesClasses, avec le nom de la classe).
+  const texteClasse = (input.classe?.commentaire ?? '').trim();
+  const commentairesClasses = input.commentairesClasses
+    ?? (texteClasse ? [{ classe: contexte.classeNom, texte: texteClasse, modifieLe: input.classe?.commentaire_modifie_le ?? null }] : []);
+
   const nomEleve = (e) => `${e.prenom}${e.initiale_nom ? ' ' + e.initiale_nom + '.' : ''}`;
   const commentaires = eleves
     .filter((e) => (e.commentaire ?? '').trim())
@@ -127,6 +133,7 @@ export function computeFicheClasse(input) {
     parEleve,
     parAmenagement,
     commentaires,
+    commentairesClasses,
     nbRecto,
   };
 }

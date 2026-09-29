@@ -49,8 +49,15 @@ export function fusionnerDonneesClasses(parties, nomGroupe) {
 
   const datesCreation = parties.map((p) => p.classe?.created_at).filter(Boolean).sort();
 
+  // Un commentaire par classe source, étiqueté de son nom (il ne vaut pas pour tout le groupe) —
+  // classes sans commentaire omises.
+  const commentairesClasses = parties
+    .filter((p) => (p.classe?.commentaire ?? '').trim())
+    .map((p) => ({ classe: p.contexte.classeNom, texte: p.classe.commentaire.trim(), modifieLe: p.classe?.commentaire_modifie_le ?? null }));
+
   return {
     classe: { referent_plai_nom: referentPlaiNom, niveau, created_at: datesCreation[0] ?? null },
+    commentairesClasses,
     contexte: {
       classeNom: nomGroupe?.trim() || classesSources.join(' + '),
       ecoleNom: premiere.contexte.ecoleNom,

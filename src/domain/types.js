@@ -27,6 +27,8 @@
  * @property {string} annee_id
  * @property {string} [niveau]
  * @property {string} [referent_plai_nom]
+ * @property {string|null} [commentaire]            commentaire libre de la classe (500 car. max)
+ * @property {string|null} [commentaire_modifie_le]  date ISO de sa dernière modification
  *
  * @typedef {Object} SelectionAR
  * @property {string} eleve_id
@@ -53,6 +55,7 @@
  * @property {{ eleve: string, eleveId: string, amenagements: string[] }[]} parEleve
  * @property {{ libelle: string, eleves: { nom: string, eleveId: string, statut: string }[] }[]} parAmenagement
  * @property {{ eleve: string, statut: string, texte: string }[]} commentaires
+ * @property {{ classe: string, texte: string, modifieLe: string|null }[]} commentairesClasses
  * @property {number} nbRecto
  *
  * @typedef {Object} FicheEleveVM

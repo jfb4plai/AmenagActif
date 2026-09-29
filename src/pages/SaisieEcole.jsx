@@ -89,6 +89,24 @@ export default function SaisieEcole() {
             </p>
           </div>
 
+          <div className="plai-card p-3 text-sm space-y-1">
+            <label className="font-medium block" htmlFor="commentaire-classe">Commentaire de la classe (optionnel)</label>
+            <textarea id="commentaire-classe" key={`${classe.id}-${classe.commentaire_modifie_le ?? ''}`}
+              className="plai-input w-full" rows={3} maxLength={500}
+              defaultValue={classe.commentaire ?? ''}
+              placeholder="Ex. : classe en contrat discipline depuis septembre ; deux titulaires en alternance"
+              onBlur={(e) => {
+                const valeur = e.target.value.trim();
+                if (valeur !== (classe.commentaire ?? '')) mut.majCommentaireClasse.mutate({ classeId, commentaire: valeur });
+              }} />
+            <p className="text-xs text-[color:var(--text3)]">
+              Contexte de la classe utile à l'enseignant qui reçoit la fiche (500 caractères maximum) — comme le commentaire d'un élève, temporaire : pensez à le mettre à jour ou à le vider quand la situation change.
+              Il apparaît en tête de la fiche classe, avec sa date de dernière modification. <strong>Jamais de nom d'élève ni de diagnostic</strong> : ce texte peut être lu par plusieurs enseignants.
+              {classe.commentaire_modifie_le && <> Dernière modification : {new Date(classe.commentaire_modifie_le).toLocaleDateString('fr-BE')}.</>}
+            </p>
+            {mut.majCommentaireClasse.isError && <p className="plai-error text-sm">Enregistrement impossible, réessayez.</p>}
+          </div>
+
           <div className="plai-card p-3 space-y-2">
             <div className="text-sm font-medium">Élèves de la classe ({eleves.length})</div>
             {eleves.length === 0 ? (

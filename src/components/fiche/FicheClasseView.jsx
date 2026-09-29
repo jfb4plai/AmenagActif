@@ -26,6 +26,24 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
         </tr></tbody>
       </table>
 
+      {vm.commentairesClasses?.length > 0 && (
+        <section className="mb-4">
+          <h2 className="font-bold underline mb-1">Contexte de la classe :</h2>
+          <ul className="border border-black text-sm divide-y divide-black">
+            {vm.commentairesClasses.map((c, i) => (
+              <li key={i} className="p-2">
+                {/* Fiche groupée : le nom de la classe précède son commentaire (il ne vaut pas pour tout le groupe). */}
+                {vm.classesSources && <strong>{c.classe} : </strong>}
+                <span className="whitespace-pre-line">{c.texte}</span>
+                {c.modifieLe && (
+                  <span className="block text-xs text-gray-600 mt-1">Modifié le {new Date(c.modifieLe).toLocaleDateString('fr-BE')}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <h2 className="font-bold underline mb-1">AU applicable(s) à toute la classe :</h2>
       <ul className="list-disc pl-6 mb-4">
         {vm.pourTous.length === 0 && <li className="list-none text-gray-500">Aucun aménagement universel retenu pour la classe.</li>}
