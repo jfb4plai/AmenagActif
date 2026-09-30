@@ -8,7 +8,8 @@ export default function Footer() {
       <span>AménagActif — Pôle Territorial de la Ville de Liège (PLAI). Diffusion restreinte aux enseignants concernés.</span>
       <Link
         to="/saisie" onClick={rouvrirBandeauAvantages}
-        className="underline text-[color:var(--teal)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]"
+        className="inline-block rounded-full border border-[color:var(--teal-border)] bg-[color:var(--teal-bg)] px-4 py-2 font-semibold text-[color:var(--teal)] no-underline hover:brightness-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]"
+        style={{ fontSize: 16 }}
       >
         Avantages de l'application PLAI
       </Link>
