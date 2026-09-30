@@ -124,12 +124,19 @@ export default function LiensEnseignants() {
   const [joursTxt, setJoursTxt] = useState(String(JOURS_INACTIF_DEFAUT));
   const jours = Number.parseInt(joursTxt, 10);
   const [aRevoquer, setARevoquer] = useState(null);
+  const [relanceOuverte, setRelanceOuverte] = useState(false);
 
   const sections = useMemo(() => {
     if (!data) return [];
     const filtres = filtrerLiens(data.liens, { statut, inactifJours: inactifActif && Number.isFinite(jours) ? jours : null });
     return grouperParEcole(filtres, data.ecoles);
   }, [data, statut, inactifActif, jours]);
+
+  // Le repérage des liens non ouverts est masqué par défaut ; le refermer désactive le filtre.
+  function basculerRelance() {
+    if (relanceOuverte) setInactifActif(false);
+    setRelanceOuverte(!relanceOuverte);
+  }
 
   async function confirmer() {
     try {
@@ -174,22 +181,36 @@ export default function LiensEnseignants() {
             <option value="tous">Tous</option>
           </select>
         </div>
-        <div className="flex items-end gap-3">
-          <div className="flex items-center gap-2">
-            <input id="filtre-inactif" type="checkbox" className="w-5 h-5" checked={inactifActif} onChange={(e) => setInactifActif(e.target.checked)} />
-            <label htmlFor="filtre-inactif" className="font-medium">Inactifs depuis plus de</label>
-          </div>
-          <div>
-            <label htmlFor="filtre-jours" className="sr-only">Nombre de jours d'inactivité</label>
-            <input
-              id="filtre-jours" type="number" min={1} max={730} className="plai-input" style={{ width: 90, fontSize: 16 }}
-              value={joursTxt} disabled={!inactifActif}
-              onChange={(e) => setJoursTxt(e.target.value)}
-            />
-          </div>
-          <span>jours (dernière ouverture, à défaut date de création)</span>
-        </div>
+        <button
+          type="button" aria-expanded={relanceOuverte} aria-controls={relanceOuverte ? 'panneau-relance' : undefined}
+          className={`plai-btn-ghost px-3 py-2 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={basculerRelance}
+        >
+          Relancer : repérer les liens non ouverts
+        </button>
       </fieldset>
+
+      {relanceOuverte && (
+        <div id="panneau-relance" className="plai-card p-4 space-y-3">
+          <p>
+            Pour relancer, dans l'intérêt des élèves, un enseignant qui n'aurait pas encore ouvert son lien. Ce n'est pas un outil de contrôle.
+          </p>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex items-center gap-2">
+              <input id="filtre-inactif" type="checkbox" className="w-5 h-5" checked={inactifActif} onChange={(e) => setInactifActif(e.target.checked)} />
+              <label htmlFor="filtre-inactif" className="font-medium">Inactifs depuis plus de</label>
+            </div>
+            <div>
+              <label htmlFor="filtre-jours" className="sr-only">Nombre de jours d'inactivité</label>
+              <input
+                id="filtre-jours" type="number" min={1} max={730} className="plai-input" style={{ width: 90, fontSize: 16 }}
+                value={joursTxt} disabled={!inactifActif}
+                onChange={(e) => setJoursTxt(e.target.value)}
+              />
+            </div>
+            <span>jours (dernière ouverture, à défaut date de création)</span>
+          </div>
+        </div>
+      )}
 
       {isLoading && <p>Chargement…</p>}
       {error && <p role="alert" className="plai-error" style={{ fontSize: 16 }}>Impossible de charger les liens : {error.message}</p>}

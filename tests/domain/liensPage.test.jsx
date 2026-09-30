@@ -76,4 +76,19 @@ describe('page Liens enseignants', () => {
     expect(screen.queryByText(/Mme Dupont/)).toBeNull();
     expect(screen.getAllByText(/M\. Martin/).length).toBeGreaterThan(0);
   });
+
+  it('le repérage des liens non ouverts est masqué par défaut, filtre désactivé à la fermeture', () => {
+    render(<LiensEnseignants />);
+    expect(screen.queryByLabelText(/Inactifs depuis plus de/)).toBeNull();
+    const bouton = screen.getByRole('button', { name: /Relancer : repérer les liens non ouverts/ });
+    expect(bouton.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(bouton);
+    expect(bouton.getAttribute('aria-expanded')).toBe('true');
+    // avec un seuil démesuré, plus aucun lien n'est « inactif » : le filtre est bien appliqué
+    fireEvent.click(screen.getByLabelText(/Inactifs depuis plus de/));
+    fireEvent.change(screen.getByLabelText(/Nombre de jours d'inactivité/), { target: { value: '100000' } });
+    expect(screen.queryByText(/Mme Dupont/)).toBeNull();
+    fireEvent.click(bouton);
+    expect(screen.getAllByText(/Mme Dupont/).length).toBeGreaterThan(0);
+  });
 });
