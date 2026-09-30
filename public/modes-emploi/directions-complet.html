@@ -159,11 +159,11 @@ strong { color: var(--text); font-weight: 700; }
     </div>
 
     <h3>Retrouver et révoquer un lien</h3>
-    <p>Menu <strong>« Liens enseignants »</strong> : un tableau par implantation, avec pour chaque lien le destinataire, les classes concernées, la date de création, la date d'expiration, la dernière ouverture, le nombre d'ouvertures et le statut (actif / expiré / révoqué).</p>
+    <p>Menu <strong>« Liens enseignants »</strong> : un tableau par implantation, avec pour chaque lien le destinataire, les classes concernées, la date de création, la date d'expiration et le statut (actif / expiré / révoqué). Par défaut, seuls les liens actifs sont affichés : le filtre « Statut » permet de voir les liens expirés ou révoqués. Le bouton « Détails » d'une ligne affiche la dernière ouverture et le nombre d'ouvertures, un repère pour dépanner (par exemple « je n'arrive pas à ouvrir mon lien »), pas un outil de contrôle.</p>
     <ul>
       <li>Cliquez <strong>« Révoquer »</strong> sur la ligne du lien concerné, puis confirmez dans la fenêtre qui s'ouvre.</li>
       <li><strong>Effet immédiat</strong> : l'enseignant ne peut plus ouvrir la fiche, et tout export déjà fait à partir de ce lien vers un autre outil est coupé aussi.</li>
-      <li><strong>C'est définitif</strong> : pour redonner l'accès, il faut générer un nouveau lien (étape précédente). La ligne reste visible avec le statut « Révoqué », pour la traçabilité.</li>
+      <li><strong>C'est définitif</strong> : pour redonner l'accès, il faut générer un nouveau lien (étape précédente). La ligne n'apparaît plus dans la liste par défaut (filtre « Statut » : Révoqués), puis elle est supprimée définitivement à partir du 1er septembre qui suit la fin de l'année scolaire, comme tous les liens expirés. Il n'y a donc rien à nettoyer à la fin de l'année.</li>
     </ul>
     <p><strong>Quand révoquer</strong> : dès qu'un enseignant change de classe, quitte l'école, ou n'a manifestement plus besoin d'accéder à la fiche. Astuce : cochez la case <strong>« Inactifs depuis plus de »</strong> et indiquez un nombre de jours pour repérer les liens dont personne ne s'est plus servi depuis longtemps, et faites un tri périodique.</p>
     <p><strong>À défaut de révocation manuelle</strong>, tout lien expire de toute façon automatiquement à la fin de l'année scolaire de la classe — mais n'attendez pas cette échéance par défaut : un enseignant qui part en cours d'année ne doit pas garder l'accès jusqu'en juin.</p>

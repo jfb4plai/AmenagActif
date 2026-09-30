@@ -1,6 +1,6 @@
 // Accès base des liens enseignants. Toujours appelé avec le client service role : les contrôles
 // d'autorisation sont faits par les appelants (api/*.js) avant d'arriver ici.
-import { hasherSecret, finAnneeScolaire, statutLien, MAX_CLASSES_PAR_LIEN } from './liens.js';
+import { hasherSecret, finAnneeScolaire, statutLien, aujourdhui, MAX_CLASSES_PAR_LIEN } from './liens.js';
 
 /** Erreur métier : message affichable tel quel au client (aucune donnée personnelle). */
 export class ErreurLien extends Error {
@@ -88,6 +88,20 @@ export async function compterOuverture(db, lienId) {
     if (error) console.error('liens : compteur indisponible', error.code ?? '');
   } catch {
     console.error('liens : compteur indisponible');
+  }
+}
+
+/**
+ * Supprime définitivement les liens dont expire_le est strictement passée (révoqués ou non) : dès le
+ * 1er septembre pour l'année scolaire écoulée. Les liens de l'année suivante ne sont jamais touchés.
+ * ar_liens_classes suit par cascade. Un échec ne doit pas empêcher d'afficher la liste.
+ */
+export async function purgerLiensExpires(db, now = new Date()) {
+  try {
+    const { error } = await db.from('ar_liens').delete().lt('expire_le', aujourdhui(now));
+    if (error) console.error('liens : purge indisponible', error.code ?? '');
+  } catch {
+    console.error('liens : purge indisponible');
   }
 }
 

@@ -355,3 +355,63 @@ describe('api/liens : liste et révocation', () => {
     expect((await liste()).statusCode).toBe(401);
   });
 });
+
+describe('api/liens : purge des liens expirés (après le 31 août)', () => {
+  const ligne = (id, o) => ({ id, token_hash: `h-${id}`, ecole_id: 'ec1', annee_id: 'an1', destinataire: `d-${id}`, nom_groupe: null, cree_par: U.ref1, cree_le: '2026-09-01T00:00:00Z', expire_le: '2099-08-31', revoque_le: null, derniere_ouverture: null, nb_ouvertures: 0, ...o });
+  const liste = async () => {
+    const r = reponse();
+    await liensHandler({ method: 'GET', headers: auth, query: {} }, r);
+    return r;
+  };
+  const ids = () => tables.ar_liens.map((l) => l.id).sort();
+
+  beforeEach(() => {
+    connecte('admin');
+    tables.ar_liens.push(
+      ligne('expire-actif', { expire_le: '2020-08-31' }),
+      ligne('expire-revoque', { expire_le: '2020-08-31', revoque_le: '2020-03-01T00:00:00Z' }),
+      ligne('aujourdhui', { expire_le: '2099-08-31' }),
+      ligne('annee-suivante', { expire_le: '2100-08-31' }),
+      ligne('revoque-en-cours', { revoque_le: '2026-09-20T00:00:00Z' }),
+    );
+  });
+
+  it('supprime les liens dont l\'échéance est passée (révoqués ou non), garde les autres', async () => {
+    const r = await liste();
+    expect(r.statusCode).toBe(200);
+    expect(ids()).toEqual(['annee-suivante', 'aujourdhui', 'revoque-en-cours']);
+    expect(r.body.liens.map((l) => l.id).sort()).toEqual(['annee-suivante', 'aujourdhui', 'revoque-en-cours']);
+  });
+
+  it('un lien reste intact toute la journée d\'échéance et disparaît le lendemain', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2099-08-31T12:00:00Z'));
+      await liste();
+      expect(ids()).toContain('aujourdhui');
+      vi.setSystemTime(new Date('2099-09-01T12:00:00Z'));
+      await liste();
+      expect(ids()).not.toContain('aujourdhui');
+      expect(ids()).toContain('annee-suivante');
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('un rôle sans droit (agent_plai) ne déclenche pas la purge', async () => {
+    connecte('agent');
+    expect((await liste()).statusCode).toBe(403);
+    expect(ids()).toContain('expire-actif');
+  });
+
+  it('une panne de purge n\'empêche pas d\'afficher la liste', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const from = mocks.db.from;
+    mocks.db.from = (nom) => {
+      const b = from(nom);
+      if (nom === 'ar_liens') b.delete = () => { throw new Error('boom'); };
+      return b;
+    };
+    const r = await liste();
+    expect(r.statusCode).toBe(200);
+    expect(ids()).toContain('expire-actif');
+  });
+});

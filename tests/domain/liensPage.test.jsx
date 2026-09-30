@@ -26,17 +26,39 @@ describe('page Liens enseignants', () => {
     expect(screen.getAllByText(/Site Centre \(FASE 4012\)/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Athénée B/).length).toBeGreaterThan(0);
     const tableau = screen.getByRole('table');
-    expect(within(tableau).getAllByRole('columnheader').length).toBe(8);
+    expect(within(tableau).getAllByRole('columnheader').length).toBe(6);
     expect(within(tableau).getByText('Actif')).toBeTruthy();
-    expect(within(tableau).getByText('Révoqué')).toBeTruthy();
-    expect(within(tableau).getByText('Jamais ouvert')).toBeTruthy();
+  });
+
+  it('liens révoqués et expirés masqués par défaut ; visibles via le filtre Statut', () => {
+    render(<LiensEnseignants />);
+    expect(screen.queryByText(/M\. Martin/)).toBeNull();
+    expect(screen.queryByText('Révoqué')).toBeNull();
+    fireEvent.change(screen.getByLabelText('Statut'), { target: { value: 'tous' } });
+    expect(screen.getAllByText(/M\. Martin/).length).toBeGreaterThan(0);
+    expect(screen.getByText('Révoqué')).toBeTruthy();
+  });
+
+  it('les ouvertures ne sont pas affichées par défaut, seulement via « Détails » ligne par ligne', () => {
+    render(<LiensEnseignants />);
+    expect(screen.queryByText(/Ouvertures/)).toBeNull();
+    expect(screen.queryByText(/Dernière ouverture/)).toBeNull();
+    expect(screen.queryByText('Jamais ouvert')).toBeNull();
+    const bouton = screen.getByRole('button', { name: /Détails du lien de Mme Dupont/ });
+    expect(bouton.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(bouton);
+    expect(bouton.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText(/Dernière ouverture/)).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
+    fireEvent.click(bouton);
+    expect(screen.queryByText(/Dernière ouverture/)).toBeNull();
   });
 
   it('un lien révoqué n\'offre plus de bouton Révoquer ; le lien actif oui', () => {
     render(<LiensEnseignants />);
+    fireEvent.change(screen.getByLabelText('Statut'), { target: { value: 'tous' } });
     expect(screen.getAllByRole('button', { name: /Révoquer/ })).toHaveLength(1);
   });
-
   it('confirmation explicite avant révocation (boîte de dialogue, pas de confirm natif)', async () => {
     const confirmNatif = vi.spyOn(window, 'confirm');
     render(<LiensEnseignants />);
@@ -52,6 +74,6 @@ describe('page Liens enseignants', () => {
     render(<LiensEnseignants />);
     fireEvent.change(screen.getByLabelText('Statut'), { target: { value: 'revoque' } });
     expect(screen.queryByText(/Mme Dupont/)).toBeNull();
-    expect(screen.getByText(/M\. Martin/)).toBeTruthy();
+    expect(screen.getAllByText(/M\. Martin/).length).toBeGreaterThan(0);
   });
 });

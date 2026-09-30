@@ -54,6 +54,7 @@ export function fakeDb(tables, { users = {}, sessionUser = null, rpc = () => ({ 
       delete() { b.op = 'delete'; return api; },
       eq(c, v) { b.filtres.push((r) => r[c] === v); return api; },
       in(c, arr) { b.filtres.push((r) => arr.includes(r[c])); return api; },
+      lt(c, v) { b.filtres.push((r) => r[c] != null && String(r[c]) < String(v)); return api; },
       is(c, v) { b.filtres.push((r) => (v === null ? r[c] == null : r[c] === v)); return api; },
       order(c) { b.ordre = c; return api; },
       limit(n) { b.lim = n; return api; },

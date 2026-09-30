@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiens, useRevoquerLien } from '../hooks/useLiens.js';
 import { filtrerLiens, grouperParEcole, titreEcole, dateFR, LIBELLE_STATUT, JOURS_INACTIF_DEFAUT } from '../domain/liens.js';
 
@@ -39,6 +39,13 @@ function DialogueRevocation({ lien, enCours, erreur, onConfirmer, onAnnuler }) {
 }
 
 function TableLiens({ liens, onRevoquer, titre }) {
+  // Infos d'usage (ouvertures) : masquées par défaut, affichées ligne par ligne sur demande.
+  const [ouverts, setOuverts] = useState(() => new Set());
+  const basculer = (id) => setOuverts((prev) => {
+    const suivant = new Set(prev);
+    if (suivant.has(id)) suivant.delete(id); else suivant.add(id);
+    return suivant;
+  });
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse text-base">
@@ -49,37 +56,60 @@ function TableLiens({ liens, onRevoquer, titre }) {
             <th scope="col" className="py-2 pr-3">Classes</th>
             <th scope="col" className="py-2 pr-3">Créé le</th>
             <th scope="col" className="py-2 pr-3">Expire le</th>
-            <th scope="col" className="py-2 pr-3">Dernière ouverture</th>
-            <th scope="col" className="py-2 pr-3">Ouvertures</th>
             <th scope="col" className="py-2 pr-3">Statut</th>
-            <th scope="col" className="py-2"><span className="sr-only">Action</span></th>
+            <th scope="col" className="py-2"><span className="sr-only">Actions</span></th>
           </tr>
         </thead>
         <tbody>
-          {liens.map((l) => (
-            <tr key={l.id} className="border-b border-[color:var(--border)] align-top">
-              <th scope="row" className="py-2 pr-3 font-medium">
-                {l.destinataire}
-                {l.cree_par && <span className="block font-normal text-[color:var(--text2)]">créé par {l.cree_par}</span>}
-              </th>
-              <td className="py-2 pr-3">{l.classes.join(', ') || 'Non disponible'}</td>
-              <td className="py-2 pr-3">{dateFR(l.cree_le)}</td>
-              <td className="py-2 pr-3">{dateFR(l.expire_le)}</td>
-              <td className="py-2 pr-3">{l.derniere_ouverture ? dateFR(l.derniere_ouverture) : 'Jamais ouvert'}</td>
-              <td className="py-2 pr-3">{l.nb_ouvertures}</td>
-              <td className="py-2 pr-3">
-                <span className="font-semibold">{LIBELLE_STATUT[l.statut]}</span>
-                {l.statut === 'revoque' && l.revoque_le && <span className="block">le {dateFR(l.revoque_le)}</span>}
-              </td>
-              <td className="py-2">
-                {l.statut !== 'revoque' && (
-                  <button type="button" className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={() => onRevoquer(l)}>
-                    Révoquer<span className="sr-only"> le lien de {l.destinataire}</span>
-                  </button>
+          {liens.map((l) => {
+            const ouvert = ouverts.has(l.id);
+            const detailId = `detail-${l.id}`;
+            return (
+              <Fragment key={l.id}>
+                <tr className="border-b border-[color:var(--border)] align-top">
+                  <th scope="row" className="py-2 pr-3 font-medium">
+                    {l.destinataire}
+                    {l.cree_par && <span className="block font-normal text-[color:var(--text2)]">créé par {l.cree_par}</span>}
+                  </th>
+                  <td className="py-2 pr-3">{l.classes.join(', ') || 'Non disponible'}</td>
+                  <td className="py-2 pr-3">{dateFR(l.cree_le)}</td>
+                  <td className="py-2 pr-3">{dateFR(l.expire_le)}</td>
+                  <td className="py-2 pr-3">
+                    <span className="font-semibold">{LIBELLE_STATUT[l.statut]}</span>
+                    {l.statut === 'revoque' && l.revoque_le && <span className="block">le {dateFR(l.revoque_le)}</span>}
+                  </td>
+                  <td className="py-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button" aria-expanded={ouvert} aria-controls={ouvert ? detailId : undefined}
+                        className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={() => basculer(l.id)}
+                      >
+                        Détails<span className="sr-only"> du lien de {l.destinataire}</span>
+                      </button>
+                      {l.statut !== 'revoque' && (
+                        <button type="button" className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={() => onRevoquer(l)}>
+                          Révoquer<span className="sr-only"> le lien de {l.destinataire}</span>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+                {ouvert && (
+                  <tr id={detailId} className="border-b border-[color:var(--border)]">
+                    <td colSpan={6} className="pb-3 pr-3 text-[color:var(--text2)]">
+                      <p>
+                        Dernière ouverture : <strong>{l.derniere_ouverture ? dateFR(l.derniere_ouverture) : 'jamais ouvert'}</strong>
+                        {' · '}Ouvertures : <strong>{l.nb_ouvertures}</strong>
+                      </p>
+                      <p>
+                        Repère pour dépanner (par exemple « je n'arrive pas à ouvrir mon lien »), pas un outil de contrôle. Au plus une ouverture est comptée par heure et par lien.
+                      </p>
+                    </td>
+                  </tr>
                 )}
-              </td>
-            </tr>
-          ))}
+              </Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -89,7 +119,7 @@ function TableLiens({ liens, onRevoquer, titre }) {
 export default function LiensEnseignants() {
   const { data, isLoading, error } = useLiens();
   const revoquer = useRevoquerLien();
-  const [statut, setStatut] = useState('tous');
+  const [statut, setStatut] = useState('actif'); // expirés et révoqués masqués par défaut
   const [inactifActif, setInactifActif] = useState(false);
   const [joursTxt, setJoursTxt] = useState(String(JOURS_INACTIF_DEFAUT));
   const jours = Number.parseInt(joursTxt, 10);
@@ -120,10 +150,10 @@ export default function LiensEnseignants() {
           <strong> à la fin de l'année scolaire</strong> de la classe (expiration automatique) ou <strong>par révocation</strong> de votre part (immédiate).
         </p>
         <p>
-          Révoquer un lien coupe aussi l'accès des profils de classe déjà transmis à d'autres outils depuis ce lien. La ligne reste visible ici (statut « Révoqué ») pour la traçabilité.
+          Révoquer un lien coupe aussi l'accès des profils de classe déjà transmis à d'autres outils depuis ce lien. Les révocations servent aux cas exceptionnels en cours d'année (enseignant qui part, lien égaré).
         </p>
         <p>
-          « Ouvertures » compte au plus une ouverture par heure et par lien : c'est un indicateur d'usage, pas un décompte exact.
+          Seuls les liens actifs sont affichés par défaut. Les liens expirés ou révoqués restent consultables avec le filtre « Statut », puis sont supprimés définitivement à partir du 1er septembre qui suit la fin de l'année scolaire.
         </p>
         <p>
           <strong>Conseil pour la colonne « Destinataire » :</strong> évitez le nom complet de l'enseignant (données personnelles, RGPD). Préférez un repère sans équivoque mais sans nom complet : initiale du prénom, matière, classe et implantation (ex. « A., français 5PA, Pitteurs »).
@@ -138,10 +168,10 @@ export default function LiensEnseignants() {
         <div>
           <label htmlFor="filtre-statut" className="block font-medium">Statut</label>
           <select id="filtre-statut" className="plai-input" style={{ fontSize: 16 }} value={statut} onChange={(e) => setStatut(e.target.value)}>
-            <option value="tous">Tous</option>
             <option value="actif">Actifs</option>
             <option value="expire">Expirés</option>
             <option value="revoque">Révoqués</option>
+            <option value="tous">Tous</option>
           </select>
         </div>
         <div className="flex items-end gap-3">

@@ -1,7 +1,7 @@
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { authentifier } from './_lib/authUtilisateur.js';
 import { peutGererEcole, ecolesGerables, versLienPublic } from './_lib/liens.js';
-import { revoquerLien } from './_lib/liensData.js';
+import { revoquerLien, purgerLiensExpires } from './_lib/liensData.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LIMITE_LIENS = 1000;
@@ -9,8 +9,10 @@ const COLONNES_PUBLIQUES = 'id, ecole_id, destinataire, nom_groupe, cree_par, cr
 
 /**
  * Gestion des liens enseignants (utilisateur connecté : admin, référent PLAI, direction ; jamais agent_plai).
- * GET  ?ecole_id=<uuid> (optionnel) : liens des écoles gérables, sans token_hash.
- * POST { action: 'revoke', lien_id } : révocation idempotente, la ligne n'est jamais supprimée.
+ * GET  ?ecole_id=<uuid> (optionnel) : supprime d'abord les liens expirés (purge après le 31 août), puis liste les
+ *      liens des écoles gérables, sans token_hash. La purge est globale (toutes écoles) mais n'est lancée qu'après
+ *      les contrôles d'accès.
+ * POST { action: 'revoke', lien_id } : révocation idempotente, la ligne n'est pas supprimée (elle l'est à l'expiration).
  * Les erreurs renvoyées au client sont génériques ; le journal serveur ne contient aucune donnée personnelle.
  */
 export default async function handler(req, res) {
@@ -33,6 +35,7 @@ export default async function handler(req, res) {
       if (demandee && !peutGererEcole(profil, ecolesLiees, demandee)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
       if (gerables !== null && gerables.length === 0) { res.status(403).json({ error: 'Accès refusé.' }); return; }
 
+      await purgerLiensExpires(db);
       let q = db.from('ar_liens').select(COLONNES_PUBLIQUES).order('cree_le', { ascending: false }).limit(LIMITE_LIENS);
       if (demandee) q = q.eq('ecole_id', demandee);
       else if (gerables !== null) q = q.in('ecole_id', gerables);
