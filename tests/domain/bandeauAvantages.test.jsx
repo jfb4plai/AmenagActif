@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import BandeauAvantages, { AVANTAGES } from '../../src/components/BandeauAvantages.jsx';
+import Footer from '../../src/components/Footer.jsx';
 
 const actif = (container) => container.querySelector('[data-actif="true"]');
 const titreActif = (container) => actif(container).querySelector('strong').textContent;
@@ -126,5 +128,22 @@ describe('bandeau d\'avantages', () => {
     render(<BandeauAvantages />);
     fireEvent.click(screen.getByRole('button', { name: 'Fermer le bandeau' }));
     expect(screen.queryByRole('region', { name: /Pourquoi AménagActif/ })).toBeNull();
+  });
+
+  it('lien « Avantages de l\'application PLAI » du pied de page : fait revenir le bandeau fermé', () => {
+    render(<MemoryRouter><BandeauAvantages /><Footer /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Fermer le bandeau' }));
+    expect(screen.queryByRole('region', { name: /Pourquoi AménagActif/ })).toBeNull();
+    fireEvent.click(screen.getByRole('link', { name: "Avantages de l'application PLAI" }));
+    expect(screen.getByRole('region', { name: /Pourquoi AménagActif/ })).toBeTruthy();
+    expect(window.localStorage.getItem('amenagactif.bandeau-avantages.ferme')).toBeNull();
+  });
+
+  it('depuis une autre page : le lien efface le choix, le bandeau apparaît à l\'arrivée sur la saisie', () => {
+    window.localStorage.setItem('amenagactif.bandeau-avantages.ferme', '1');
+    render(<MemoryRouter><Footer /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('link', { name: "Avantages de l'application PLAI" }));
+    render(<BandeauAvantages />);
+    expect(screen.getByRole('region', { name: /Pourquoi AménagActif/ })).toBeTruthy();
   });
 });

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 const DUREE_MS = 10000;
 const PAS_MS = 100;
 const CLE_FERME = 'amenagactif.bandeau-avantages.ferme';
+const EVENEMENT_ROUVRIR = 'amenagactif:bandeau-avantages-rouvrir';
 const FOCUS = 'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]';
 
 export const AVANTAGES = [
@@ -36,6 +37,12 @@ function lireFerme() {
 
 function ecrireFerme() {
   try { window.localStorage.setItem(CLE_FERME, '1'); } catch { /* stockage indisponible : le bandeau reviendra */ }
+}
+
+/** Lien de réaffichage (pied de page) : efface le choix « Fermer » et réveille le bandeau s'il est déjà monté. */
+export function rouvrirBandeauAvantages() {
+  try { window.localStorage.removeItem(CLE_FERME); } catch { /* stockage indisponible */ }
+  window.dispatchEvent(new Event(EVENEMENT_ROUVRIR));
 }
 
 function animationsReduites() {
@@ -76,6 +83,12 @@ export default function BandeauAvantages() {
   const [manuel, setManuel] = useState(false); // vrai dès qu'on navigue à la main : la lecture d'écran annonce alors le message
 
   const enMarche = lecture && !survol && !ferme;
+
+  useEffect(() => {
+    const rouvrir = () => { setFerme(false); setIndex(0); setEcoule(0); setLecture(!animationsReduites()); };
+    window.addEventListener(EVENEMENT_ROUVRIR, rouvrir);
+    return () => window.removeEventListener(EVENEMENT_ROUVRIR, rouvrir);
+  }, []);
 
   useEffect(() => {
     if (!enMarche) return undefined;
