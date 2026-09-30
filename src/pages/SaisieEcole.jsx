@@ -5,6 +5,7 @@ import BarreSaut from '../components/saisie/BarreSaut.jsx';
 import EnTeteEleves from '../components/saisie/EnTeteEleves.jsx';
 import EleveEditor from '../components/saisie/EleveEditor.jsx';
 import BandeauAU from '../components/saisie/BandeauAU.jsx';
+import BandeauAvantages from '../components/BandeauAvantages.jsx';
 import ChapitreAR from '../components/saisie/ChapitreAR.jsx';
 import AjoutEleve from '../components/saisie/AjoutEleve.jsx';
 import { useCatalogue } from '../hooks/useCatalogue.js';
@@ -31,6 +32,8 @@ export default function SaisieEcole() {
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
 
   return (
+    <>
+    <BandeauAvantages />
     <div className="plai-section space-y-4">
       <h1 className="text-xl font-semibold">Saisie des aménagements</h1>
       <SelecteurContexte ecoleId={ctx.ecoleId} anneeId={ctx.anneeId} onChange={(v) => { setCtx(v); setClasseId(null); }} />
@@ -182,5 +185,6 @@ export default function SaisieEcole() {
         </>
       )}
     </div>
+    </>
   );
 }
