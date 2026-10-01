@@ -58,18 +58,18 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
           {vm.parAmenagement.length === 0 && <tr><td className="border border-black p-2 text-gray-500">Aucun.</td></tr>}
           {vm.parAmenagement.map((row) => (
             <tr key={row.libelle}>
-              <td className="border border-black p-2 align-top w-3/4">{row.libelle}</td>
-              <td className="border border-black p-2 w-1/4">
-                <ul className="list-disc pl-5">
-                  {row.eleves.map((e, i) => (
-                    <li key={i}>
-                      {lienEleve ? <a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a> : <span>{e.nom}</span>}
-                      {showStatutEleve && (
-                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 ml-1">{e.statut}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+              <td className="border border-black p-2 align-top w-2/3">{row.libelle}</td>
+              <td className="border border-black p-2 align-top w-1/3">
+                {/* Élèves à la suite, séparés par un point médian (gain de place) ; liens conservés sur la fiche école. */}
+                {row.eleves.map((e, i) => (
+                  <span key={i}>
+                    {i > 0 && ' · '}
+                    {lienEleve ? <a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a> : <span>{e.nom}</span>}
+                    {showStatutEleve && (
+                      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 ml-1">{e.statut}</span>
+                    )}
+                  </span>
+                ))}
               </td>
             </tr>
           ))}
