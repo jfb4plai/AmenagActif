@@ -59,3 +59,23 @@ export async function verifyProfilToken(token) {
   if (typeof payload.classeId !== 'string' || !payload.jti) throw new errors.JWTClaimValidationFailed('claims manquants', payload, 'classeId', 'missing');
   return { classeId: payload.classeId, jti: payload.jti, exp: payload.exp, lid: typeof payload.lid === 'string' ? payload.lid : null };
 }
+
+export const AUDIENCE_INVITATION = 'invitation';
+export const JOURS_INVITATION = 7; // le lien Supabase natif est plafonné à 24 h : ce jeton intermédiaire en génère un neuf au clic
+
+/** Jeton d'invitation : audience distincte (inutilisable comme jeton de fiche ou de profil). */
+export async function signInvitationToken({ email, joursValide = JOURS_INVITATION }) {
+  return new SignJWT({ email })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setAudience(AUDIENCE_INVITATION)
+    .setIssuedAt()
+    .setExpirationTime(`${joursValide}d`)
+    .sign(secret());
+}
+
+/** @returns {Promise<{ email: string }>} Lève si signature, aud ou exp invalide. */
+export async function verifyInvitationToken(token) {
+  const { payload } = await jwtVerify(token, secret(), { audience: AUDIENCE_INVITATION, algorithms: ['HS256'] });
+  if (typeof payload.email !== 'string' || !payload.email) throw new errors.JWTClaimValidationFailed('email manquant', payload, 'email', 'missing');
+  return { email: payload.email };
+}

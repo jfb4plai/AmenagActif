@@ -7,6 +7,7 @@ import RequireRole from './components/RequireRole.jsx';
 import { useRole } from './lib/auth.jsx';
 import Login from './pages/Login.jsx';
 import NouveauMotDePasse from './pages/NouveauMotDePasse.jsx';
+import Activer from './pages/Activer.jsx';
 import SaisieEcole from './pages/SaisieEcole.jsx';
 import FicheClassePage from './pages/FicheClassePage.jsx';
 import FicheEcolePage from './pages/FicheEcolePage.jsx';
@@ -46,6 +47,7 @@ export default function App() {
     <Routes>
       <Route path="/connexion" element={<Login />} />
       <Route path="/nouveau-mot-de-passe" element={<NouveauMotDePasse />} />
+      <Route path="/activer" element={<Activer />} />
       <Route path="/fiche/:token" element={<FichePublique />} />
       <Route path="/catalogue-amenagements" element={<CatalogueAmenagements />} />
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />

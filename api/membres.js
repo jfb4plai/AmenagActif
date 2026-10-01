@@ -1,5 +1,6 @@
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { envoyerEmail } from './_lib/email.js';
+import { signInvitationToken, JOURS_INVITATION } from './_lib/jwt.js';
 
 const ROLES = ['admin', 'referent_plai', 'direction', 'agent_plai'];
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai'];
@@ -77,13 +78,14 @@ export default async function handler(req, res) {
           if (e2b && e2b.code !== '23505') throw e2b;
         }
 
-        const lien = data.properties.action_link;
+        // Lien intermédiaire de 7 jours : le lien Supabase (24 h max) n'est généré qu'au clic, voir api/activer.js.
+        const lien = `${APP_URL}/activer?t=${encodeURIComponent(await signInvitationToken({ email }))}`;
         const roleLabel = LABEL_ROLE[role] ?? role;
         try {
           await envoyerEmail({
             to: email,
             subject: 'Invitation à AménagActif',
-            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${echapperHtml(lien)}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien n'est valable que 24 heures.</strong> Passé ce délai, la page de définition du mot de passe vous permettra d'en redemander un directement avec votre adresse e-mail. Ce lien est personnel, ne le transférez pas.</p>`,
+            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${echapperHtml(lien)}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien est valable ${JOURS_INVITATION} jours.</strong> Passé ce délai, vous pourrez en redemander un directement avec votre adresse e-mail. Ce lien est personnel, ne le transférez pas.</p>`,
           });
         } catch (e3) {
           console.error("Envoi de l'invitation échoué :", e3?.name, e3?.status ?? '');
