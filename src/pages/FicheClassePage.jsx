@@ -17,7 +17,8 @@ function Picker() {
   const [selection, setSelection] = useState(new Set());
   const [nomGroupe, setNomGroupe] = useState('');
   const [valide, setValide] = useState(null); // { classeIds, nomGroupe } une fois "Valider" cliqué
-  const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction';
+  const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction' || role === 'agent_plai';
+  const peutLier = role !== 'agent_plai'; // liens enseignants : référents et directions uniquement (cf. api/_lib/ficheData.js)
   const apercu = useFicheGroupe(valide?.classeIds, valide?.nomGroupe);
 
   useEffect(() => {
@@ -47,9 +48,9 @@ function Picker() {
 
   return (
     <div className="plai-section space-y-3">
-      <h1 className="text-xl font-semibold">Fiches par classe</h1>
-      <Link className="text-sm text-teal underline" to="/fiches/ecole">Voir la fiche « vue école complète »</Link>
-      <div className="flex gap-3">
+      <h1 className="text-xl font-semibold no-print">Fiches par classe</h1>
+      <Link className="text-sm text-teal underline no-print" to="/fiches/ecole">Voir la fiche « vue école complète »</Link>
+      <div className="flex gap-3 no-print">
         {ecoleUnique ? (
           <span className="plai-input inline-block bg-[color:var(--bg)]">{ecoleUnique.nom}</span>
         ) : (
@@ -63,7 +64,7 @@ function Picker() {
           {annees.map((a) => <option key={a.id} value={a.id}>{a.libelle}</option>)}
         </select>
       </div>
-      <ul className="space-y-1">
+      <ul className="space-y-1 no-print">
         {(grid?.classes ?? []).map((c) => (
           <li key={c.id} className="flex items-center gap-2">
             {peutGrouper && (
@@ -76,11 +77,11 @@ function Picker() {
       </ul>
 
       {peutGrouper && selection.size >= 2 && (
-        <div className="plai-card p-3 space-y-2 max-w-md">
+        <div className="plai-card p-3 space-y-2 max-w-md no-print">
           <p className="font-medium text-sm">Fiche groupée — {selection.size} classes sélectionnées</p>
           <p className="text-xs text-[color:var(--text3)]">
             Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…) : une seule fiche,
-            AU et AR fusionnés, sans doublon. L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule.
+            AU et AR fusionnés, sans doublon.{peutLier && " L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule."}
           </p>
           <label className="text-sm block">Nom du groupe (optionnel)
             <input className="plai-input w-full" placeholder="Atelier cuisine 3e" value={nomGroupe} onChange={(e) => changerNomGroupe(e.target.value)} />
@@ -98,15 +99,22 @@ function Picker() {
           {apercu.error && <p className="plai-error text-sm">{apercu.error.message}</p>}
           {apercu.data && (
             <>
-              <p className="text-base">
-                Aperçu confirmé pour <strong>{apercu.data.classeNom}</strong> : vérifiez le contenu ci-dessous avant de générer le lien à envoyer.
+              <p className="text-base no-print">
+                Aperçu confirmé pour <strong>{apercu.data.classeNom}</strong> : vérifiez le contenu ci-dessous{peutLier && ' avant de générer le lien à envoyer'}.
               </p>
-              <GenerateurLien
-                classeIds={valide.classeIds}
-                nomGroupe={valide.nomGroupe}
-                libelle={`Aménagements à mettre en place — ${apercu.data.classeNom}`}
-              />
-              <div className="border border-[color:var(--border)] rounded overflow-auto max-h-[70vh]">
+              <div className="no-print">
+                <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
+              </div>
+              {peutLier && (
+                <div className="no-print">
+                  <GenerateurLien
+                    classeIds={valide.classeIds}
+                    nomGroupe={valide.nomGroupe}
+                    libelle={`Aménagements à mettre en place — ${apercu.data.classeNom}`}
+                  />
+                </div>
+              )}
+              <div className="apercu-fiche border border-[color:var(--border)] rounded overflow-auto max-h-[70vh]">
                 <FicheClasseView vm={apercu.data} />
               </div>
             </>
