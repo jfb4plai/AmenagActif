@@ -64,7 +64,7 @@ export default function ChangerClasse({ eleve, cibles, ecoles = [], ecoleId, don
                 {propres.map((c) => <option key={c.id} value={c.id}>{libelle(c)}</option>)}
               </optgroup>
               {autres.map(({ ecole, classes: cl }) => (
-                <optgroup key={ecole.id} label={ecole.nom}>
+                <optgroup key={ecole.id} label={ecole.implantation_nom || ecole.nom}>
                   {cl.map((c) => <option key={c.id} value={c.id}>{libelle(c)}</option>)}
                 </optgroup>
               ))}

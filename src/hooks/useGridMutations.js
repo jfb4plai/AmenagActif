@@ -128,7 +128,7 @@ export function useGridMutations(ecoleId, anneeId) {
       const b = await supabase.from('ar_amenagements_libres').update({ a_confirmer: false }).eq('eleve_id', eleveId);
       if (b.error) throw b.error;
     },
-    onSuccess: invalider,
+    onSuccess: () => { invalider(); qc.invalidateQueries({ queryKey: ['a-confirmer-classes'] }); },
   });
 
   /** Confirme tout ce qui a été repris dans une classe : AR/libres de ses élèves + ses AU. */
@@ -143,7 +143,7 @@ export function useGridMutations(ecoleId, anneeId) {
       const c = await supabase.from('ar_amenagements_classe').update({ a_confirmer: false }).eq('classe_id', classeId);
       if (c.error) throw c.error;
     },
-    onSuccess: invalider,
+    onSuccess: () => { invalider(); qc.invalidateQueries({ queryKey: ['a-confirmer-classes'] }); },
   });
 
   /** Change un élève de classe (même année). Atomique côté SQL ; invalide toutes les grilles et fiches (l'élève peut changer d'implantation). */
