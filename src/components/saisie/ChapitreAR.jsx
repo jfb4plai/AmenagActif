@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AmenagementLibreForm from './AmenagementLibreForm.jsx';
+import EnTeteDispositif from './EnTeteDispositif.jsx';
 
 function normaliser(s) {
   return String(s ?? '')
@@ -8,7 +9,7 @@ function normaliser(s) {
     .toLowerCase();
 }
 
-export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsAR, libres, filtre, onToggle, onAddLibre, onRemoveLibre, eleveSurvole, onHoverEleve }) {
+export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsAR, libres, filtre, onToggle, onAddLibre, onRemoveLibre, eleveSurvole, onHoverEleve, dispositif }) {
   const [ouvert, setOuvert] = useState(false);
   const [libreOuvert, setLibreOuvert] = useState(false);
 
@@ -47,6 +48,14 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
           </button>
         </td>
       </tr>
+
+      {dispositif && (
+        <tr>
+          <td colSpan={totalCols + 1} className="p-0">
+            <EnTeteDispositif chapitre={chapitre} {...dispositif} />
+          </td>
+        </tr>
+      )}
 
       {affiche && amenagementsAffiches.map((a) => (
         <tr key={a.id} className="border-b border-[color:var(--border)] hover:bg-white/60">

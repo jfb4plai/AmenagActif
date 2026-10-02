@@ -1,3 +1,5 @@
+import { messageConfirmationRetraitAU } from '../../domain/dispositifs.js';
+
 function normaliser(s) {
   return String(s ?? '')
     .normalize('NFD')
@@ -61,7 +63,12 @@ export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, on
                 checked={estCoche(a.id)}
                 disabled={!peutRetirer && estCoche(a.id)}
                 title={!peutRetirer && estCoche(a.id) ? "Retrait réservé au référent PLAI, à la direction ou à l'administrateur" : undefined}
-                onChange={(e) => onToggle({ classeId: classe.id, amenagementId: a.id, actif: e.target.checked })}
+                onChange={(e) => {
+                  const actif = e.target.checked;
+                  // Décocher un AU de classe touche tous les enseignants : confirmation expliquant les conséquences.
+                  if (!actif && !window.confirm(messageConfirmationRetraitAU(a.libelle))) return;
+                  onToggle({ classeId: classe.id, amenagementId: a.id, actif });
+                }}
               />
               <span>
                 {a.libelle}

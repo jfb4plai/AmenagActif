@@ -7,11 +7,14 @@ import EleveEditor from '../components/saisie/EleveEditor.jsx';
 import BandeauAU from '../components/saisie/BandeauAU.jsx';
 import BandeauAvantages from '../components/BandeauAvantages.jsx';
 import ChapitreAR from '../components/saisie/ChapitreAR.jsx';
+import CarteDispositif from '../components/saisie/CarteDispositif.jsx';
+import RecapDispositifs from '../components/saisie/RecapDispositifs.jsx';
 import AjoutEleve from '../components/saisie/AjoutEleve.jsx';
 import { useCatalogue } from '../hooks/useCatalogue.js';
 import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import { useGridMutations } from '../hooks/useGridMutations.js';
 import { useRole } from '../lib/auth.jsx';
+import { chapitreEnModeAU, bloqueBasculeDispositif } from '../domain/dispositifs.js';
 
 export default function SaisieEcole() {
   const { role } = useRole();
@@ -21,6 +24,7 @@ export default function SaisieEcole() {
   const [editId, setEditId] = useState(null);
   const [recherche, setRecherche] = useState('');
   const [eleveSurvole, setEleveSurvole] = useState(null);
+  const [blocages, setBlocages] = useState({});
   const { data: cat } = useCatalogue();
   const { data: grid, isLoading, error } = useEcoleGrid(ctx.ecoleId, ctx.anneeId);
   const mut = useGridMutations(ctx.ecoleId, ctx.anneeId);
@@ -30,6 +34,27 @@ export default function SaisieEcole() {
 
   const chapitres = cat?.chapitres ?? [];
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
+  const dispositifs = chapitres.filter((c) => c.est_dispositif);
+  const modesClasse = (grid?.modesDispositifs ?? []).filter((m) => m.classe_id === classeId);
+  const enModeAU = (ch) => chapitreEnModeAU(ch, modesClasse);
+  const blocageDe = (ch) => blocages[`${classeId}:${ch.id}`] ?? null;
+  // Bascule du mode d'un dispositif : refusée (message) si des cases de l'autre mode sont cochées.
+  const tenterBascule = (ch, vers) => {
+    const msg = bloqueBasculeDispositif({
+      vers, chapitreId: ch.id, amenagements: cat?.amenagements ?? [],
+      eleveIds: new Set(eleves.map((e) => e.id)),
+      selectionsAR: grid.selectionsAR,
+      auClasse: grid.auClasse.filter((x) => x.classe_id === classeId),
+    });
+    setBlocages((b) => ({ ...b, [`${classeId}:${ch.id}`]: msg }));
+    if (!msg) mut.basculerDispositif.mutate({ classeId, chapitreId: ch.id, pourToute: vers === 'AU' });
+  };
+  const enteteDe = (ch) => ({
+    mode: enModeAU(ch) ? 'AU' : 'AR',
+    peutBasculer: peutEditerStructure,
+    blocage: blocageDe(ch),
+    onBascule: (vers) => tenterBascule(ch, vers),
+  });
 
   return (
     <>
@@ -143,6 +168,8 @@ export default function SaisieEcole() {
             />
           </div>
 
+          <RecapDispositifs dispositifs={dispositifs} modes={modesClasse} />
+
           <div className="mb-2">
             <input type="search" className="plai-input w-full max-w-sm" placeholder="Rechercher un AU ou un AR par mot-clé (ex : bruit, temps, oral)…"
               value={recherche} onChange={(e) => setRecherche(e.target.value)} />
@@ -155,6 +182,14 @@ export default function SaisieEcole() {
             auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)} onToggle={(v) => mut.toggleAU.mutate(v)}
             peutRetirer={peutEditerStructure} filtre={recherche} />
 
+          {dispositifs.filter(enModeAU).map((ch) => (
+            <CarteDispositif key={ch.id} classe={classe} chapitre={ch}
+              items={(cat.amenagements ?? []).filter((a) => a.chapitre_id === ch.id)}
+              auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)}
+              onToggle={(v) => mut.toggleAU.mutate(v)}
+              peutRetirer={peutEditerStructure} filtre={recherche} entete={enteteDe(ch)} />
+          ))}
+
           <div>
             <h2 className="font-semibold mb-1">Aménagements raisonnables — {classe.nom}</h2>
             <BarreSaut chapitres={chapitres} />
@@ -166,7 +201,7 @@ export default function SaisieEcole() {
                 onDeleteEleve={(v) => mut.deleteEleve.mutateAsync(v)}
                 eleveSurvole={eleveSurvole} onHoverEleve={setEleveSurvole} />
               <tbody>
-                {chapitres.map((ch) => (
+                {chapitres.filter((ch) => !enModeAU(ch)).map((ch) => (
                   <ChapitreAR key={ch.id} chapitre={ch}
                     amenagements={(cat.amenagements ?? []).filter((a) => a.chapitre_id === ch.id && a.type === 'AR')}
                     eleves={eleves}
@@ -176,12 +211,14 @@ export default function SaisieEcole() {
                     onToggle={(v) => mut.toggleAR.mutate(v)}
                     onAddLibre={(v) => mut.addLibre.mutate(v)}
                     onRemoveLibre={(v) => mut.removeLibre.mutate(v)}
-                    eleveSurvole={eleveSurvole} onHoverEleve={setEleveSurvole} />
+                    eleveSurvole={eleveSurvole} onHoverEleve={setEleveSurvole}
+                    dispositif={ch.est_dispositif ? enteteDe(ch) : undefined} />
                 ))}
               </tbody>
             </table>
           </div>
           {mut.toggleAR.isError && <p className="plai-error">Échec d'enregistrement, réessayez.</p>}
+          {mut.basculerDispositif.isError && <p className="plai-error">Changement de mode refusé (droits insuffisants ?), réessayez.</p>}
         </>
       )}
     </div>
