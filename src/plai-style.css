@@ -179,7 +179,11 @@ textarea.plai-input { resize: vertical; }
   /* aperçu fiche groupée : lever le cadre défilant pour imprimer toute la fiche */
   .apercu-fiche { max-height: none !important; overflow: visible !important; border: 0 !important; }
   .max-w-3xl { max-width: none !important; }
-  @page { size: A4; margin: 14mm; }
+  /* Marge de page à 0 : Chrome/Edge n'impriment alors NI l'en-tête (date, titre) NI le pied de page (adresse du site),
+     qui n'existent que dans la marge de page. La marge visible de 14 mm est reportée en marge intérieure du corps,
+     répétée sur chaque page grâce à box-decoration-break: clone (vérifié sur une fiche de 4 pages). */
+  @page { size: A4; margin: 0; }
+  body { margin: 0 !important; padding: 14mm !important; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 }
 
 /* ── Grille saisie AR : nom de l'élève au survol de sa case ── */
