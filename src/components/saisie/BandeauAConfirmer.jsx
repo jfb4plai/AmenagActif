@@ -1,6 +1,6 @@
 import { aConfirmerParClasse } from '../../domain/reprise.js';
 
-/** Bandeau de la saisie : ce qui a été repris de l'année précédente et n'a pas encore été relu. */
+/** Bandeau de la saisie : ce qui a été repris de l'année précédente ou d'une autre classe et n'a pas encore été relu. */
 export default function BandeauAConfirmer({ eleves, grid, classeId, onConfirmerEleve, onConfirmerClasse, enCours }) {
   const r = aConfirmerParClasse({
     eleves,
@@ -13,7 +13,7 @@ export default function BandeauAConfirmer({ eleves, grid, classeId, onConfirmerE
   return (
     <section className="p-3 text-sm space-y-2 rounded" style={{ background: '#fff3e6', border: '1px solid #f97316', color: '#9a3412' }}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p><strong>{r.total} aménagement(s) repris de l'année précédente, à confirmer.</strong> Relisez-les : le niveau, la filière ou les progrès de l'élève ont pu changer.</p>
+        <p><strong>{r.total} aménagement(s) repris de l'année précédente ou d'une autre classe, à confirmer.</strong> Relisez-les : le niveau, la filière ou les progrès de l'élève ont pu changer.</p>
         <button className="plai-btn" disabled={enCours} onClick={onConfirmerClasse}>Tout confirmer</button>
       </div>
       <ul className="flex flex-wrap gap-2">
