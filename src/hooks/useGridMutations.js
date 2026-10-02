@@ -120,5 +120,31 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
-  return { toggleAR, toggleAU, basculerDispositif, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, majCommentaireClasse, addLibre, removeLibre };
+  /** Confirme (retire le marqueur « à confirmer ») les AR et aménagements libres d'un élève. */
+  const confirmerEleve = useMutation({
+    mutationFn: async ({ eleveId }) => {
+      const a = await supabase.from('ar_selections').update({ a_confirmer: false }).eq('eleve_id', eleveId);
+      if (a.error) throw a.error;
+      const b = await supabase.from('ar_amenagements_libres').update({ a_confirmer: false }).eq('eleve_id', eleveId);
+      if (b.error) throw b.error;
+    },
+    onSuccess: invalider,
+  });
+
+  /** Confirme tout ce qui a été repris dans une classe : AR/libres de ses élèves + ses AU. */
+  const confirmerClasse = useMutation({
+    mutationFn: async ({ classeId, eleveIds }) => {
+      if (eleveIds.length) {
+        const a = await supabase.from('ar_selections').update({ a_confirmer: false }).in('eleve_id', eleveIds);
+        if (a.error) throw a.error;
+        const b = await supabase.from('ar_amenagements_libres').update({ a_confirmer: false }).in('eleve_id', eleveIds);
+        if (b.error) throw b.error;
+      }
+      const c = await supabase.from('ar_amenagements_classe').update({ a_confirmer: false }).eq('classe_id', classeId);
+      if (c.error) throw c.error;
+    },
+    onSuccess: invalider,
+  });
+
+  return { toggleAR, toggleAU, basculerDispositif, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, majCommentaireClasse, addLibre, removeLibre, confirmerEleve, confirmerClasse };
 }

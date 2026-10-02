@@ -72,6 +72,7 @@ export default function BandeauAU({ classe, auCatalogue, chapitres, auClasse, on
               />
               <span>
                 {a.libelle}
+                {auClasse.find((x) => x.amenagement_id === a.id)?.a_confirmer && <span className="text-xs text-orange font-medium"> · à confirmer</span>}
                 <span className="text-xs text-[color:var(--text3)]"> · {chapCourt(a.chapitre_id)}</span>
               </span>
             </label>

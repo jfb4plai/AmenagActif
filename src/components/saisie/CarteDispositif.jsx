@@ -42,7 +42,10 @@ export default function CarteDispositif({ classe, chapitre, items, auClasse, onT
                     if (!actif && !window.confirm(messageConfirmationRetraitAU(a.libelle))) return;
                     onToggle({ classeId: classe.id, amenagementId: a.id, actif });
                   }} />
-                <span>{a.libelle}</span>
+                <span>
+                  {a.libelle}
+                  {auClasse.find((x) => x.amenagement_id === a.id)?.a_confirmer && <span className="text-xs text-orange font-medium"> · à confirmer</span>}
+                </span>
               </label>
             </li>
           ))}

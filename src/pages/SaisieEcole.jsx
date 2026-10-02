@@ -10,6 +10,7 @@ import ChapitreAR from '../components/saisie/ChapitreAR.jsx';
 import CarteDispositif from '../components/saisie/CarteDispositif.jsx';
 import RecapDispositifs from '../components/saisie/RecapDispositifs.jsx';
 import AjoutEleve from '../components/saisie/AjoutEleve.jsx';
+import BandeauAConfirmer from '../components/saisie/BandeauAConfirmer.jsx';
 import { useCatalogue } from '../hooks/useCatalogue.js';
 import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import { useGridMutations } from '../hooks/useGridMutations.js';
@@ -186,6 +187,12 @@ export default function SaisieEcole() {
           <BandeauAU classe={classe} auCatalogue={auCat} chapitres={chapitres}
             auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)} onToggle={(v) => mut.toggleAU.mutate(v)}
             peutRetirer={peutEditerStructure} filtre={recherche} />
+
+          <BandeauAConfirmer eleves={eleves} grid={grid} classeId={classeId}
+            enCours={mut.confirmerEleve.isPending || mut.confirmerClasse.isPending}
+            onConfirmerEleve={(eleveId) => mut.confirmerEleve.mutate({ eleveId })}
+            onConfirmerClasse={() => mut.confirmerClasse.mutate({ classeId, eleveIds: eleves.map((e) => e.id) })} />
+          {(mut.confirmerEleve.isError || mut.confirmerClasse.isError) && <p className="plai-error text-sm">Confirmation impossible, réessayez.</p>}
 
           {dispositifs.filter(enModeAU).map((ch) => (
             <CarteDispositif key={ch.id} classe={classe} chapitre={ch}

@@ -16,6 +16,7 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
   const cols = eleves;
   const totalCols = cols.length;
   const estCoche = (eleveId, amId) => selectionsAR.some((s) => s.eleve_id === eleveId && s.amenagement_id === amId);
+  const estAConfirmer = (eleveId, amId) => selectionsAR.some((s) => s.eleve_id === eleveId && s.amenagement_id === amId && s.a_confirmer);
   // selectionsAR est passé pour toute l'école (useEcoleGrid) : ne compter que les élèves de cette classe.
   const nbCoches = selectionsAR.filter((s) => amenagements.some((a) => a.id === s.amenagement_id) && cols.some((c) => c.id === s.eleve_id)).length;
   // libres est passé pour toute l'école (useEcoleGrid) : ne garder que les élèves de cette classe.
@@ -61,11 +62,12 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
         <tr key={a.id} className="border-b border-[color:var(--border)] hover:bg-white/60">
           <td className="p-1 align-top">{a.libelle}</td>
           {cols.map((e) => (
-            <td key={e.id} className={`cell-eleve text-center border-l border-[color:var(--border)] ${e.id === eleveSurvole ? 'bg-[color:var(--teal-bg)]' : ''}`}
+            <td key={e.id} className={`cell-eleve text-center border-l border-[color:var(--border)] ${e.id === eleveSurvole ? 'bg-[color:var(--teal-bg)]' : estAConfirmer(e.id, a.id) ? 'bg-orange/10' : ''}`}
+              title={estAConfirmer(e.id, a.id) ? "Repris de l'année précédente : à confirmer" : undefined}
               data-eleve={`${e.prenom} ${e.initiale_nom}`}
               onMouseEnter={() => onHoverEleve?.(e.id)} onMouseLeave={() => onHoverEleve?.(null)}>
               <input type="checkbox" checked={estCoche(e.id, a.id)}
-                aria-label={`${a.libelle} — ${e.prenom} ${e.initiale_nom}`}
+                aria-label={`${a.libelle} — ${e.prenom} ${e.initiale_nom}${estAConfirmer(e.id, a.id) ? ' — à confirmer' : ''}`}
                 onChange={(ev) => onToggle({ eleveId: e.id, amenagementId: a.id, actif: ev.target.checked })} />
             </td>
           ))}
@@ -81,6 +83,7 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
                 <div key={l.id} className="text-sm flex items-center gap-2">
                   <span className="text-teal">+</span>
                   <span>{el ? `${el.prenom} ${el.initiale_nom}` : '—'} : {l.texte}</span>
+                  {l.a_confirmer && <span className="text-xs text-orange font-medium">à confirmer</span>}
                   <button className="text-xs underline" onClick={() => onRemoveLibre({ id: l.id })}>retirer</button>
                 </div>
               );

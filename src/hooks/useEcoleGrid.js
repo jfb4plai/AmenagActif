@@ -53,12 +53,12 @@ export function useEcoleGrid(ecoleId, anneeId) {
       const eleveIds = eleves.map((e) => e.id);
 
       const [{ data: auClasse, error: e1 }, sel, lib, modes] = await Promise.all([
-        supabase.from('ar_amenagements_classe').select('classe_id, amenagement_id, cree_le').in('classe_id', classeIds),
+        supabase.from('ar_amenagements_classe').select('classe_id, amenagement_id, cree_le, a_confirmer').in('classe_id', classeIds),
         eleveIds.length
-          ? supabase.from('ar_selections').select('eleve_id, amenagement_id, cree_le').in('eleve_id', eleveIds)
+          ? supabase.from('ar_selections').select('eleve_id, amenagement_id, cree_le, a_confirmer').in('eleve_id', eleveIds)
           : Promise.resolve({ data: [], error: null }),
         eleveIds.length
-          ? supabase.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte').in('eleve_id', eleveIds)
+          ? supabase.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte, a_confirmer').in('eleve_id', eleveIds)
           : Promise.resolve({ data: [], error: null }),
         supabase.from('ar_classe_dispositifs').select('classe_id, chapitre_id, pour_toute_la_classe').in('classe_id', classeIds),
       ]);
