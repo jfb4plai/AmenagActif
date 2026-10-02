@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import EleveEditor from './EleveEditor.jsx';
 
-export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve, eleveSurvole, onHoverEleve }) {
+export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve, eleveSurvole, onHoverEleve, avertissementsDe, extraDe }) {
   const [editId, setEditId] = useState(null);
 
   return (
@@ -18,6 +18,7 @@ export default function EnTeteEleves({ eleves, onSaveEleve, onDeleteEleve, eleve
             {editId === e.id && (
               <div className="absolute mt-1 z-40">
                 <EleveEditor eleve={e} onClose={() => setEditId(null)}
+                  avertissements={avertissementsDe?.(e) ?? []} extra={extraDe?.(e)}
                   onSave={(v) => onSaveEleve({ id: e.id, classeId: e.classe_id, ...v })}
                   onDelete={onDeleteEleve ? () => onDeleteEleve({ id: e.id }) : undefined} />
               </div>

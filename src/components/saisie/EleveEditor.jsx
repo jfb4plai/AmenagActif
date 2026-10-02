@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
+export default function EleveEditor({ eleve, onSave, onDelete, onClose, avertissements = [], extra = null }) {
   const [prenom, setPrenom] = useState(eleve?.prenom ?? '');
   const [initiale, setInitiale] = useState(eleve?.initiale_nom ?? '');
   const [commentaire, setCommentaire] = useState(eleve?.commentaire ?? '');
@@ -38,6 +38,11 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
 
   return (
     <div className="plai-card p-3 space-y-2 w-72">
+      {avertissements.length > 0 && (
+        <div role="note" className="text-xs p-2 rounded space-y-1" style={{ background: '#fff3e6', border: '1px solid #f97316', color: '#9a3412' }}>
+          {avertissements.map((l) => <p key={l}>{l}</p>)}
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium">Prénom</label>
         <input className="plai-input w-full" value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Emilie" disabled={enCours} />
@@ -81,6 +86,8 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose }) {
         </button>
         <button className="text-sm underline" onClick={onClose} disabled={enCours}>Annuler</button>
       </div>
+
+      {eleve?.id && extra}
 
       {eleve?.id && onDelete && (
         <div className="pt-2 border-t border-[color:var(--border)]">
