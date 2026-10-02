@@ -12,10 +12,14 @@ import RecapDispositifs from '../components/saisie/RecapDispositifs.jsx';
 import AjoutEleve from '../components/saisie/AjoutEleve.jsx';
 import BandeauAConfirmer from '../components/saisie/BandeauAConfirmer.jsx';
 import { useCatalogue } from '../hooks/useCatalogue.js';
-import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
+import { useEcoleGrid, useEcoles } from '../hooks/useEcoleGrid.js';
+import { useClassesCibles } from '../hooks/useClassesCibles.js';
 import { useGridMutations } from '../hooks/useGridMutations.js';
 import { useRole } from '../lib/auth.jsx';
 import { chapitreEnModeAU, bloqueBasculeDispositif } from '../domain/dispositifs.js';
+import { aConfirmerParClasse } from '../domain/reprise.js';
+import { avertissementEleve } from '../domain/changementClasse.js';
+import ChangerClasse from '../components/saisie/ChangerClasse.jsx';
 
 export default function SaisieEcole() {
   const { role } = useRole();
@@ -29,9 +33,19 @@ export default function SaisieEcole() {
   const { data: cat } = useCatalogue();
   const { data: grid, isLoading, error } = useEcoleGrid(ctx.ecoleId, ctx.anneeId);
   const mut = useGridMutations(ctx.ecoleId, ctx.anneeId);
+  const { data: ecoles = [] } = useEcoles();
+  const { data: cibles } = useClassesCibles(ctx.anneeId);
 
   const classe = useMemo(() => grid?.classes.find((c) => c.id === classeId) ?? null, [grid, classeId]);
   const eleves = useMemo(() => (grid?.eleves ?? []).filter((e) => e.classe_id === classeId), [grid, classeId]);
+
+  // Aménagements « à confirmer » par élève de la classe (repris de l'année précédente ou d'un changement de classe).
+  const nAConfirmerParEleve = useMemo(() => {
+    if (!grid) return new Map();
+    const r = aConfirmerParClasse({ eleves, selectionsAR: grid.selectionsAR, libres: grid.libres, auClasse: [] });
+    return new Map(r.parEleve.map((x) => [x.eleve.id, x.n]));
+  }, [grid, eleves]);
+  const avertissementsDe = (e) => avertissementEleve({ eleve: e, nAConfirmer: nAConfirmerParEleve.get(e.id) ?? 0 });
 
   // Un message de blocage devient périmé dès que les données ou la classe changent.
   useEffect(() => { setBlocages({}); }, [grid, classeId]);
@@ -61,6 +75,14 @@ export default function SaisieEcole() {
     blocage: blocageDe(ch),
     onBascule: (vers) => tenterBascule(ch, vers),
   });
+
+  // « Changer de classe » : réservé à qui peut éditer la structure (pas l'agent accompagnant).
+  const extraDe = (e) => (peutEditerStructure ? (
+    <ChangerClasse eleve={e} cibles={cibles} ecoles={ecoles} ecoleId={ctx.ecoleId}
+      donnees={{ chapitres, amenagements: cat?.amenagements ?? [], selectionsAR: grid?.selectionsAR ?? [], libres: grid?.libres ?? [] }}
+      onChanger={(classeCibleId) => mut.changerClasse.mutateAsync({ eleveId: e.id, classeCibleId })}
+      onFait={() => setEditId(null)} />
+  ) : null);
 
   return (
     <>
@@ -158,6 +180,7 @@ export default function SaisieEcole() {
                     {editId === e.id && (
                       <div className="absolute z-40 mt-1">
                         <EleveEditor eleve={e} onClose={() => setEditId(null)}
+                          avertissements={avertissementsDe(e)} extra={extraDe(e)}
                           onSave={(v) => mut.upsertEleve.mutateAsync({ id: e.id, classeId: e.classe_id, ...v })}
                           onDelete={() => mut.deleteEleve.mutateAsync({ id: e.id })} />
                       </div>
@@ -211,7 +234,8 @@ export default function SaisieEcole() {
               <EnTeteEleves eleves={eleves}
                 onSaveEleve={(v) => mut.upsertEleve.mutateAsync(v)}
                 onDeleteEleve={(v) => mut.deleteEleve.mutateAsync(v)}
-                eleveSurvole={eleveSurvole} onHoverEleve={setEleveSurvole} />
+                eleveSurvole={eleveSurvole} onHoverEleve={setEleveSurvole}
+                avertissementsDe={avertissementsDe} extraDe={extraDe} />
               <tbody>
                 {chapitres.filter((ch) => !enModeAU(ch)).map((ch) => (
                   <ChapitreAR key={ch.id} chapitre={ch}

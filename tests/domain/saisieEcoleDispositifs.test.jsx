@@ -12,6 +12,9 @@ vi.mock('../../src/hooks/useEcoleGrid.js', () => ({
   useEcoleGrid: () => ({ data: h.grid, isLoading: false, error: null }),
 }));
 vi.mock('../../src/hooks/useGridMutations.js', () => ({ useGridMutations: () => h.mut }));
+vi.mock('../../src/hooks/useClassesCibles.js', () => ({
+  useClassesCibles: () => ({ data: { classes: [{ id: 'c1', nom: '5LA', niveau: '5e', ecole_id: 's1' }, { id: 'c2', nom: '5LB', niveau: '5e', ecole_id: 's1' }], modes: [] } }),
+}));
 vi.mock('../../src/lib/auth.jsx', () => ({ useRole: () => ({ role: h.role, isAdmin: false }) }));
 
 import SaisieEcole from '../../src/pages/SaisieEcole.jsx';
@@ -22,12 +25,12 @@ const amenagements = [
   { id: 'x2', chapitre_id: 'd1', ordre: 2, libelle: 'Pause à la demande', type: 'AR' },
 ];
 
-function installer({ modes = [], selectionsAR = [], libres = [], role = 'referent_plai' } = {}) {
+function installer({ modes = [], selectionsAR = [], libres = [], role = 'referent_plai', eleveChange = false } = {}) {
   h.role = role;
   h.cat = { chapitres: [chapitre], amenagements };
   h.grid = {
     classes: [{ id: 'c1', nom: '5LA', niveau: '5e' }],
-    eleves: [{ id: 'e1', classe_id: 'c1', prenom: 'Emilie', initiale_nom: 'D' }],
+    eleves: [{ id: 'e1', classe_id: 'c1', prenom: 'Emilie', initiale_nom: 'D', classe_changee_le: eleveChange ? '2026-10-03T12:00:00Z' : null, classe_precedente_nom: eleveChange ? '4A' : null }],
     selectionsAR, auClasse: [], libres, modesDispositifs: modes,
   };
   h.mutate = vi.fn();
@@ -96,5 +99,33 @@ describe('SaisieEcole : dispositifs', () => {
     const radios = screen.getAllByRole('radio');
     expect(radios).toHaveLength(2);
     radios.forEach((r) => expect(r.disabled).toBe(true));
+  });
+});
+
+describe('SaisieEcole : changement de classe', () => {
+  it("avertit à l'édition d'un élève dont des aménagements sont « à confirmer »", () => {
+    installer({ selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1', a_confirmer: true }] });
+    ouvrirClasse();
+    fireEvent.click(screen.getByTitle('Cliquer pour modifier'));
+    expect(screen.getByRole('note').textContent).toContain('1 aménagement « à confirmer »');
+  });
+
+  it("n'avertit pas quand rien n'est à confirmer et que l'élève n'a pas changé de classe", () => {
+    installer({ selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1', a_confirmer: false }] });
+    ouvrirClasse();
+    fireEvent.click(screen.getByTitle('Cliquer pour modifier'));
+    expect(screen.queryByRole('note')).toBeNull();
+  });
+
+  it("propose « Changer de classe en cours d'année » aux référents, pas aux agents", () => {
+    installer({ role: 'referent_plai' });
+    ouvrirClasse();
+    fireEvent.click(screen.getByTitle('Cliquer pour modifier'));
+    expect(screen.getByText("Changer de classe en cours d'année")).toBeTruthy();
+    cleanup();
+    installer({ role: 'agent_plai' });
+    ouvrirClasse();
+    fireEvent.click(screen.getByTitle('Cliquer pour modifier'));
+    expect(screen.queryByText("Changer de classe en cours d'année")).toBeNull();
   });
 });
