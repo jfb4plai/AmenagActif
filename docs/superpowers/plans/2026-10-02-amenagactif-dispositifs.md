@@ -91,9 +91,9 @@ grant select, insert, update, delete on ar_classe_dispositifs to authenticated;
 grant select, insert, update, delete on ar_classe_dispositifs to service_role;
 
 -- Premier dispositif, groupe vide (les items sont ajoutés ensuite par l'admin dans Administration).
+-- Garde hors de l'agrégat : un SELECT agrégé sans GROUP BY renvoie toujours une ligne, même filtré.
 insert into ar_chapitres (ordre, titre, est_dispositif)
-select coalesce(max(ordre), 0) + 1, 'Dispositif de régulation des comportements', true
-from ar_chapitres
+select (select coalesce(max(ordre), 0) + 1 from ar_chapitres), 'Dispositif de régulation des comportements', true
 where not exists (select 1 from ar_chapitres where titre = 'Dispositif de régulation des comportements');
 
 commit;
