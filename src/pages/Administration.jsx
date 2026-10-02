@@ -215,7 +215,9 @@ function SectionCatalogue() {
                 <span>{estOuvert ? '▼' : '▶'}</span>
                 <span>{ch.titre}</span>
                 <span className="text-sm text-[color:var(--text3)]">
-                  ({items.filter((i) => i.type === 'AU').length} AU · {items.filter((i) => i.type === 'AR').length} AR)
+                  {ch.est_dispositif
+                    ? `(dispositif : ${items.length} aménagement(s), AR ou AU selon la classe)`
+                    : `(${items.filter((i) => i.type === 'AU').length} AU · ${items.filter((i) => i.type === 'AR').length} AR)`}
                 </span>
               </button>
               {estOuvert && (
@@ -230,18 +232,27 @@ function SectionCatalogue() {
                         onBlur={(e) => { if (e.target.value.trim() && e.target.value !== a.libelle) majAmenagement.mutate({ id: a.id, libelle: e.target.value }); }}
                       />
                       <div className="flex flex-wrap items-center gap-3 text-base">
-                        <label className="flex items-center gap-1">
-                          Type
-                          <select className="plai-input !w-auto !py-1" value={a.type}
-                            onChange={(e) => majAmenagement.mutate({ id: a.id, type: e.target.value })}>
-                            <option value="AU">AU — universel (classe)</option>
-                            <option value="AR">AR — raisonnable (élève)</option>
-                          </select>
-                        </label>
+                        {ch.est_dispositif ? (
+                          <span className="flex items-center gap-1" title="Le type dépend de la classe : AR par élève, ou AU si le dispositif est passé à toute la classe.">
+                            Type <strong>selon la classe (AR ou AU)</strong>
+                          </span>
+                        ) : (
+                          <label className="flex items-center gap-1">
+                            Type
+                            <select className="plai-input !w-auto !py-1" value={a.type}
+                              onChange={(e) => majAmenagement.mutate({ id: a.id, type: e.target.value })}>
+                              <option value="AU">AU — universel (classe)</option>
+                              <option value="AR">AR — raisonnable (élève)</option>
+                            </select>
+                          </label>
+                        )}
                         <label className="flex items-center gap-1">
                           Chapitre
                           <select className="plai-input !w-auto !py-1" value={a.chapitre_id}
-                            onChange={(e) => majAmenagement.mutate({ id: a.id, chapitreId: e.target.value })}>
+                            onChange={(e) => {
+                              const cible = chapitres.find((c) => c.id === e.target.value);
+                              majAmenagement.mutate({ id: a.id, chapitreId: e.target.value, ...(cible?.est_dispositif ? { type: 'AR' } : {}) });
+                            }}>
                             {chapitres.map((c) => <option key={c.id} value={c.id}>{c.titre}</option>)}
                           </select>
                         </label>
@@ -266,7 +277,7 @@ function SectionCatalogue() {
                       </div>
                     </div>
                   ))}
-                  <AjoutAmenagement chapitreId={ch.id} onAdd={ajouterAmenagement.mutate} />
+                  <AjoutAmenagement chapitreId={ch.id} estDispositif={ch.est_dispositif === true} onAdd={ajouterAmenagement.mutate} />
                 </div>
               )}
             </div>
@@ -283,7 +294,7 @@ function SectionCatalogue() {
 
 const AIDE_NE_PAS_TRANSMETTRE = "Par défaut, un aménagement est transmis aux autres apps PLAI qui reçoivent le profil d'une classe. Cochez pour que celui-ci ne soit pas envoyé ; il reste visible dans la fiche AménagActif. Exemple : « Rédiger le cours en braille » révèle une déficience visuelle ; cochez pour ne pas l'envoyer aux autres apps. Dans l'écran « Transmission aux autres apps », cette même exception apparaît comme « Non transmis ».";
 
-function AjoutAmenagement({ chapitreId, onAdd }) {
+function AjoutAmenagement({ chapitreId, estDispositif = false, onAdd }) {
   const [libelle, setLibelle] = useState('');
   const [type, setType] = useState('AR');
   const [nePasTransmettre, setNePasTransmettre] = useState(false);
@@ -299,15 +310,19 @@ function AjoutAmenagement({ chapitreId, onAdd }) {
       <p id={`${idp}-libelle-aide`} className="text-base text-[color:var(--text2)]">
         Ce texte s'affiche tel quel sur les fiches et dans les autres apps. Son code est généré automatiquement et ne changera plus, même si vous reformulez le libellé.
       </p>
-      <div className="flex flex-wrap items-center gap-3">
-        <label htmlFor={`${idp}-type`} className="flex items-center gap-2">
-          Type
-          <select id={`${idp}-type`} className="plai-input !w-auto !py-1" style={{ fontSize: 16 }} value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="AU">AU — universel</option>
-            <option value="AR">AR — raisonnable</option>
-          </select>
-        </label>
-      </div>
+      {estDispositif ? (
+        <p className="text-base text-[color:var(--text2)]">Type : <strong>selon la classe</strong> (AR par élève, ou AU si le dispositif est passé à toute la classe pour une classe donnée).</p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <label htmlFor={`${idp}-type`} className="flex items-center gap-2">
+            Type
+            <select id={`${idp}-type`} className="plai-input !w-auto !py-1" style={{ fontSize: 16 }} value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="AU">AU — universel</option>
+              <option value="AR">AR — raisonnable</option>
+            </select>
+          </label>
+        </div>
+      )}
       <div>
         <label htmlFor={`${idp}-np`} className="flex items-center gap-2 font-medium">
           <input id={`${idp}-np`} type="checkbox" className="w-5 h-5" checked={nePasTransmettre}
@@ -323,14 +338,24 @@ function AjoutAmenagement({ chapitreId, onAdd }) {
 
 function AjoutChapitre({ onAdd }) {
   const [titre, setTitre] = useState('');
+  const [estDispositif, setEstDispositif] = useState(false);
   return (
     <form className="border border-dashed border-teal rounded p-2 flex flex-wrap items-end gap-2"
-      onSubmit={(e) => { e.preventDefault(); if (titre.trim()) { onAdd({ titre }); setTitre(''); } }}>
+      onSubmit={(e) => { e.preventDefault(); if (titre.trim()) { onAdd({ titre, estDispositif }); setTitre(''); setEstDispositif(false); } }}>
       <label className="text-sm flex-1 min-w-[12rem]">Nouveau chapitre
-        <input className="plai-input block w-full" placeholder="Ex. : Accompagnement numérique"
+        <input className="plai-input block w-full" placeholder="Ex. : Dispositif de régulation des comportements"
           value={titre} onChange={(e) => setTitre(e.target.value)} />
         <span className="block text-xs text-[color:var(--text3)] font-normal">
-          Ajouté à la fin de la liste (13e chapitre, 14e…). Une fois créé, dépliez-le ci-dessus pour y ajouter des AU/AR.
+          Ajouté à la fin de la liste (13e chapitre, 14e…). Une fois créé, dépliez-le ci-dessus pour y ajouter des aménagements.
+        </span>
+      </label>
+      <label className="text-sm flex items-start gap-2 w-full">
+        <input type="checkbox" className="w-5 h-5 mt-0.5" checked={estDispositif} onChange={(e) => setEstDispositif(e.target.checked)} />
+        <span>
+          Ce chapitre est un <strong>dispositif</strong>
+          <span className="block text-xs text-[color:var(--text3)] font-normal">
+            Ses aménagements sont des AR (par élève) par défaut ; pour chaque classe, une case permet de les passer en AU (toute la classe). Non modifiable après la création.
+          </span>
         </span>
       </label>
       <button className="plai-btn" type="submit" disabled={!titre.trim()}>Ajouter le chapitre</button>

@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   try {
     const db = supabaseAdmin();
     const [{ data: chapitres, error: e1 }, { data: amenagements, error: e2 }] = await Promise.all([
-      db.from('ar_chapitres').select('id, ordre, titre').order('ordre'),
+      db.from('ar_chapitres').select('id, ordre, titre, est_dispositif').order('ordre'),
       db.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type').eq('actif', true).order('ordre'),
     ]);
     if (e1) throw e1;

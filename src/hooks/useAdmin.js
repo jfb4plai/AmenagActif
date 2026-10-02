@@ -119,7 +119,7 @@ export function useCatalogueAdmin() {
     queryKey: ['catalogue-admin'],
     queryFn: async () => {
       const [{ data: chapitres, error: e1 }, { data: amenagements, error: e2 }] = await Promise.all([
-        supabase.from('ar_chapitres').select('id, ordre, titre, code').order('ordre'),
+        supabase.from('ar_chapitres').select('id, ordre, titre, code, est_dispositif').order('ordre'),
         supabase.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type, actif, code, partage_profil').order('ordre'),
       ]);
       if (e1) throw e1;
@@ -183,9 +183,9 @@ export function useCatalogueMutations() {
   });
 
   const ajouterChapitre = useMutation({
-    mutationFn: async ({ titre }) => {
+    mutationFn: async ({ titre, estDispositif = false }) => {
       const ordre = await prochainOrdreChapitre();
-      const { error } = await supabase.from('ar_chapitres').insert({ ordre, titre: titre.trim() });
+      const { error } = await supabase.from('ar_chapitres').insert({ ordre, titre: titre.trim(), ...(estDispositif ? { est_dispositif: true } : {}) });
       if (error) throw error;
     },
     onSuccess: inval,

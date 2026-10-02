@@ -96,11 +96,14 @@ export default function CatalogueAmenagements() {
           return (
             <section key={ch.id} className="plai-card p-4 space-y-2">
               <h2 className="font-semibold">{ch.titre}</h2>
+              {ch.est_dispositif && (
+                <p className="text-sm text-[color:var(--text3)]">AU ou AR selon la classe : coché élève par élève, ou une seule fois pour toute la classe.</p>
+              )}
               <ul className="space-y-1.5">
                 {items.map((a) => (
                   <li key={a.id} className="text-sm flex items-start gap-2">
-                    <span className={`shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded ${a.type === 'AU' ? 'bg-teal/10 text-teal' : 'bg-orange/10 text-orange'}`}>
-                      {a.type}
+                    <span className={`shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded ${ch.est_dispositif ? 'bg-gray-200 text-gray-700' : a.type === 'AU' ? 'bg-teal/10 text-teal' : 'bg-orange/10 text-orange'}`}>
+                      {ch.est_dispositif ? 'Dispositif' : a.type}
                     </span>
                     <span>{a.libelle}</span>
                   </li>
