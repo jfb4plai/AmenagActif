@@ -45,14 +45,14 @@ export function useEcoleGrid(ecoleId, anneeId) {
         .from('ar_classes').select('id, nom, niveau, referent_plai_nom, commentaire, commentaire_modifie_le').eq('ecole_id', ecoleId).eq('annee_id', anneeId).order('nom');
       if (ec) throw ec;
       const classeIds = classes.map((c) => c.id);
-      if (classeIds.length === 0) return { classes, eleves: [], selectionsAR: [], auClasse: [], libres: [] };
+      if (classeIds.length === 0) return { classes, eleves: [], selectionsAR: [], auClasse: [], libres: [], modesDispositifs: [] };
 
       const { data: eleves, error: ee } = await supabase
         .from('ar_eleves').select('id, classe_id, prenom, initiale_nom, commentaire, statut').in('classe_id', classeIds).order('prenom');
       if (ee) throw ee;
       const eleveIds = eleves.map((e) => e.id);
 
-      const [{ data: auClasse, error: e1 }, sel, lib] = await Promise.all([
+      const [{ data: auClasse, error: e1 }, sel, lib, modes] = await Promise.all([
         supabase.from('ar_amenagements_classe').select('classe_id, amenagement_id, cree_le').in('classe_id', classeIds),
         eleveIds.length
           ? supabase.from('ar_selections').select('eleve_id, amenagement_id, cree_le').in('eleve_id', eleveIds)
@@ -60,12 +60,14 @@ export function useEcoleGrid(ecoleId, anneeId) {
         eleveIds.length
           ? supabase.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte').in('eleve_id', eleveIds)
           : Promise.resolve({ data: [], error: null }),
+        supabase.from('ar_classe_dispositifs').select('classe_id, chapitre_id, pour_toute_la_classe').in('classe_id', classeIds),
       ]);
       if (e1) throw e1;
       if (sel.error) throw sel.error;
       if (lib.error) throw lib.error;
+      if (modes.error) throw modes.error;
 
-      return { classes, eleves, selectionsAR: sel.data, auClasse, libres: lib.data };
+      return { classes, eleves, selectionsAR: sel.data, auClasse, libres: lib.data, modesDispositifs: modes.data };
     },
   });
 }

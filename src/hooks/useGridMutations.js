@@ -32,6 +32,19 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
+  // Mode d'un dispositif pour une classe (AR par élève / AU pour toute la classe). L'écran vérifie
+  // d'abord bloqueBasculeDispositif ; les droits sont imposés par la RLS (ar_can_editer_structure_ecole).
+  const basculerDispositif = useMutation({
+    mutationFn: async ({ classeId, chapitreId, pourToute }) => {
+      const { error } = await supabase.from('ar_classe_dispositifs').upsert(
+        { classe_id: classeId, chapitre_id: chapitreId, pour_toute_la_classe: pourToute, modifie_le: new Date().toISOString() },
+        { onConflict: 'classe_id,chapitre_id' },
+      );
+      if (error) throw error;
+    },
+    onSuccess: invalider,
+  });
+
   const upsertEleve = useMutation({
     mutationFn: async ({ id, classeId, prenom, initialeNom, commentaire, statut }) => {
       const row = { prenom, initiale_nom: initialeNom ?? '', commentaire: commentaire ?? '', statut };
@@ -107,5 +120,5 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
-  return { toggleAR, toggleAU, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, majCommentaireClasse, addLibre, removeLibre };
+  return { toggleAR, toggleAU, basculerDispositif, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, majCommentaireClasse, addLibre, removeLibre };
 }
