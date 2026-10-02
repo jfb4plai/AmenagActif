@@ -56,6 +56,21 @@ describe('écran Transmission aux autres apps', () => {
     await screen.findByText('Enregistré');
   });
 
+  it('un item de dispositif affiche « selon la classe » au lieu de AR', () => {
+    donnees.chapitres.push({ id: 'd1', ordre: 13, titre: '13. DISPOSITIF DE RÉGULATION', code: 'dispositif_regulation', est_dispositif: true });
+    donnees.amenagements.push({ id: 'x1', chapitre_id: 'd1', ordre: 1, libelle: 'Coin calme', type: 'AR', actif: true, code: 'ar_coin_calme', partage_profil: true });
+    try {
+      rendu();
+      fireEvent.click(screen.getByRole('button', { name: /13\. DISPOSITIF/ }));
+      const ligne = screen.getByText('Coin calme').closest('tr');
+      expect(within(ligne).getByText('selon la classe')).toBeTruthy();
+      expect(within(ligne).queryByText('AR')).toBeNull();
+    } finally {
+      donnees.chapitres.pop();
+      donnees.amenagements.pop();
+    }
+  });
+
   it('une erreur est affichée, jamais silencieuse', async () => {
     mutate.mockRejectedValueOnce(new Error('droits insuffisants'));
     rendu();

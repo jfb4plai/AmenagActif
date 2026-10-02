@@ -176,7 +176,7 @@ export default function TransmissionProfil() {
                                     {a.libelle}
                                     {!a.actif && <span className="block text-[color:var(--text2)]">(désactivé)</span>}
                                   </th>
-                                  <td className="py-2 pr-3">{a.type}</td>
+                                  <td className="py-2 pr-3">{ch.est_dispositif ? 'selon la classe' : a.type}</td>
                                   <td className="py-2">
                                     <button type="button" role="switch" aria-checked={!!a.partage_profil}
                                       aria-label={`${a.partage_profil ? 'Transmis' : 'Non transmis'} : ${a.libelle}`}
