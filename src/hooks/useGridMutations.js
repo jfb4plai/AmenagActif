@@ -146,5 +146,20 @@ export function useGridMutations(ecoleId, anneeId) {
     onSuccess: invalider,
   });
 
-  return { toggleAR, toggleAU, basculerDispositif, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, majCommentaireClasse, addLibre, removeLibre, confirmerEleve, confirmerClasse };
+  /** Change un élève de classe (même année). Atomique côté SQL ; invalide toutes les grilles et fiches (l'élève peut changer d'implantation). */
+  const changerClasse = useMutation({
+    mutationFn: async ({ eleveId, classeCibleId }) => {
+      const { error } = await supabase.rpc('ar_changer_classe_eleve', { p_eleve: eleveId, p_classe_cible: classeCibleId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['grille'] });
+      qc.invalidateQueries({ queryKey: ['classes-cibles'] });
+      qc.invalidateQueries({ queryKey: ['fiche-classe'] });
+      qc.invalidateQueries({ queryKey: ['fiche-groupe'] });
+      qc.invalidateQueries({ queryKey: ['a-confirmer-classes'] });
+    },
+  });
+
+  return { toggleAR, toggleAU, basculerDispositif, upsertEleve, deleteEleve, ensureClasse, deleteClasse, majReferentPlaiClasse, majCommentaireClasse, addLibre, removeLibre, confirmerEleve, confirmerClasse, changerClasse };
 }
