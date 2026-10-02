@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import FicheClasseView from '../../src/components/fiche/FicheClasseView.jsx';
 import { computeFicheClasse } from '../../src/domain/projections/ficheClasse.js';
 import { fusionnerDonneesClasses } from '../../src/domain/projections/fusionClasses.js';
+import { computeFicheEleve } from '../../src/domain/projections/ficheEleve.js';
 import * as f from '../../src/test/fixtures/sample.js';
 
 export const chapD = { id: 'd1', ordre: 13, titre: 'Dispositif de régulation des comportements', est_dispositif: true };
@@ -126,5 +127,48 @@ describe('FicheClasseView — bloc dispositif', () => {
     vm.classesSources = ['5LA', '5LB'];
     render(<FicheClasseView vm={vm} />);
     expect(screen.getByText(`${chapD.titre} (5LA) :`)).toBeTruthy();
+  });
+});
+
+describe('computeFicheEleve — dispositifs', () => {
+  const entree = (extra = {}) => ({
+    eleve: f.eleves[0], classeNom: '5LA', ecoleNom: 'Athénée X',
+    amenagements: [...f.amenagements, ...itemsD], chapitres: [...f.chapitres, chapD],
+    selectionsAR: [], libres: [], auClasse: [], modesDispositifs: [], ...extra,
+  });
+
+  it('mode AU : le bloc du dispositif apparaît sur la fiche de chaque élève de la classe', () => {
+    const vm = computeFicheEleve(entree({ modesDispositifs: modeAU, auClasse: [{ amenagement_id: 'x1' }] }));
+    expect(vm.dispositifsClasse).toEqual([{ titre: chapD.titre, items: ['Coin calme'] }]);
+  });
+
+  it('mode AR : les items cochés pour cet élève sont listés sous le titre du dispositif', () => {
+    const vm = computeFicheEleve(entree({ modesDispositifs: modeAR, selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1' }] }));
+    expect(vm.dispositifsClasse).toEqual([]);
+    expect(vm.parChapitre).toEqual([{ chapitreTitre: chapD.titre, amenagements: ['Coin calme'] }]);
+  });
+
+  it('mode AU : une sélection élève résiduelle sur le dispositif est ignorée', () => {
+    const vm = computeFicheEleve(entree({ modesDispositifs: modeAU, selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1' }] }));
+    expect(vm.parChapitre).toEqual([]);
+  });
+});
+
+describe('computeFicheEleve — AU de la classe (pourTous)', () => {
+  const entree = (extra = {}) => ({
+    eleve: f.eleves[0], classeNom: '5LA', ecoleNom: 'Athénée X',
+    amenagements: [...f.amenagements, ...itemsD], chapitres: [...f.chapitres, chapD],
+    selectionsAR: [], libres: [], auClasse: [], modesDispositifs: [], ...extra,
+  });
+
+  it('liste les AU ordinaires de la classe, avec chapitre et surbrillance de « Mise en page »', () => {
+    const vm = computeFicheEleve(entree({ auClasse: [{ amenagement_id: 'a-au1' }] }));
+    expect(vm.pourTous).toEqual([{ libelle: 'Mise en page', chapitreTitre: f.chapitres[0].titre, surligne: true }]);
+  });
+
+  it('exclut les items de dispositif (ils ont leur propre bloc) et reste vide sans AU', () => {
+    const vm = computeFicheEleve(entree({ modesDispositifs: modeAU, auClasse: [{ amenagement_id: 'x1' }] }));
+    expect(vm.pourTous).toEqual([]);
+    expect(vm.dispositifsClasse).toHaveLength(1);
   });
 });

@@ -8,12 +8,17 @@ async function charger(eleveId) {
     .select('id, prenom, initiale_nom, commentaire, statut, classe_id, ar_classes(nom, ar_ecoles(nom, implantation_nom))')
     .eq('id', eleveId).single();
   if (error) throw error;
-  const [cat, chap, sel, lib] = await Promise.all([
+  const [cat, chap, sel, lib, auc, modes] = await Promise.all([
     supabase.from('ar_amenagements').select('id, chapitre_id, ordre, libelle, type'),
-    supabase.from('ar_chapitres').select('id, ordre, titre').order('ordre'),
+    supabase.from('ar_chapitres').select('id, ordre, titre, est_dispositif').order('ordre'),
     supabase.from('ar_selections').select('eleve_id, amenagement_id').eq('eleve_id', eleveId),
     supabase.from('ar_amenagements_libres').select('id, eleve_id, chapitre_id, texte').eq('eleve_id', eleveId),
+    supabase.from('ar_amenagements_classe').select('amenagement_id').eq('classe_id', eleve.classe_id),
+    supabase.from('ar_classe_dispositifs').select('chapitre_id, pour_toute_la_classe').eq('classe_id', eleve.classe_id),
   ]);
+  // Jamais de fiche partielle silencieuse : les deux nouvelles lectures décident de ce qui s'affiche.
+  if (auc.error) throw auc.error;
+  if (modes.error) throw modes.error;
   return computeFicheEleve({
     eleve,
     classeNom: eleve.ar_classes?.nom ?? '',
@@ -22,6 +27,8 @@ async function charger(eleveId) {
     chapitres: chap.data,
     selectionsAR: sel.data,
     libres: lib.data,
+    auClasse: auc.data,
+    modesDispositifs: modes.data,
   });
 }
 

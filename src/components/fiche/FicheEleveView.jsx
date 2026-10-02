@@ -11,6 +11,22 @@ export default function FicheEleveView({ vm }) {
         <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-white border border-gray-400 align-middle">{vm.statut}</span>
         {' '}({vm.classeNom})
       </h1>
+      <section className="mb-3">
+        <h2 className="font-bold underline">AU applicable(s) à toute la classe :</h2>
+        <ul className="list-disc pl-6">
+          {(vm.pourTous?.length ?? 0) === 0 && <li className="list-none text-gray-500">Aucun aménagement universel retenu pour la classe.</li>}
+          {vm.pourTous?.map((x, i) => (
+            <li key={i} className={x.surligne ? 'bg-yellow-200' : ''}>{x.libelle}</li>
+          ))}
+        </ul>
+      </section>
+      {vm.dispositifsClasse?.map((d) => (
+        <section key={d.titre} className="mb-3">
+          <h2 className="font-bold underline">{d.titre} :</h2>
+          <ul className="list-disc pl-6">{d.items.map((a, i) => <li key={i}>{a}</li>)}</ul>
+        </section>
+      ))}
+      <h2 className="font-bold underline mb-1">Aménagements de {vm.eleve} :</h2>
       {vm.parChapitre.length === 0 && <p className="text-gray-500">Aucun aménagement spécifique enregistré.</p>}
       {vm.parChapitre.map((ch) => (
         <section key={ch.chapitreTitre} className="mb-3">
