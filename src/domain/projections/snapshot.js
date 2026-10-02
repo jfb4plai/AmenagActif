@@ -1,3 +1,5 @@
+import { appliquerTypesEffectifs } from '../dispositifs.js';
+
 /**
  * État complet AU/AR d'une classe, sérialisable, comparable.
  * @param {{
@@ -6,11 +8,13 @@
  *  auClasse: { amenagement_id: string }[],
  *  selectionsAR: import('../types.js').SelectionAR[],
  *  libres: import('../types.js').AmenagementLibre[],
+ *  chapitres?: import('../types.js').Chapitre[],
+ *  modesDispositifs?: { chapitre_id: string, pour_toute_la_classe: boolean }[],
  * }} input
  * @returns {{ au: string[], parEleve: Record<string,string[]> }}
  */
 export function buildSnapshot(input) {
-  const { eleves, amenagements, auClasse, selectionsAR, libres } = input;
+  const { eleves, amenagements, auClasse, selectionsAR, libres } = appliquerTypesEffectifs(input);
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const nomEleve = (e) => `${e.prenom}${e.initiale_nom ? ' ' + e.initiale_nom + '.' : ''}`;
   const eleveById = new Map(eleves.map((e) => [e.id, nomEleve(e)]));

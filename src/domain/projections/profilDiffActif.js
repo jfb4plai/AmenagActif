@@ -1,3 +1,5 @@
+import { appliquerTypesEffectifs } from '../dispositifs.js';
+
 /**
  * Profil AU/AR d'une classe, format d'échange pour DiffActif.
  * @param {{
@@ -8,10 +10,11 @@
  *  auClasse: { amenagement_id: string }[],
  *  selectionsAR: import('../types.js').SelectionAR[],
  *  libres: import('../types.js').AmenagementLibre[],
+ *  modesDispositifs?: { chapitre_id: string, pour_toute_la_classe: boolean }[],
  * }} input
  */
 export function computeProfilDiffActif(input) {
-  const { contexte, eleves, amenagements, chapitres, auClasse, selectionsAR, libres } = input;
+  const { contexte, eleves, amenagements, chapitres, auClasse, selectionsAR, libres } = appliquerTypesEffectifs(input);
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const chapById = new Map(chapitres.map((c) => [c.id, c]));
   const chapTitre = (id) => chapById.get(id)?.titre ?? '';

@@ -1,3 +1,5 @@
+import { appliquerTypesEffectifs } from '../dispositifs.js';
+
 /**
  * Projection `plai.profil-classe` v1 : profil d'aménagements d'une classe, minimisé
  * pour être transmis à un autre outil PLAI (passerelle). Fonction pure, déterministe.
@@ -68,6 +70,7 @@ const jour = (d) => d.toISOString().slice(0, 10);
  *  auClasse: { amenagement_id: string, cree_le?: string }[],
  *  selectionsAR: { eleve_id: string, amenagement_id: string, cree_le?: string }[],
  *  libres: { eleve_id: string, cree_le?: string }[],
+ *  modesDispositifs?: { chapitre_id: string, pour_toute_la_classe: boolean }[],
  * }} input
  * @param {{ now?: Date, dureeJours?: number, expireAt?: Date, k?: number, regles?: string[][] }} [options]
  */
@@ -79,7 +82,7 @@ export function computeProfilClasse(input, options = {}) {
     k = K_SEUIL_DEFAUT,
     regles = REGLES_CONFLIT,
   } = options;
-  const { contexte, eleves, amenagements, chapitres, auClasse, selectionsAR, libres } = input;
+  const { contexte, eleves, amenagements, chapitres, auClasse, selectionsAR, libres } = appliquerTypesEffectifs(input);
 
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const chapById = new Map(chapitres.map((c) => [c.id, c]));

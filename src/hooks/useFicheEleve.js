@@ -16,7 +16,11 @@ async function charger(eleveId) {
     supabase.from('ar_amenagements_classe').select('amenagement_id').eq('classe_id', eleve.classe_id),
     supabase.from('ar_classe_dispositifs').select('chapitre_id, pour_toute_la_classe').eq('classe_id', eleve.classe_id),
   ]);
-  // Jamais de fiche partielle silencieuse : les deux nouvelles lectures décident de ce qui s'affiche.
+  // Jamais de fiche partielle silencieuse : chaque lecture est contrôlée.
+  if (cat.error) throw cat.error;
+  if (chap.error) throw chap.error;
+  if (sel.error) throw sel.error;
+  if (lib.error) throw lib.error;
   if (auc.error) throw auc.error;
   if (modes.error) throw modes.error;
   return computeFicheEleve({
