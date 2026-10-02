@@ -57,4 +57,6 @@ Données canoniques Supabase = seule source. Les vues (fiche classe, fiche élè
 ## Périmètre
 
 **Livré (Plan 1)** : schéma, auth + rôles, grille de saisie école, fiches classe/élève web + PDF, lien à jeton enseignant.
-**À venir (Plan 2)** : notification mail, import CSV enseignants, import/export xlsx, export profil DiffActif actif, clôture d'année + report des élèves montants.
+**À venir (Plan 2)** : notification mail, import CSV enseignants, import/export xlsx, export profil DiffActif actif, clôture d'année (lecture seule de l'année N).
+
+**Reprise d'année** : `/reprise` (admin, référent PLAI, direction) reprend les élèves de l'année N vers N+1 (classes clonées, groupes → classes, exceptions par élève, changement d'implantation via l'admin). AR/AU repris = « à confirmer » dans la saisie.
