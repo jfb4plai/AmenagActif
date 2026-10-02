@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { chargerDonneesClasseAvec, COLONNES_ELEVES, COLONNES_AMENAGEMENTS } from '../../src/domain/chargeurFiche.js';
+import { chargerDonneesClasseAvec, COLONNES_ELEVES, COLONNES_AMENAGEMENTS, COLONNES_CHAPITRES } from '../../src/domain/chargeurFiche.js';
 
 /** Faux client Supabase : enregistre (table, colonnes) et renvoie des données de fixture. */
 function fauxDb(tables, erreurs = {}) {
@@ -23,6 +23,7 @@ function fauxDb(tables, erreurs = {}) {
 const tables = {
   ar_classes: [{ id: 'c1', nom: '3A', ecole_id: 'e1', ar_ecoles: { nom: 'E' }, ar_annees: { libelle: '2026-2027' } }],
   ar_eleves: [{ id: 'el1', classe_id: 'c1', prenom: 'X', statut: 'IPT' }],
+  ar_classe_dispositifs: [{ chapitre_id: 'ch-d', pour_toute_la_classe: true }],
   ar_profils_acces_ecoles: [{ user_id: 'multi' }],
   ar_profils_acces: [
     { user_id: 'legacy', nom: 'Legacy', role: 'direction', ecole_id: 'e1' },
@@ -54,13 +55,21 @@ describe('chargeur de fiche partagé', () => {
     }
   });
 
+  it('charge est_dispositif sur les chapitres et les modes de dispositifs de la classe', async () => {
+    const db = fauxDb(tables);
+    const d = await chargerDonneesClasseAvec(db, 'c1');
+    expect(COLONNES_CHAPITRES).toContain('est_dispositif');
+    expect(db.selects.find((s) => s.table === 'ar_chapitres').cols).toContain('est_dispositif');
+    expect(d.modesDispositifs).toEqual([{ chapitre_id: 'ch-d', pour_toute_la_classe: true }]);
+  });
+
   it('inclut les référents multi-écoles et exclut les autres écoles (I2)', async () => {
     const d = await chargerDonneesClasseAvec(fauxDb(tables), 'c1');
     expect(d.referents.map((r) => r.nom).sort()).toEqual(['Legacy', 'Multi']);
   });
 
   it("lève l'erreur au lieu de produire une fiche partielle (I3)", async () => {
-    const toutes = ['ar_classes', 'ar_eleves', 'ar_amenagements', 'ar_chapitres', 'ar_amenagements_classe', 'ar_selections', 'ar_amenagements_libres', 'ar_profils_acces_ecoles', 'ar_profils_acces'];
+    const toutes = ['ar_classes', 'ar_eleves', 'ar_amenagements', 'ar_chapitres', 'ar_amenagements_classe', 'ar_selections', 'ar_amenagements_libres', 'ar_profils_acces_ecoles', 'ar_profils_acces', 'ar_classe_dispositifs'];
     for (const t of toutes) {
       await expect(chargerDonneesClasseAvec(fauxDb(tables, { [t]: true }), 'c1')).rejects.toThrow(/boom|impossible/);
     }

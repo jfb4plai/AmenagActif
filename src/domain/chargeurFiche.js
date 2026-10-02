@@ -9,7 +9,8 @@
 export const COLONNES_CLASSE = 'id, nom, niveau, referent_plai_nom, commentaire, commentaire_modifie_le, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)';
 export const COLONNES_ELEVES = 'id, classe_id, prenom, initiale_nom, commentaire, statut, created_at';
 export const COLONNES_AMENAGEMENTS = 'id, chapitre_id, ordre, libelle, type, code, partage_profil';
-export const COLONNES_CHAPITRES = 'id, ordre, titre, code';
+export const COLONNES_CHAPITRES = 'id, ordre, titre, code, est_dispositif';
+export const COLONNES_MODES_DISPOSITIFS = 'chapitre_id, pour_toute_la_classe';
 export const COLONNES_AU_CLASSE = 'amenagement_id, cree_le';
 export const COLONNES_SELECTIONS = 'eleve_id, amenagement_id, cree_le';
 export const COLONNES_LIBRES = 'id, eleve_id, chapitre_id, texte, cree_le';
@@ -41,7 +42,7 @@ export async function chargerDonneesClasseAvec(db, classeId) {
   const eleveIds = eleves.map((e) => e.id);
   const vide = Promise.resolve({ data: [], error: null });
 
-  const [cat, chap, au, sel, lib, liensEcole, profils] = await Promise.all([
+  const [cat, chap, au, sel, lib, liensEcole, profils, modes] = await Promise.all([
     db.from('ar_amenagements').select(COLONNES_AMENAGEMENTS),
     db.from('ar_chapitres').select(COLONNES_CHAPITRES).order('ordre'),
     db.from('ar_amenagements_classe').select(COLONNES_AU_CLASSE).eq('classe_id', classeId),
@@ -50,6 +51,7 @@ export async function chargerDonneesClasseAvec(db, classeId) {
     // Comptes multi-écoles rattachés à cette école via ar_profils_acces_ecoles.
     db.from('ar_profils_acces_ecoles').select('user_id').eq('ecole_id', classe.ecole_id),
     db.from('ar_profils_acces').select(COLONNES_PROFILS).in('role', ROLES_REFERENTS),
+    db.from('ar_classe_dispositifs').select(COLONNES_MODES_DISPOSITIFS).eq('classe_id', classeId),
   ]);
 
   const userIdsMulti = new Set(verifier(liensEcole, 'rattachements écoles').map((l) => l.user_id));
@@ -67,6 +69,7 @@ export async function chargerDonneesClasseAvec(db, classeId) {
     auClasse: verifier(au, 'aménagements universels'),
     selectionsAR: verifier(sel, 'sélections'),
     libres: verifier(lib, 'aménagements libres'),
+    modesDispositifs: verifier(modes, 'modes des dispositifs'),
     referents,
   };
 }
