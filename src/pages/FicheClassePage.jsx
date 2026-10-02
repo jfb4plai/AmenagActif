@@ -6,6 +6,8 @@ import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche } from '../lib/imprimerFiche.js';
 import { useRole } from '../lib/auth.jsx';
 import GenerateurLien from '../components/GenerateurLien.jsx';
+import { useAConfirmerClasses } from '../hooks/useAConfirmer.js';
+import { messageAvantEnvoi } from '../domain/changementClasse.js';
 
 function Picker() {
   const { data: ecoles = [] } = useEcoles();
@@ -20,6 +22,7 @@ function Picker() {
   const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction' || role === 'agent_plai';
   const peutLier = role !== 'agent_plai'; // liens enseignants : référents et directions uniquement (cf. api/_lib/ficheData.js)
   const apercu = useFicheGroupe(valide?.classeIds, valide?.nomGroupe);
+  const aConfirmer = useAConfirmerClasses(valide?.classeIds);
 
   useEffect(() => {
     if (ecoleUnique && ecoleId !== ecoleUnique.id) setEcoleId(ecoleUnique.id);
@@ -111,6 +114,7 @@ function Picker() {
                     classeIds={valide.classeIds}
                     nomGroupe={valide.nomGroupe}
                     libelle={`Aménagements à mettre en place — ${apercu.data.classeNom}`}
+                    avertissement={messageAvantEnvoi(aConfirmer.data)}
                   />
                 </div>
               )}
@@ -134,6 +138,7 @@ export default function FicheClassePage({ picker }) {
 function FicheClasseContenu({ classeId }) {
   const { data: vm, isLoading, error } = useFicheClasse(classeId);
   const { role } = useRole();
+  const aConfirmer = useAConfirmerClasses([classeId]);
 
   const [lienOuvert, setLienOuvert] = useState(false);
 
@@ -150,7 +155,8 @@ function FicheClasseContenu({ classeId }) {
         )}
       </div>
       {role !== 'agent_plai' && lienOuvert && (
-        <GenerateurLien classeIds={[classeId]} libelle={`Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`} />
+        <GenerateurLien classeIds={[classeId]} libelle={`Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`}
+          avertissement={messageAvantEnvoi(aConfirmer.data)} />
       )}
       <FicheClasseView vm={vm} />
     </div>

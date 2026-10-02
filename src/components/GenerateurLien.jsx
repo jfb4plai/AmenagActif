@@ -7,9 +7,10 @@ const MAX_DESTINATAIRE = 80;
 
 /**
  * Génère un lien enseignant opaque. Le destinataire est obligatoire : il sert à retrouver et révoquer le lien.
- * Props : classeIds (1 à 10), nomGroupe (fiche groupée), libelle (texte cliquable collé dans le courriel).
+ * Props : classeIds (1 à 10), nomGroupe (fiche groupée), libelle (texte cliquable collé dans le courriel),
+ * avertissement (texte facultatif affiché avant le bouton, ex. aménagements « à confirmer » : non bloquant).
  */
-export default function GenerateurLien({ classeIds, nomGroupe, libelle }) {
+export default function GenerateurLien({ classeIds, nomGroupe, libelle, avertissement = null }) {
   const id = useId();
   const [destinataire, setDestinataire] = useState('');
   const [enCours, setEnCours] = useState(false);
@@ -61,6 +62,11 @@ export default function GenerateurLien({ classeIds, nomGroupe, libelle }) {
           Il n'est jamais montré aux élèves ni sur la fiche.
         </p>
       </div>
+      {avertissement && (
+        <p role="note" className="p-2 rounded" style={{ background: '#fff3e6', border: '1px solid #f97316', color: '#9a3412', fontSize: 16 }}>
+          {avertissement}
+        </p>
+      )}
       <button type="submit" className="plai-btn" style={{ fontSize: 16 }} disabled={enCours}>
         {enCours ? 'Génération…' : 'Générer et copier le lien'}
       </button>
