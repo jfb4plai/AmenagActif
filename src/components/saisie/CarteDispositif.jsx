@@ -28,12 +28,12 @@ export default function CarteDispositif({ classe, chapitre, items, auClasse, onT
             — {enRecherche ? `${affiches.length} résultat(s)` : `${nbCoches} coché(s) pour toute la classe`}
           </span>
         </div>
-        {tries.length === 0 && <p className="text-sm text-[color:var(--text3)]">Aucun aménagement dans ce dispositif pour l'instant.</p>}
-        {enRecherche && tries.length > 0 && affiches.length === 0 && <p className="text-sm text-[color:var(--text3)]">Aucun aménagement ne correspond.</p>}
+        {tries.length === 0 && <p className="text-base text-[color:var(--text3)]">Aucun aménagement dans ce dispositif pour l'instant.</p>}
+        {enRecherche && tries.length > 0 && affiches.length === 0 && <p className="text-base text-[color:var(--text3)]">Aucun aménagement ne correspond.</p>}
         <ul className="space-y-1">
           {affiches.map((a) => (
             <li key={a.id}>
-              <label className="flex items-start gap-2 text-sm">
+              <label className="flex items-start gap-2 text-base">
                 <input type="checkbox" className="mt-0.5" checked={estCoche(a.id)}
                   disabled={!peutRetirer && estCoche(a.id)}
                   title={!peutRetirer && estCoche(a.id) ? "Retrait réservé au référent PLAI, à la direction ou à l'administrateur" : undefined}

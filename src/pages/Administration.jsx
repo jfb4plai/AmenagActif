@@ -359,7 +359,7 @@ function AjoutChapitre({ onAdd }) {
         <input type="checkbox" className="w-5 h-5 mt-0.5" checked={estDispositif} onChange={(e) => setEstDispositif(e.target.checked)} />
         <span>
           Ce chapitre est un <strong>dispositif</strong>
-          <span className="block text-xs text-[color:var(--text3)] font-normal">
+          <span className="block text-base text-[color:var(--text3)] font-normal">
             Ses aménagements sont des AR (par élève) par défaut ; pour chaque classe, une case permet de les passer en AU (toute la classe). Non modifiable après la création.
           </span>
         </span>

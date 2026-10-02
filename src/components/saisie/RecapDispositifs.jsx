@@ -4,7 +4,7 @@ import { chapitreEnModeAU } from '../../domain/dispositifs.js';
 export default function RecapDispositifs({ dispositifs, modes }) {
   if (!dispositifs.length) return null;
   return (
-    <div className="plai-card p-3 text-sm">
+    <div className="plai-card p-3 text-base">
       <div className="font-medium mb-1">Dispositifs de cette classe</div>
       <ul className="space-y-0.5">
         {dispositifs.map((ch) => (
