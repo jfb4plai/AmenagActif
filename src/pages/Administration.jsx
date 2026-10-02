@@ -379,7 +379,7 @@ function SectionAnnees() {
     <section className="space-y-3">
       <h2 className="font-semibold">Années scolaires</h2>
       <p className="text-sm text-[color:var(--text3)]">
-        L'année « active » est celle présélectionnée dans la saisie et les fiches. Fin août, créez la nouvelle année et rendez-la active.
+        L'année « active » est celle présélectionnée dans la saisie et les fiches. Fin août, créez la nouvelle année et rendez-la active. Une fois la nouvelle année créée, <Link to="/reprise" className="underline text-teal">reprenez les élèves de l'année précédente</Link>.
       </p>
       <form
         className="flex gap-2 items-end"
