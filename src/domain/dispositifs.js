@@ -101,6 +101,14 @@ export function bloqueBasculeDispositif({ vers, chapitreId, amenagements, eleveI
   return null;
 }
 
+/**
+ * Vrai si déplacer un item du chapitre source vers le chapitre cible entre ou sort d'un dispositif
+ * (ses cochages existants changeraient de sens ou deviendraient invisibles).
+ */
+export function traverseDispositif(source, cible) {
+  return (source?.est_dispositif === true || cible?.est_dispositif === true) && source?.id !== cible?.id;
+}
+
 /** Texte de la confirmation avant de décocher un AU de classe (ordinaire ou dispositif). */
 export function messageConfirmationRetraitAU(libelle) {
   return `Décocher « ${libelle} » pour toute la classe ?\n\n- il disparaît de la fiche de la classe pour tous les enseignants qui la consultent ;\n- il ne figurera plus dans le profil transmis aux autres apps (DiffActif).\n\nÀ confirmer seulement si l'aménagement ne s'applique réellement plus.`;

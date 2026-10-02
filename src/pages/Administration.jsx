@@ -5,6 +5,7 @@ import {
   useCatalogueAdmin, useCatalogueMutations,
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
+import { traverseDispositif } from '../domain/dispositifs.js';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles nécessitant une école à l'invitation
@@ -251,7 +252,12 @@ function SectionCatalogue() {
                           <select className="plai-input !w-auto !py-1" value={a.chapitre_id}
                             onChange={(e) => {
                               const cible = chapitres.find((c) => c.id === e.target.value);
-                              majAmenagement.mutate({ id: a.id, chapitreId: e.target.value, ...(cible?.est_dispositif ? { type: 'AR' } : {}) });
+                              majAmenagement.mutate({
+                                id: a.id, chapitreId: e.target.value,
+                                ...(cible?.est_dispositif ? { type: 'AR' } : {}),
+                                // Entrer/sortir d'un dispositif : refusé si l'item est déjà coché (cochages invisibles sinon).
+                                ...(traverseDispositif(ch, cible) ? { verifierCochages: true } : {}),
+                              });
                             }}>
                             {chapitres.map((c) => <option key={c.id} value={c.id}>{c.titre}</option>)}
                           </select>

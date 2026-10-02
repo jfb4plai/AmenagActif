@@ -101,7 +101,24 @@ describe('Administration : catalogue et dispositifs', () => {
     fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
     const selects = screen.getAllByRole('combobox', { name: /Chapitre/ });
     fireEvent.change(selects[0], { target: { value: 'd1' } });
-    expect(h.majAmenagement.mutate).toHaveBeenCalledWith({ id: 'a1', chapitreId: 'd1', type: 'AR' });
+    expect(h.majAmenagement.mutate).toHaveBeenCalledWith({ id: 'a1', chapitreId: 'd1', type: 'AR', verifierCochages: true });
+  });
+
+  it('déplacer un item entre deux chapitres ordinaires : pas de vérification des cochages', () => {
+    h.cat = { chapitres: [...chapitres, { id: 'c2', ordre: 2, titre: 'Évaluations', code: 'EVAL', est_dispositif: false }], amenagements };
+    rendre();
+    fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
+    const selects = screen.getAllByRole('combobox', { name: /Chapitre/ });
+    fireEvent.change(selects[0], { target: { value: 'c2' } });
+    expect(h.majAmenagement.mutate).toHaveBeenCalledWith({ id: 'a1', chapitreId: 'c2' });
+  });
+
+  it('sortir un item d’un dispositif : vérification des cochages', () => {
+    rendre();
+    fireEvent.click(screen.getByRole('button', { name: /Dispositif de régulation/ }));
+    const selects = screen.getAllByRole('combobox', { name: /Chapitre/ });
+    fireEvent.change(selects[0], { target: { value: 'c1' } });
+    expect(h.majAmenagement.mutate).toHaveBeenCalledWith({ id: 'x1', chapitreId: 'c1', verifierCochages: true });
   });
 
   it('création de chapitre : case dispositif transmise à la mutation', () => {

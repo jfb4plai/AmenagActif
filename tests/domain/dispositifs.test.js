@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   estModeAU, chapitreEnModeAU, typeEffectif, appliquerTypesEffectifs,
-  selectionsActives, dispositifsAU, bloqueBasculeDispositif, messageConfirmationRetraitAU,
+  selectionsActives, dispositifsAU, bloqueBasculeDispositif, messageConfirmationRetraitAU, traverseDispositif,
 } from '../../src/domain/dispositifs.js';
 
 const chapitres = [
@@ -91,6 +91,18 @@ describe('dispositifsAU', () => {
     expect(dispositifsAU({ amenagements, chapitres, auClasse, modes: [] })).toEqual([]);
     expect(dispositifsAU({ amenagements, chapitres, auClasse: [], modes: modeAU })).toEqual([]);
   });
+});
+
+describe('traverseDispositif', () => {
+  const ord1 = { id: 'c1', est_dispositif: false };
+  const ord2 = { id: 'c2', est_dispositif: false };
+  const d1 = { id: 'd1', est_dispositif: true };
+  const d2 = { id: 'd2', est_dispositif: true };
+  it('ordinaire vers ordinaire : non', () => expect(traverseDispositif(ord1, ord2)).toBe(false));
+  it('ordinaire vers dispositif : oui', () => expect(traverseDispositif(ord1, d1)).toBe(true));
+  it('dispositif vers ordinaire : oui', () => expect(traverseDispositif(d1, ord1)).toBe(true));
+  it('dispositif vers le même dispositif : non', () => expect(traverseDispositif(d1, d1)).toBe(false));
+  it('dispositif vers un autre dispositif : oui', () => expect(traverseDispositif(d1, d2)).toBe(true));
 });
 
 describe('bloqueBasculeDispositif', () => {

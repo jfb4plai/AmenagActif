@@ -152,7 +152,18 @@ export function useCatalogueMutations() {
 
   const majAmenagement = useMutation({
     // Ne JAMAIS y mettre `code` : immuable (trigger SQL), généré automatiquement à la création.
-    mutationFn: async ({ id, libelle, type, actif, chapitreId, partageProfil }) => {
+    mutationFn: async ({ id, libelle, type, actif, chapitreId, partageProfil, verifierCochages }) => {
+      // Entrée/sortie d'un dispositif : refus si des cochages existent (ils changeraient de sens ou deviendraient invisibles).
+      if (verifierCochages && chapitreId) {
+        const [sel, cl] = await Promise.all([
+          supabase.from('ar_selections').select('eleve_id', { count: 'exact', head: true }).eq('amenagement_id', id),
+          supabase.from('ar_amenagements_classe').select('amenagement_id', { count: 'exact', head: true }).eq('amenagement_id', id),
+        ]);
+        if (sel.error) throw sel.error;
+        if (cl.error) throw cl.error;
+        const n = (sel.count ?? 0) + (cl.count ?? 0);
+        if (n > 0) throw new Error(`Déplacement refusé : cet aménagement est déjà coché pour ${n} élève(s) ou classe(s). Décochez-le d'abord partout, puis déplacez-le.`);
+      }
       const patch = {};
       if (partageProfil !== undefined) patch.partage_profil = partageProfil;
       if (libelle !== undefined) patch.libelle = libelle.trim();
