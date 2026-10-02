@@ -23,7 +23,7 @@ function fauxDb(tables, erreurs = {}) {
 const tables = {
   ar_classes: [{ id: 'c1', nom: '3A', ecole_id: 'e1', ar_ecoles: { nom: 'E' }, ar_annees: { libelle: '2026-2027' } }],
   ar_eleves: [{ id: 'el1', classe_id: 'c1', prenom: 'X', statut: 'IPT' }],
-  ar_classe_dispositifs: [{ chapitre_id: 'ch-d', pour_toute_la_classe: true }],
+  ar_classe_dispositifs: [{ chapitre_id: 'ch-d', pour_toute_la_classe: true, modifie_le: '2026-10-01T08:00:00Z' }],
   ar_profils_acces_ecoles: [{ user_id: 'multi' }],
   ar_profils_acces: [
     { user_id: 'legacy', nom: 'Legacy', role: 'direction', ecole_id: 'e1' },
@@ -60,7 +60,8 @@ describe('chargeur de fiche partagé', () => {
     const d = await chargerDonneesClasseAvec(db, 'c1');
     expect(COLONNES_CHAPITRES).toContain('est_dispositif');
     expect(db.selects.find((s) => s.table === 'ar_chapitres').cols).toContain('est_dispositif');
-    expect(d.modesDispositifs).toEqual([{ chapitre_id: 'ch-d', pour_toute_la_classe: true }]);
+    expect(d.modesDispositifs).toEqual([{ chapitre_id: 'ch-d', pour_toute_la_classe: true, modifie_le: '2026-10-01T08:00:00Z' }]);
+    expect(db.selects.find((s) => s.table === 'ar_classe_dispositifs').cols).toContain('modifie_le');
   });
 
   it('inclut les référents multi-écoles et exclut les autres écoles (I2)', async () => {

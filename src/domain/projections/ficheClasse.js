@@ -128,6 +128,8 @@ export function computeFicheClasse(input) {
     ...selectionsAR.map((s) => s.cree_le),
     ...auClasse.map((x) => x.cree_le),
     ...libres.map((l) => l.cree_le),
+    ...(input.modesDispositifs ?? []).map((m) => m.modifie_le),
+    ...(input.datesModification ?? []),
     input.classe?.created_at,
     ...eleves.map((e) => e.created_at),
   ].filter(Boolean).sort();

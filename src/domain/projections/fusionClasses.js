@@ -68,6 +68,8 @@ export function fusionnerDonneesClasses(parties, nomGroupe) {
     commentairesClasses,
     dispositifsClasse,
     modesDispositifs: [],
+    // Les modes ne sont pas fusionnés (figés en blocs) mais leurs dates de changement comptent pour dateMaj.
+    datesModification: parties.flatMap((p) => (p.modesDispositifs ?? []).map((m) => m.modifie_le)),
     contexte: {
       classeNom: nomGroupe?.trim() || classesSources.join(' + '),
       ecoleNom: premiere.contexte.ecoleNom,

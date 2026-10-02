@@ -75,6 +75,16 @@ describe('computeFicheClasse — dispositifs', () => {
   });
 });
 
+describe('computeFicheClasse — date de mise à jour et modes de dispositifs', () => {
+  it('un changement de mode plus récent que toutes les autres dates fixe dateMaj', () => {
+    const avant = computeFicheClasse(base({ modesDispositifs: [{ chapitre_id: 'd1', pour_toute_la_classe: false, modifie_le: '2020-01-01T00:00:00Z' }] }));
+    const modifie = '2099-03-04T10:00:00Z';
+    const vm = computeFicheClasse(base({ modesDispositifs: [{ chapitre_id: 'd1', pour_toute_la_classe: true, modifie_le: modifie }] }));
+    expect(avant.dateMaj < modifie).toBe(true);
+    expect(vm.dateMaj).toBe(modifie);
+  });
+});
+
 describe('fusionnerDonneesClasses — dispositifs', () => {
   const partieA = () => base({
     modesDispositifs: modeAU,
@@ -99,6 +109,17 @@ describe('fusionnerDonneesClasses — dispositifs', () => {
     expect(vm.dispositifsClasse).toEqual([{ titre: chapD.titre, items: ['Coin calme'], classe: '5LA' }]);
     const row = vm.parAmenagement.find((r) => r.libelle === 'Coin calme');
     expect(row.eleves.map((e) => e.nom)).toEqual(['Yasmine T.']);
+  });
+
+  it('fiche fusionnée : dateMaj reflète le changement de mode le plus récent des classes', () => {
+    const modifie = '2099-03-04T10:00:00Z';
+    const a = { ...partieA(), modesDispositifs: [{ chapitre_id: 'd1', pour_toute_la_classe: true, modifie_le: '2026-09-11T08:00:00Z' }] };
+    const b = { ...partieB(), modesDispositifs: [{ chapitre_id: 'd1', pour_toute_la_classe: false, modifie_le: modifie }] };
+    const fusion = fusionnerDonneesClasses([a, b]);
+    expect(fusion.modesDispositifs).toEqual([]);
+    expect(computeFicheClasse(fusion).dateMaj).toBe(modifie);
+    const sans = fusionnerDonneesClasses([a, { ...partieB(), modesDispositifs: [] }]);
+    expect(computeFicheClasse(sans).dateMaj < modifie).toBe(true);
   });
 
   it('écarte la sélection résiduelle de la classe en mode AU avant fusion', () => {
