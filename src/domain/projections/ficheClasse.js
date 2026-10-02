@@ -1,4 +1,5 @@
 import { normaliseLibelle, LIBELLE_RECTO_NORMALISE } from '../normalise.js';
+import { dispositifsAU, selectionsActives } from '../dispositifs.js';
 
 const LIBELLE_MISE_EN_PAGE = normaliseLibelle('Mise en page');
 
@@ -13,11 +14,20 @@ const LIBELLE_MISE_EN_PAGE = normaliseLibelle('Mise en page');
  *  selectionsAR: (import('../types.js').SelectionAR & { cree_le?: string })[],
  *  libres: import('../types.js').AmenagementLibre[],
  *  referents: import('../types.js').ReferentEcole[],
+ *  modesDispositifs?: { chapitre_id: string, pour_toute_la_classe: boolean }[],
+ *  dispositifsClasse?: { titre: string, items: string[], classe: string }[],
  * }} input
  * @returns {import('../types.js').FicheClasseVM}
  */
 export function computeFicheClasse(input) {
-  const { contexte, eleves, amenagements, chapitres, auClasse, selectionsAR, libres, referents } = input;
+  const { contexte, eleves, amenagements, chapitres, auClasse, libres, referents } = input;
+  const modes = input.modesDispositifs ?? [];
+  // Une sélection par élève restée sur un dispositif passé en AU (état normalement impossible) est ignorée.
+  const selectionsAR = selectionsActives(input.selectionsAR, amenagements, chapitres, modes);
+  // Blocs « dispositif pour toute la classe » : fournis par fusionnerDonneesClasses pour une fiche groupée
+  // (un par classe source), sinon calculés ici pour la classe unique.
+  const dispositifsClasse = input.dispositifsClasse
+    ?? dispositifsAU({ amenagements, chapitres, auClasse, modes }).map((b) => ({ ...b, classe: contexte.classeNom }));
 
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const chapById = new Map(chapitres.map((c) => [c.id, c]));
@@ -130,6 +140,7 @@ export function computeFicheClasse(input) {
     dateMaj,
     tableauReferents: { pia, par },
     pourTous,
+    dispositifsClasse,
     parEleve,
     parAmenagement,
     commentaires,

@@ -1,3 +1,5 @@
+import { dispositifsAU, selectionsActives } from '../dispositifs.js';
+
 /**
  * Fusionne les données brutes de plusieurs classes (même école) en un seul
  * jeu d'entrée pour computeFicheClasse — regroupement ad hoc "cours pratique"
@@ -18,6 +20,7 @@
  *  selectionsAR: import('../types.js').SelectionAR[],
  *  libres: import('../types.js').AmenagementLibre[],
  *  referents: import('../types.js').ReferentEcole[],
+ *  modesDispositifs?: { chapitre_id: string, pour_toute_la_classe: boolean }[],
  * }>} parties
  * @param {string} [nomGroupe]
  */
@@ -29,7 +32,12 @@ export function fusionnerDonneesClasses(parties, nomGroupe) {
 
   const eleves = parties.flatMap((p) => p.eleves);
   const auClasse = [...new Map(parties.flatMap((p) => p.auClasse).map((x) => [x.amenagement_id, x])).values()];
-  const selectionsAR = parties.flatMap((p) => p.selectionsAR);
+  // Le mode d'un dispositif est propre à chaque classe : on écarte avant fusion les sélections résiduelles
+  // des classes où il est en mode AU, et on fige un bloc par classe (étiqueté de son nom).
+  const selectionsAR = parties.flatMap((p) => selectionsActives(p.selectionsAR, p.amenagements, p.chapitres, p.modesDispositifs ?? []));
+  const dispositifsClasse = parties.flatMap((p) => dispositifsAU({
+    amenagements: p.amenagements, chapitres: p.chapitres, auClasse: p.auClasse, modes: p.modesDispositifs ?? [],
+  }).map((b) => ({ ...b, classe: p.contexte.classeNom })));
   const libres = parties.flatMap((p) => p.libres);
 
   const referentPlaiNom = [...new Set(
@@ -58,6 +66,8 @@ export function fusionnerDonneesClasses(parties, nomGroupe) {
   return {
     classe: { referent_plai_nom: referentPlaiNom, niveau, created_at: datesCreation[0] ?? null },
     commentairesClasses,
+    dispositifsClasse,
+    modesDispositifs: [],
     contexte: {
       classeNom: nomGroupe?.trim() || classesSources.join(' + '),
       ecoleNom: premiere.contexte.ecoleNom,

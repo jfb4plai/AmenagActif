@@ -40,6 +40,9 @@ describe('typeEffectif', () => {
     expect(typeEffectif(amenagements[0], chapitres, modeAU)).toBe('AU');
     expect(typeEffectif(amenagements[1], chapitres, modeAU)).toBe('AR');
   });
+  it('un aménagement inconnu renvoie undefined sans lever', () => {
+    expect(typeEffectif(undefined, chapitres, modeAU)).toBeUndefined();
+  });
 });
 
 describe('appliquerTypesEffectifs', () => {

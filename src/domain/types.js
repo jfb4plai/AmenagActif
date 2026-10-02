@@ -3,6 +3,7 @@
  * @property {string} id
  * @property {number} ordre
  * @property {string} titre
+ * @property {boolean} [est_dispositif]   // groupe « dispositif » : items AR par élève ou AU de classe selon la classe
  *
  * @typedef {Object} Amenagement
  * @property {string} id
@@ -52,6 +53,7 @@
  * @property {string|null} dateMaj
  * @property {{ pia: string[], par: string[] }} tableauReferents
  * @property {{ libelle: string, chapitreTitre: string, surligne: boolean }[]} pourTous
+ * @property {{ titre: string, items: string[], classe: string }[]} dispositifsClasse
  * @property {{ eleve: string, eleveId: string, amenagements: string[] }[]} parEleve
  * @property {{ libelle: string, eleves: { nom: string, eleveId: string, statut: string }[] }[]} parAmenagement
  * @property {{ eleve: string, statut: string, texte: string }[]} commentaires
@@ -64,6 +66,8 @@
  * @property {string} ecoleNom
  * @property {string} statut
  * @property {{ chapitreTitre: string, amenagements: string[] }[]} parChapitre
+ * @property {{ libelle: string, chapitreTitre: string, surligne: boolean }[]} pourTous
+ * @property {{ titre: string, items: string[] }[]} dispositifsClasse
  * @property {string} commentaire
  */
 export {};

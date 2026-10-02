@@ -20,7 +20,7 @@ export function chapitreEnModeAU(chapitre, modes = []) {
 
 export function typeEffectif(amenagement, chapitres, modes = []) {
   const ch = chapitres.find((c) => c.id === amenagement?.chapitre_id);
-  return chapitreEnModeAU(ch, modes) ? 'AU' : amenagement.type;
+  return chapitreEnModeAU(ch, modes) ? 'AU' : amenagement?.type;
 }
 
 /**
