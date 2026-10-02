@@ -60,7 +60,7 @@ export function dispositifsAU({ amenagements, chapitres, auClasse, modes = [] })
   for (const x of auClasse) {
     const a = amgtById.get(x.amenagement_id);
     const ch = a && chapById.get(a.chapitre_id);
-    if (!ch || !chapitreEnModeAU(ch, modes)) continue;
+    if (!ch || a.type !== 'AR' || !chapitreEnModeAU(ch, modes)) continue; // seuls les items stockés AR sont des items de dispositif
     if (!parChap.has(ch.id)) parChap.set(ch.id, { titre: ch.titre, ordre: ch.ordre, items: [] });
     parChap.get(ch.id).items.push({ ordre: a.ordre, libelle: a.libelle });
   }

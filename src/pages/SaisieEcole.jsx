@@ -189,7 +189,7 @@ export default function SaisieEcole() {
 
           {dispositifs.filter(enModeAU).map((ch) => (
             <CarteDispositif key={ch.id} classe={classe} chapitre={ch}
-              items={(cat.amenagements ?? []).filter((a) => a.chapitre_id === ch.id)}
+              items={(cat.amenagements ?? []).filter((a) => a.chapitre_id === ch.id && a.type === 'AR')}
               auClasse={grid.auClasse.filter((x) => x.classe_id === classeId)}
               onToggle={(v) => mut.toggleAU.mutate(v)}
               peutRetirer={peutEditerStructure} filtre={recherche} entete={enteteDe(ch)} />

@@ -79,6 +79,13 @@ describe('dispositifsAU', () => {
       { titre: 'Dispositif de régulation des comportements', items: ['Coin calme', 'Pictogramme de pause'] },
     ]);
   });
+  it("un item de type AU rangé dans un chapitre dispositif n'est pas dupliqué dans le bloc", () => {
+    const amgts = [...amenagements, { id: 'x3', chapitre_id: 'd1', ordre: 3, libelle: 'AU rangé ici', type: 'AU' }];
+    const blocs = dispositifsAU({ amenagements: amgts, chapitres, auClasse: [...auClasse, { amenagement_id: 'x3' }], modes: modeAU });
+    expect(blocs).toEqual([
+      { titre: 'Dispositif de régulation des comportements', items: ['Coin calme', 'Pictogramme de pause'] },
+    ]);
+  });
   it('rien en mode AR ou sans mode, ou sans item coché', () => {
     expect(dispositifsAU({ amenagements, chapitres, auClasse, modes: modeAR })).toEqual([]);
     expect(dispositifsAU({ amenagements, chapitres, auClasse, modes: [] })).toEqual([]);
