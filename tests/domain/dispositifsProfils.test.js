@@ -46,6 +46,11 @@ describe('profilClasse (contrat DiffActif) — dispositifs', () => {
     expect(p.au.map((x) => x.code)).toEqual(['ar_coin_calme']);
     expect(p.ar).toEqual([]);
   });
+  it('mode AU : une sélection élève résiduelle est non transmise et exclue de ar', () => {
+    const p = computeProfilClasse({ ...auInput, selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1' }], classe }, { now: new Date('2026-10-02T08:00:00Z') });
+    expect(p.elements_non_transmis_present).toBe(true);
+    expect(p.ar).toEqual([]);
+  });
   it('mode AR : transmis comme AR avec sa tranche d’effectif', () => {
     const p = computeProfilClasse({ ...arInput, classe }, { now: new Date('2026-10-02T08:00:00Z') });
     expect(p.au).toEqual([]);

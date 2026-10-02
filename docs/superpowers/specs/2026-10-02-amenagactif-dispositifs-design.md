@@ -17,7 +17,7 @@ Introduire des groupes d'aménagements nommés « dispositifs » (premier : « D
 7. Fiche élève : elle affiche tous les AU de la classe (bloc « AU applicable(s) à toute la classe », surbrillance de « Mise en page » comme sur la fiche classe), puis les blocs des dispositifs en mode AU. (Décision JF 2026-10-02 : la fiche élève n'affichait jusqu'ici aucun AU de classe.) Dispositifs en mode AR : leurs items cochés pour l'élève figurent sous le titre du dispositif dans ses aménagements.
 8. Profil DiffActif et autres consommateurs : lisent le type effectif (AU ou AR selon la fiche classe). Chantier DiffActif reporté ; AménagActif prépare la donnée.
 9. Rôles : la bascule est réservée à référent PLAI, direction, admin. L'agent accompagnant peut ajouter un dispositif en AU mais pas le retirer (règle RLS déjà en place pour les AU).
-10. Confirmation avant tout décochage d'un AU de classe (**tous les AU**, pas seulement les dispositifs) par référent/direction/admin, avec explication des conséquences : retrait de la fiche pour tous les enseignants, signalé comme retrait au prochain envoi, absent du profil DiffActif.
+10. Confirmation avant tout décochage d'un AU de classe (**tous les AU**, pas seulement les dispositifs) par référent/direction/admin, avec explication des conséquences : retrait de la fiche pour tous les enseignants, absent du profil DiffActif.
 11. Catalogue public : badge « Dispositif » + mention « AU ou AR selon la classe » (le catalogue n'a pas de notion de classe, un badge dynamique y est impossible).
 12. Contenu initial : groupe « Dispositif de régulation des comportements » créé vide ; l'admin ajoute les items via Administration.
 

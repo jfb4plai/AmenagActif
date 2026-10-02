@@ -244,7 +244,7 @@ describe('messageConfirmationRetraitAU', () => {
     const m = messageConfirmationRetraitAU('Coin calme');
     expect(m).toContain('« Coin calme »');
     expect(m).toMatch(/fiche de la classe/);
-    expect(m).toMatch(/prochain envoi/);
+    expect(m).not.toContain('prochain envoi');
     expect(m).toMatch(/DiffActif/);
   });
 });
@@ -354,7 +354,7 @@ export function bloqueBasculeDispositif({ vers, chapitreId, amenagements, eleveI
 
 /** Texte de la confirmation avant de décocher un AU de classe (ordinaire ou dispositif). */
 export function messageConfirmationRetraitAU(libelle) {
-  return `Décocher « ${libelle} » pour toute la classe ?\n\n- il disparaît de la fiche de la classe pour tous les enseignants qui la consultent ;\n- le prochain envoi le signalera comme retiré ;\n- il ne figurera plus dans le profil transmis aux autres apps (DiffActif).\n\nÀ confirmer seulement si l'aménagement ne s'applique réellement plus.`;
+  return `Décocher « ${libelle} » pour toute la classe ?\n\n- il disparaît de la fiche de la classe pour tous les enseignants qui la consultent ;\n- il ne figurera plus dans le profil transmis aux autres apps (DiffActif).\n\nÀ confirmer seulement si l'aménagement ne s'applique réellement plus.`;
 }
 ```
 

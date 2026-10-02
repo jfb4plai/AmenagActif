@@ -93,6 +93,12 @@ describe('EnTeteDispositif', () => {
     expect(screen.getByText(/modifiable par le référent PLAI, la direction ou l'administrateur/)).toBeTruthy();
   });
 
+  it("désactive les radios pendant une bascule sans afficher la phrase d'explication", () => {
+    render(<EnTeteDispositif {...base} enCours onBascule={() => {}} />);
+    screen.getAllByRole('radio').forEach((r) => expect(r.disabled).toBe(true));
+    expect(screen.queryByText(/modifiable par le référent PLAI/)).toBeNull();
+  });
+
   it('affiche le blocage avec role alert', () => {
     render(<EnTeteDispositif {...base} blocage="1 élève a déjà des cases cochées" onBascule={() => {}} />);
     expect(screen.getByRole('alert').textContent).toContain('1 élève a déjà');

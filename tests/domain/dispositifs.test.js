@@ -104,6 +104,23 @@ describe('bloqueBasculeDispositif', () => {
   it("vers AU : ignore les sélections d'un autre chapitre", () => {
     expect(bloqueBasculeDispositif({ vers: 'AU', chapitreId: 'd1', amenagements, eleveIds, selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'a2' }], auClasse: [] })).toBeNull();
   });
+  it('vers AU : un aménagement libre seul bloque, avec accord au singulier et au pluriel', () => {
+    const base = { vers: 'AU', chapitreId: 'd1', amenagements, eleveIds, selectionsAR: [], auClasse: [] };
+    const un = bloqueBasculeDispositif({ ...base, libres: [{ eleve_id: 'e1', chapitre_id: 'd1' }] });
+    expect(un).toMatch(/1 aménagement libre ajouté pour des élèves de ce dispositif\. Supprimez-le d'abord/);
+    const deux = bloqueBasculeDispositif({ ...base, libres: [{ eleve_id: 'e1', chapitre_id: 'd1' }, { eleve_id: 'e2', chapitre_id: 'd1' }] });
+    expect(deux).toMatch(/2 aménagements libres ajoutés pour des élèves de ce dispositif\. Supprimez-les d'abord/);
+  });
+  it("vers AU : un libre d'un élève hors classe ou d'un autre chapitre ne bloque pas", () => {
+    const base = { vers: 'AU', chapitreId: 'd1', amenagements, eleveIds, selectionsAR: [], auClasse: [] };
+    expect(bloqueBasculeDispositif({ ...base, libres: [{ eleve_id: 'zz', chapitre_id: 'd1' }, { eleve_id: 'e1', chapitre_id: 'autre' }] })).toBeNull();
+  });
+  it('vers AU : sélection et libre ensemble, le message mentionne les deux', () => {
+    const msg = bloqueBasculeDispositif({ vers: 'AU', chapitreId: 'd1', amenagements, eleveIds,
+      selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1' }], auClasse: [], libres: [{ eleve_id: 'e2', chapitre_id: 'd1' }] });
+    expect(msg).toMatch(/1 élève a déjà/);
+    expect(msg).toMatch(/1 aménagement libre ajouté/);
+  });
   it('vers AR : refuse si des items sont cochés pour la classe', () => {
     const msg = bloqueBasculeDispositif({ vers: 'AR', chapitreId: 'd1', amenagements, eleveIds, selectionsAR: [], auClasse: [{ amenagement_id: 'x1' }, { amenagement_id: 'a1' }] });
     expect(msg).toMatch(/1 aménagement/);
@@ -114,11 +131,11 @@ describe('bloqueBasculeDispositif', () => {
 });
 
 describe('messageConfirmationRetraitAU', () => {
-  it("nomme l'aménagement et explique les trois conséquences", () => {
+  it("nomme l'aménagement et explique les deux conséquences", () => {
     const m = messageConfirmationRetraitAU('Coin calme');
     expect(m).toContain('« Coin calme »');
     expect(m).toMatch(/fiche de la classe/);
-    expect(m).toMatch(/prochain envoi/);
+    expect(m).not.toContain('prochain envoi');
     expect(m).toMatch(/DiffActif/);
   });
 });

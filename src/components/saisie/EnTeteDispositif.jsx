@@ -2,7 +2,7 @@
  * En-tête commun d'un dispositif (dans la grille en mode AR, dans la carte en mode AU) :
  * badge de mode + choix du mode. Présentationnel : le parent calcule le blocage et déclenche la mutation.
  */
-export default function EnTeteDispositif({ chapitre, mode, peutBasculer, blocage, onBascule }) {
+export default function EnTeteDispositif({ chapitre, mode, peutBasculer, enCours = false, blocage, onBascule }) {
   const nom = `mode-${chapitre.id}`;
   return (
     <div className="px-2 py-2 border-b border-[color:var(--border)] text-sm space-y-1" role="group" aria-label={`Mode du dispositif ${chapitre.titre}`}>
@@ -11,11 +11,11 @@ export default function EnTeteDispositif({ chapitre, mode, peutBasculer, blocage
           {mode === 'AU' ? 'AU · toute la classe' : 'AR · par élève'}
         </span>
         <label className="flex items-center gap-1">
-          <input type="radio" name={nom} checked={mode === 'AR'} disabled={!peutBasculer} onChange={() => onBascule('AR')} />
+          <input type="radio" name={nom} checked={mode === 'AR'} disabled={!peutBasculer || enCours} onChange={() => onBascule('AR')} />
           élève par élève (AR)
         </label>
         <label className="flex items-center gap-1">
-          <input type="radio" name={nom} checked={mode === 'AU'} disabled={!peutBasculer} onChange={() => onBascule('AU')} />
+          <input type="radio" name={nom} checked={mode === 'AU'} disabled={!peutBasculer || enCours} onChange={() => onBascule('AU')} />
           à toute la classe (AU)
         </label>
       </div>

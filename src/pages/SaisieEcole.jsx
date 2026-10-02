@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import SelecteurContexte from '../components/saisie/SelecteurContexte.jsx';
 import SelecteurClasse from '../components/saisie/SelecteurClasse.jsx';
 import BarreSaut from '../components/saisie/BarreSaut.jsx';
@@ -32,6 +32,9 @@ export default function SaisieEcole() {
   const classe = useMemo(() => grid?.classes.find((c) => c.id === classeId) ?? null, [grid, classeId]);
   const eleves = useMemo(() => (grid?.eleves ?? []).filter((e) => e.classe_id === classeId), [grid, classeId]);
 
+  // Un message de blocage devient périmé dès que les données ou la classe changent.
+  useEffect(() => { setBlocages({}); }, [grid, classeId]);
+
   const chapitres = cat?.chapitres ?? [];
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
   const dispositifs = chapitres.filter((c) => c.est_dispositif);
@@ -45,6 +48,7 @@ export default function SaisieEcole() {
       eleveIds: new Set(eleves.map((e) => e.id)),
       selectionsAR: grid.selectionsAR,
       auClasse: grid.auClasse.filter((x) => x.classe_id === classeId),
+      libres: grid.libres,
     });
     setBlocages((b) => ({ ...b, [`${classeId}:${ch.id}`]: msg }));
     if (!msg) mut.basculerDispositif.mutate({ classeId, chapitreId: ch.id, pourToute: vers === 'AU' });
@@ -52,6 +56,7 @@ export default function SaisieEcole() {
   const enteteDe = (ch) => ({
     mode: enModeAU(ch) ? 'AU' : 'AR',
     peutBasculer: peutEditerStructure,
+    enCours: mut.basculerDispositif.isPending,
     blocage: blocageDe(ch),
     onBascule: (vers) => tenterBascule(ch, vers),
   });
