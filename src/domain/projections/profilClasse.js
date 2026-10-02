@@ -1,4 +1,4 @@
-import { appliquerTypesEffectifs } from '../dispositifs.js';
+import { appliquerTypesEffectifs, selectionsActives } from '../dispositifs.js';
 
 /**
  * Projection `plai.profil-classe` v1 : profil d'aménagements d'une classe, minimisé
@@ -82,7 +82,9 @@ export function computeProfilClasse(input, options = {}) {
     k = K_SEUIL_DEFAUT,
     regles = REGLES_CONFLIT,
   } = options;
-  const { contexte, eleves, amenagements, chapitres, auClasse, selectionsAR, libres } = appliquerTypesEffectifs(input);
+  const { contexte, eleves, amenagements, chapitres, auClasse, libres } = appliquerTypesEffectifs(input);
+  // Sélections restées sur un dispositif désormais en AU : ignorées (calculé sur les types d'origine).
+  const selectionsAR = selectionsActives(input.selectionsAR, input.amenagements, input.chapitres ?? [], input.modesDispositifs ?? []);
 
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const chapById = new Map(chapitres.map((c) => [c.id, c]));

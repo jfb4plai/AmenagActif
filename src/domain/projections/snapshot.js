@@ -1,4 +1,4 @@
-import { appliquerTypesEffectifs } from '../dispositifs.js';
+import { appliquerTypesEffectifs, selectionsActives } from '../dispositifs.js';
 
 /**
  * État complet AU/AR d'une classe, sérialisable, comparable.
@@ -14,7 +14,9 @@ import { appliquerTypesEffectifs } from '../dispositifs.js';
  * @returns {{ au: string[], parEleve: Record<string,string[]> }}
  */
 export function buildSnapshot(input) {
-  const { eleves, amenagements, auClasse, selectionsAR, libres } = appliquerTypesEffectifs(input);
+  const { eleves, amenagements, auClasse, libres } = appliquerTypesEffectifs(input);
+  // Sélections restées sur un dispositif désormais en AU : ignorées (calculé sur les types d'origine).
+  const selectionsAR = selectionsActives(input.selectionsAR, input.amenagements, input.chapitres ?? [], input.modesDispositifs ?? []);
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const nomEleve = (e) => `${e.prenom}${e.initiale_nom ? ' ' + e.initiale_nom + '.' : ''}`;
   const eleveById = new Map(eleves.map((e) => [e.id, nomEleve(e)]));

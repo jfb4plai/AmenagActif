@@ -19,6 +19,11 @@ describe('snapshot — dispositifs', () => {
     expect(s.au).toEqual(['Coin calme']);
     expect(s.parEleve['Emilie D.']).toEqual([]);
   });
+  it('mode AU : une sélection élève résiduelle est ignorée', () => {
+    const s = buildSnapshot({ ...auInput, selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1' }] });
+    expect(s.au).toEqual(['Coin calme']);
+    expect(s.parEleve['Emilie D.']).toEqual([]);
+  });
   it('mode AR : item dans les AR de l’élève', () => {
     const s = buildSnapshot(arInput);
     expect(s.au).toEqual([]);
@@ -29,6 +34,11 @@ describe('snapshot — dispositifs', () => {
 describe('profilDiffActif — dispositifs', () => {
   it('mode AU : auCommuns', () => {
     const p = computeProfilDiffActif(auInput);
+    expect(p.auCommuns.map((a) => a.libelle)).toEqual(['Coin calme']);
+    expect(p.arParEleve).toEqual([]);
+  });
+  it('mode AU : une sélection élève résiduelle est ignorée', () => {
+    const p = computeProfilDiffActif({ ...auInput, selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1' }] });
     expect(p.auCommuns.map((a) => a.libelle)).toEqual(['Coin calme']);
     expect(p.arParEleve).toEqual([]);
   });
@@ -46,9 +56,10 @@ describe('profilClasse (contrat DiffActif) — dispositifs', () => {
     expect(p.au.map((x) => x.code)).toEqual(['ar_coin_calme']);
     expect(p.ar).toEqual([]);
   });
-  it('mode AU : une sélection élève résiduelle est non transmise et exclue de ar', () => {
+  it('mode AU : une sélection élève résiduelle est ignorée (pas de drapeau non transmis, item dans au seulement)', () => {
     const p = computeProfilClasse({ ...auInput, selectionsAR: [{ eleve_id: 'e1', amenagement_id: 'x1' }], classe }, { now: new Date('2026-10-02T08:00:00Z') });
-    expect(p.elements_non_transmis_present).toBe(true);
+    expect(p.elements_non_transmis_present).toBe(false);
+    expect(p.au.map((x) => x.code)).toEqual(['ar_coin_calme']);
     expect(p.ar).toEqual([]);
   });
   it('mode AR : transmis comme AR avec sa tranche d’effectif', () => {

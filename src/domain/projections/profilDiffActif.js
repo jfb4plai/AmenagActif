@@ -1,4 +1,4 @@
-import { appliquerTypesEffectifs } from '../dispositifs.js';
+import { appliquerTypesEffectifs, selectionsActives } from '../dispositifs.js';
 
 /**
  * Profil AU/AR d'une classe, format d'échange pour DiffActif.
@@ -14,7 +14,9 @@ import { appliquerTypesEffectifs } from '../dispositifs.js';
  * }} input
  */
 export function computeProfilDiffActif(input) {
-  const { contexte, eleves, amenagements, chapitres, auClasse, selectionsAR, libres } = appliquerTypesEffectifs(input);
+  const { contexte, eleves, amenagements, chapitres, auClasse, libres } = appliquerTypesEffectifs(input);
+  // Sélections restées sur un dispositif désormais en AU : ignorées (calculé sur les types d'origine).
+  const selectionsAR = selectionsActives(input.selectionsAR, input.amenagements, input.chapitres ?? [], input.modesDispositifs ?? []);
   const amgtById = new Map(amenagements.map((a) => [a.id, a]));
   const chapById = new Map(chapitres.map((c) => [c.id, c]));
   const chapTitre = (id) => chapById.get(id)?.titre ?? '';
