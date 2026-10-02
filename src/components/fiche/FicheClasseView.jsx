@@ -52,6 +52,16 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
         ))}
       </ul>
 
+      {vm.dispositifsClasse?.map((d, i) => (
+        <section key={i} className="mb-4">
+          {/* Titre exact du dispositif ; en fiche groupée, la classe précise de quelle classe il s'agit. */}
+          <h2 className="font-bold underline mb-1">{d.titre}{vm.classesSources ? ` (${d.classe})` : ''} :</h2>
+          <ul className="list-disc pl-6">
+            {d.items.map((libelle, j) => <li key={j}>{libelle}</li>)}
+          </ul>
+        </section>
+      ))}
+
       <h2 className="font-bold underline mb-1">AR spécifiques à un élève :</h2>
       <table className="w-full border border-black mb-4 text-sm">
         <tbody>

@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import FicheClasseView from '../../src/components/fiche/FicheClasseView.jsx';
 import { computeFicheClasse } from '../../src/domain/projections/ficheClasse.js';
 import { fusionnerDonneesClasses } from '../../src/domain/projections/fusionClasses.js';
 import * as f from '../../src/test/fixtures/sample.js';
@@ -103,5 +105,26 @@ describe('fusionnerDonneesClasses — dispositifs', () => {
     a.selectionsAR = [...a.selectionsAR, { eleve_id: 'e2', amenagement_id: 'x1', cree_le: '2026-09-10T08:00:00Z' }];
     const fusion = fusionnerDonneesClasses([a, partieB()]);
     expect(fusion.selectionsAR.some((s) => s.eleve_id === 'e2' && s.amenagement_id === 'x1')).toBe(false);
+  });
+});
+
+describe('FicheClasseView — bloc dispositif', () => {
+  it('affiche le titre exact du dispositif et ses items sous les AU', () => {
+    const vm = computeFicheClasse(base({
+      modesDispositifs: modeAU,
+      auClasse: [...f.auClasse, { amenagement_id: 'x1', cree_le: '2026-09-10T08:00:00Z' }],
+    }));
+    render(<FicheClasseView vm={vm} />);
+    expect(screen.getByText(`${chapD.titre} :`)).toBeTruthy();
+    expect(screen.getByText('Coin calme')).toBeTruthy();
+  });
+  it('ajoute le nom de la classe en fiche groupée', () => {
+    const vm = computeFicheClasse(base({
+      modesDispositifs: modeAU,
+      auClasse: [...f.auClasse, { amenagement_id: 'x1', cree_le: '2026-09-10T08:00:00Z' }],
+    }));
+    vm.classesSources = ['5LA', '5LB'];
+    render(<FicheClasseView vm={vm} />);
+    expect(screen.getByText(`${chapD.titre} (5LA) :`)).toBeTruthy();
   });
 });
