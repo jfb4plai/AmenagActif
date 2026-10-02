@@ -83,7 +83,7 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
                 <div key={l.id} className="text-sm flex items-center gap-2">
                   <span className="text-teal">+</span>
                   <span>{el ? `${el.prenom} ${el.initiale_nom}` : '—'} : {l.texte}</span>
-                  {l.a_confirmer && <span className="text-xs text-orange font-medium">à confirmer</span>}
+                  {l.a_confirmer && <span className="text-xs text-[#9a3412] font-medium">à confirmer</span>}
                   <button className="text-xs underline" onClick={() => onRemoveLibre({ id: l.id })}>retirer</button>
                 </div>
               );

@@ -20,7 +20,7 @@ export default function EtapeEleves({ d, ecoleId, ecoles, isAdmin, mapping, exce
   return (
     <section className="space-y-3">
       <div className="plai-card p-3 space-y-1">
-        <label htmlFor="filtre-eleve" className="font-semibold block">3. Corriger les exceptions</label>
+        <label htmlFor="filtre-eleve" className="font-semibold block">Corriger les exceptions</label>
         <input id="filtre-eleve" type="search" className="plai-input w-full max-w-sm" placeholder="Chercher un prénom (ex : Amir)"
           value={filtre} onChange={(e) => setFiltre(e.target.value)} />
         <p className="text-sm text-[color:var(--text3)]">
@@ -61,7 +61,7 @@ export default function EtapeEleves({ d, ecoleId, ecoles, isAdmin, mapping, exce
                         <option value="transfert">Autre implantation (à réaffecter par l'administrateur)</option>
                         <option value="termine">Fin de parcours / quitte le réseau</option>
                       </select>
-                      {exceptions[e.id] && <span className="text-xs text-orange font-medium">modifié</span>}
+                      {exceptions[e.id] && <span className="text-xs text-[#9a3412] font-medium">modifié</span>}
                     </>
                   )}
                 </li>

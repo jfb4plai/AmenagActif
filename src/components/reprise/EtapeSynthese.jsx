@@ -8,7 +8,7 @@ function messageErreur(m) {
 export default function EtapeSynthese({ s, onAppliquer, enCours, rapport, nomEleve }) {
   return (
     <section className="plai-card p-3 space-y-3">
-      <h2 className="font-semibold">4. Synthèse</h2>
+      <h2 className="font-semibold">Synthèse</h2>
       <ul className="text-sm space-y-1">
         <li><strong>{s.classe}</strong> élève(s) seront repris dans une classe (AR et aménagements libres copiés « à confirmer »).</li>
         <li><strong>{s.transfert}</strong> changent d'implantation (file de l'administrateur).</li>

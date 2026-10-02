@@ -44,7 +44,7 @@ export default function CarteDispositif({ classe, chapitre, items, auClasse, onT
                   }} />
                 <span>
                   {a.libelle}
-                  {auClasse.find((x) => x.amenagement_id === a.id)?.a_confirmer && <span className="text-xs text-orange font-medium"> · à confirmer</span>}
+                  {auClasse.find((x) => x.amenagement_id === a.id)?.a_confirmer && <span className="text-xs text-[#9a3412] font-medium"> · à confirmer</span>}
                 </span>
               </label>
             </li>

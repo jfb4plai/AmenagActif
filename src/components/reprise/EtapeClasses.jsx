@@ -7,7 +7,7 @@ export default function EtapeClasses({ d, ecoleId, srcLibelle, cibleLibelle, map
   return (
     <section className="space-y-4">
       <div className="plai-card p-3 space-y-2">
-        <h2 className="font-semibold">1. Classes de {cibleLibelle}</h2>
+        <h2 className="font-semibold">Classes de {cibleLibelle}</h2>
         <p className="text-sm text-[color:var(--text3)]">
           Reprend les classes de {srcLibelle} : nom, niveau, référent(s) PLAI et aménagements universels (ces derniers sont marqués « à confirmer »).
           Les classes déjà créées ne sont pas modifiées : vous pouvez relancer sans risque après avoir ajouté une classe à la main.
@@ -40,7 +40,7 @@ export default function EtapeClasses({ d, ecoleId, srcLibelle, cibleLibelle, map
       </div>
 
       <div className="plai-card p-3 space-y-2">
-        <h2 className="font-semibold">2. Où va la majorité de chaque groupe ?</h2>
+        <h2 className="font-semibold">Où va la majorité de chaque groupe ?</h2>
         <p className="text-sm text-[color:var(--text3)]">
           Pour chaque classe de {srcLibelle}, choisissez la classe de {cibleLibelle} où va la majorité de ses élèves.
           Tous les élèves du groupe y seront proposés par défaut ; vous corrigerez les exceptions à l'étape suivante.

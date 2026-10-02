@@ -57,7 +57,7 @@ export default function App() {
       <Route path="/liens" element={<RequireAuth><Shell><RequireRole roles={GESTIONNAIRES_LIENS}><LiensEnseignants /></RequireRole></Shell></RequireAuth>} />
       <Route path="/administration" element={<RequireAuth><Shell><RequireRole roles={['admin']}><Administration /></RequireRole></Shell></RequireAuth>} />
       <Route path="/reprise" element={<RequireAuth><Shell><RequireRole roles={GESTIONNAIRES_LIENS}><Reprise /></RequireRole></Shell></RequireAuth>} />
-      <Route path="/administration/transmission"element={<RequireAuth><Shell><RequireRole roles={['admin']}><TransmissionProfil /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/administration/transmission" element={<RequireAuth><Shell><RequireRole roles={['admin']}><TransmissionProfil /></RequireRole></Shell></RequireAuth>} />
       <Route path="/fiches" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><FicheClassePage picker /></RequireRole></Shell></RequireAuth>} />
       <Route path="/fiches/ecole" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><FicheEcolePage /></RequireRole></Shell></RequireAuth>} />
       <Route path="/classe/:classeId/fiche" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><FicheClassePage /></RequireRole></Shell></RequireAuth>} />
