@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AménagActif — reprendre les élèves à la rentrée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f7; --surface: #ffffff; --surface2: #f4f2ee;
+  --border: #e8e4dd; --border2: #d4cfc6;
+  --text: #1a1814; --text2: #5a564f; --text3: #9a958c;
+  --teal: #0f6e56; --teal-bg: #e1f5ee; --teal-border: #1d9e75;
+  --orange: #f97316; --orange-bg: #fef1e7; --orange-border: #f97316;
+  --radius: 10px; --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
+.plai-nav {
+  background: rgba(250,249,247,0.95); border-bottom: 1px solid var(--border);
+  padding: 0.9rem 2rem; display: flex; align-items: center; gap: 12px;
+}
+.plai-nav img { height: 32px; width: auto; }
+.plai-nav span { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+.plai-container { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+.plai-badge {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 2rem;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--teal); background: var(--teal-bg); border: 1px solid var(--teal-border);
+  padding: 5px 14px; border-radius: 20px;
+}
+h1 { font-family: 'DM Serif Display', serif; font-size: 30px; margin: 0.85rem 0 0.4rem; color: var(--text); }
+.byline { font-size: 14px; color: var(--text3); margin-bottom: 1.75rem; }
+.lead { font-size: 17px; color: var(--text2); margin-bottom: 0.5rem; }
+.plai-section { padding: 2rem 0 1.75rem; border-top: 1px solid var(--border); }
+.plai-section h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 1rem; color: var(--text); }
+.plai-section h3 { font-family: 'DM Serif Display', serif; font-size: 17px; margin: 1.25rem 0 0.6rem; color: var(--text); }
+.plai-section p { margin-bottom: 0.9rem; }
+.plai-section ol, .plai-section ul { margin: 0 0 0.9rem 1.4rem; }
+.plai-section li { margin-bottom: 0.6rem; }
+.plai-section li::marker { color: var(--teal); font-weight: 700; }
+strong { color: var(--text); font-weight: 700; }
+.plai-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1.5rem; margin: 1rem 0;
+}
+.rgpd {
+  background: var(--orange-bg); border: 1px solid var(--orange-border); border-radius: var(--radius);
+  padding: 1.1rem 1.4rem; margin: 1rem 0;
+}
+.rgpd h3 { margin-top: 0; color: #9a3f0a; }
+.principe {
+  background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: var(--radius);
+  padding: 1.1rem 1.4rem; margin: 1rem 0;
+}
+.principe h3 { margin-top: 0; color: var(--teal); }
+.principe ul { margin: 0; }
+.principe li:last-child { margin-bottom: 0; }
+.plai-footer {
+  text-align: center; padding: 2.5rem 0 2.5rem; font-size: 13px; color: var(--text3);
+  border-top: 1px solid var(--border); margin-top: 1rem;
+}
+.plai-footer p + p { margin-top: 6px; }
+.limite { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.5rem 1.5rem 1rem; margin: 1rem 0; }
+.limite h3 { margin-top: 0.6rem; }
+@media print {
+  .plai-nav { position: static; }
+  body { font-size: 12.5pt; }
+  .plai-section { break-inside: avoid-page; }
+}
+</style>
+</head>
+<body>
+<header class="plai-nav">
+  <img src="https://amenagactif.jfb4plai.com/plai-logo.jpg" alt="PLAI">
+  <span>AménagActif</span>
+</header>
+
+<div class="plai-container">
+  <div class="plai-badge">Mode d'emploi · Référents PLAI et directions</div>
+  <h1>Reprendre les élèves à la rentrée (nouvelle année scolaire)</h1>
+  <p class="byline">Pôle Territorial de la Ville de Liège (PLAI) · 3 octobre 2026</p>
+  <p class="lead">Ce mode d'emploi s'adresse aux <strong>référents PLAI et aux directions</strong> des implantations. Il explique comment <strong>reprendre vos élèves de l'année scolaire qui se termine vers la suivante</strong>, sans tout ressaisir : les classes se créent en un clic, les élèves sont placés par groupe, et vous ne corrigez que les exceptions.</p>
+  <p class="lead">Il ne concerne <strong>pas</strong> un élève qui change de classe en cours d'année : pour cela, consultez le mode d'emploi « Un élève change de classe ou d'implantation en cours d'année ».</p>
+  <p class="lead">Sommaire : les trois temps de la rentrée, avant de commencer, étape 1 (classes), étape 2 (exceptions), étape 3 (synthèse), ce qui est repris ou non, après la reprise, les élèves qui changent d'implantation, les dispositifs, questions fréquentes.</p>
+
+  <section class="plai-section">
+    <h2>Les trois temps de la rentrée</h2>
+    <div class="principe">
+      <h3>À retenir</h3>
+      <ul>
+        <li><strong>Temps 1 : l'administrateur PLAI prépare l'année.</strong> Il crée la nouvelle année scolaire (ex. 2027-2028) et la rend active au moment opportun (Administration, section Années). Un bandeau orange le lui rappelle entre le 15 août et le 31 décembre.</li>
+        <li><strong>Temps 2 : vous reprenez vos élèves</strong> avec l'assistant du menu <strong>« Reprise d'année »</strong>, une implantation à la fois.</li>
+        <li><strong>Temps 3 : vous relisez et confirmez.</strong> Rien n'est considéré comme acquis tant que vous n'avez pas confirmé : l'élève a pu progresser, changer de niveau ou de filière.</li>
+      </ul>
+    </div>
+    <p>Les fiches de l'année qui se termine <strong>ne sont jamais modifiées ni supprimées</strong> : la reprise crée de nouvelles fiches et laisse les anciennes intactes.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Avant de commencer</h2>
+    <ul>
+      <li><strong>La nouvelle année doit exister.</strong> Si le sélecteur « Vers » ne la propose pas, demandez à un administrateur PLAI de la créer (Administration, section Années : champ « Année scolaire » au format 2027-2028, bouton « Ajouter »). Elle n'a pas besoin d'être active pour que vous puissiez reprendre vos élèves.</li>
+      <li><strong>Vos élèves doivent être à jour dans l'année qui se termine.</strong> L'assistant reprend ce qui est encodé : un élève absent de la liste ne sera pas proposé.</li>
+      <li><strong>Une implantation à la fois.</strong> Si vous êtes rattaché à une seule, elle est déjà sélectionnée ; l'administrateur et les référents de plusieurs implantations la choisissent.</li>
+      <li><strong>Qui peut le faire ?</strong> Les référents PLAI, les directions et l'administrateur. Les agents accompagnants n'ont pas accès à l'assistant.</li>
+    </ul>
+    <p>Ouvrez le menu <strong>« Reprise d'année »</strong>. En haut de la page, trois sélecteurs :</p>
+    <ul>
+      <li><strong>Implantation</strong> : l'école concernée.</li>
+      <li><strong>Reprendre depuis</strong> : l'année scolaire qui vient de se terminer (proposée automatiquement : l'année juste avant la cible).</li>
+      <li><strong>Vers</strong> : la nouvelle année (proposée automatiquement : l'année active). Si l'année active est encore l'ancienne, choisissez la nouvelle vous-même.</li>
+    </ul>
+  </section>
+
+  <section class="plai-section">
+    <h2>Étape 1 : les classes</h2>
+    <p>Onglet <strong>« 1. Classes »</strong>.</p>
+    <ol>
+      <li>Cliquez <strong>« Reprendre les classes de 2026-2027 »</strong> (l'année affichée est celle de départ). L'assistant crée les mêmes classes dans la nouvelle année, avec leur nom, leur niveau, leur(s) référent(s) PLAI et leurs <strong>aménagements universels (AU)</strong>, que vous retrouverez marqués « à confirmer ».</li>
+      <li>Vous pouvez <strong>relancer sans risque</strong> (le bouton devient « Compléter avec les classes manquantes ») : les classes déjà créées ne sont jamais modifiées, vous pouvez donc ajouter une classe à la main puis relancer.</li>
+      <li><strong>Mettez à jour le niveau de chaque classe</strong> dans la rubrique « Niveau de chaque classe » (ex. « 3e » devient « 4e »). Ce niveau s'affiche dans la saisie et sur les fiches ; il est repris tel quel de l'an dernier tant que vous ne le changez pas.</li>
+      <li>Rubrique <strong>« Où va la majorité de chaque groupe ? »</strong> : pour chaque classe de l'année qui se termine, choisissez la classe de la nouvelle année où va <strong>la majorité de ses élèves</strong>. Tous les élèves du groupe y seront proposés par défaut. Laissez « — pas de classe principale — » pour un groupe sans destination commune : chaque élève sera alors à placer un par un.</li>
+    </ol>
+    <div class="rgpd">
+      <h3>Pas de suggestion automatique</h3>
+      <p style="margin-bottom:0">L'assistant ne devine pas la classe d'arrivée d'après la lettre ou le niveau (une mauvaise suggestion serait pire que pas de suggestion) : les classes changent de composition d'une année à l'autre, et c'est <strong>vous</strong> qui connaissez la réalité de votre implantation.</p>
+    </div>
+    <p>Le bouton « Suivant » reste grisé tant qu'aucune classe n'existe dans la nouvelle année.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Étape 2 : les exceptions</h2>
+    <p>Onglet <strong>« 2. Exceptions »</strong>, rubrique « Corriger les exceptions ». Chaque élève est <strong>déjà placé</strong> dans la classe principale de son groupe. Ne modifiez que ceux qui vont ailleurs. Un champ de recherche (« Chercher un prénom ») aide à retrouver un élève.</p>
+    <p>Pour chaque élève, le menu de destination propose :</p>
+    <ul>
+      <li><strong>Une classe de votre implantation</strong> (groupe « Cette implantation ») : à choisir si l'élève ne va pas dans la classe principale de son groupe (redoublement, réorientation, nouvelle filière…). Un élève modifié porte la mention <strong>« modifié »</strong> ; si vous le remettez dans la classe du groupe, la mention disparaît.</li>
+      <li><strong>« Autre implantation (à réaffecter par l'administrateur) »</strong> : l'élève change d'école. Vous ne choisissez pas sa classe : c'est l'administrateur qui l'affectera (voir la section « Les élèves qui changent d'implantation »).</li>
+      <li><strong>« Fin de parcours / quitte le réseau »</strong> : l'élève n'est pas repris (diplômé, parti hors Pôle). Rien d'autre à faire.</li>
+      <li><strong>« — non traité — »</strong> : l'élève n'est pas repris pour l'instant, mais il reste dans la liste pour plus tard. Utile si sa situation n'est pas décidée à la rentrée.</li>
+    </ul>
+    <p>Un <strong>nouvel élève</strong>, absent de l'année précédente, ne figure pas dans ces listes : ajoutez-le depuis la Saisie, comme d'habitude (lien en bas de la page).</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Étape 3 : la synthèse et l'application</h2>
+    <p>Onglet <strong>« 3. Synthèse »</strong> : un récapitulatif chiffré avant d'agir.</p>
+    <ul>
+      <li>N élèves seront <strong>repris dans une classe</strong> (leurs AR et aménagements libres sont copiés « à confirmer »).</li>
+      <li>N <strong>changent d'implantation</strong> (file de l'administrateur).</li>
+      <li>N sont en <strong>fin de parcours</strong> (rien à faire).</li>
+      <li>N sont <strong>non traités</strong> (ils resteront dans la liste pour plus tard).</li>
+      <li>N élèves <strong>déjà repris précédemment</strong>, s'il y en a.</li>
+    </ul>
+    <p>Vérifiez que ces chiffres correspondent à ce que vous attendez, puis cliquez <strong>« Appliquer (N reprise(s)) »</strong>. Un rapport indique combien d'élèves ont été repris et signale les éventuels échecs, élève par élève.</p>
+    <p><strong>Vous pouvez relancer l'assistant autant de fois que nécessaire</strong> (par exemple pour traiter les non-traités) : un élève déjà repris n'est jamais repris deux fois, et la liste affiche alors « déjà repris ».</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Ce qui est repris, ce qui ne l'est pas</h2>
+    <div class="principe">
+      <h3>Repris dans la nouvelle année</h3>
+      <ul>
+        <li>L'<strong>identité</strong> de l'élève (prénom et initiale) et son <strong>statut</strong> (IPT ou PAR).</li>
+        <li>Ses <strong>AR</strong> et ses <strong>aménagements libres</strong>, marqués « à confirmer ».</li>
+        <li>Pour les classes : <strong>nom, niveau, référent(s) PLAI</strong>, <strong>AU</strong> (marqués « à confirmer ») et <strong>mode des dispositifs</strong> (par élève ou pour toute la classe).</li>
+      </ul>
+    </div>
+    <div class="limite">
+      <h3>Non repris, volontairement</h3>
+      <ul>
+        <li>Le <strong>commentaire de l'élève</strong> : il décrit souvent une situation ponctuelle (ex. un événement familial de l'an dernier). À vous de le réécrire si nécessaire.</li>
+        <li>Le <strong>commentaire de la classe</strong> et les <strong>liens enseignants</strong>.</li>
+        <li>Les <strong>enseignants</strong> attribués aux classes : les assignations sont à refaire.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="plai-section">
+    <h2>Après la reprise : relire et confirmer</h2>
+    <ol>
+      <li>Ouvrez la <strong>Saisie</strong> de la nouvelle année. Dans chaque classe, un <strong>bandeau orange</strong> annonce « N aménagement(s) repris de l'année précédente ou d'une autre classe, à confirmer », avec un bouton par élève (« Confirmer Emilie D. ») et un bouton « Tout confirmer ». Les cases concernées et les AU sont aussi marqués « à confirmer » en toutes lettres.</li>
+      <li><strong>Relisez</strong> : le niveau, la filière ou les progrès de l'élève ont pu changer. <strong>Décochez</strong> ce qui ne convient plus, <strong>cochez</strong> ce qui manque (ce que vous cochez est enregistré comme confirmé), puis <strong>confirmez</strong> le reste.</li>
+      <li><strong>Générez de nouveaux liens enseignants</strong> pour la nouvelle année (menu Fiches). Les liens de l'an dernier expirent le 31 août de leur année scolaire : ils ne sont pas repris. Au moment de générer un lien, un encadré orange vous prévient s'il reste des aménagements « à confirmer » dans la fiche. Il ne bloque rien, mais l'idéal est de relire d'abord.</li>
+    </ol>
+    <p>Pensez à <strong>réécrire le commentaire</strong> de l'élève et de la classe s'ils sont encore utiles.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Les élèves qui changent d'implantation</h2>
+    <h3>Si vous êtes référent ou direction</h3>
+    <ol>
+      <li>À l'étape 2, choisissez <strong>« Autre implantation (à réaffecter par l'administrateur) »</strong> pour l'élève concerné, puis appliquez.</li>
+      <li><strong>Prévenez l'implantation d'accueil</strong> : son référent doit avoir créé les classes de la nouvelle année (étape 1 de sa propre reprise), sinon l'administrateur ne pourra pas affecter l'élève.</li>
+    </ol>
+    <h3>Si vous êtes administrateur PLAI</h3>
+    <ol>
+      <li>Au bas de la page « Reprise d'année », la rubrique <strong>« Élèves à réaffecter (changement d'implantation) »</strong> liste tous les élèves marqués « Autre implantation », avec leur classe et leur école d'origine.</li>
+      <li>Pour chacun, choisissez la <strong>classe d'arrivée</strong> (regroupées par implantation) puis cliquez <strong>« Affecter »</strong> : l'élève est repris avec ses AR « à confirmer » et quitte la file.</li>
+      <li>Si la classe attendue n'apparaît pas, ouvrez d'abord l'assistant de l'implantation d'arrivée pour créer ses classes.</li>
+    </ol>
+    <p>Vous pouvez aussi, en tant qu'administrateur, <strong>placer directement un élève dans une classe d'une autre implantation</strong> dès l'étape 2 : les classes des autres écoles apparaissent alors dans le menu de destination.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Les dispositifs</h2>
+    <p>La reprise <strong>conserve le mode</strong> de chaque dispositif (par élève ou pour toute la classe) d'une année à l'autre, classe par classe. Si un élève arrive dans une classe qui applique un dispositif à <strong>toute la classe</strong>, ses aménagements individuels de ce dispositif ne sont <strong>pas copiés</strong> : l'AU de la classe le couvre déjà. Rien n'est supprimé dans l'année précédente. Vérifiez à la rentrée que le mode convient toujours à chaque classe.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Questions fréquentes</h2>
+    <h3>J'ai oublié un élève, que faire ?</h3>
+    <p>S'il était encodé l'an dernier, relancez l'assistant : il apparaît s'il n'a pas déjà été repris. S'il est nouveau, ajoutez-le depuis la Saisie.</p>
+    <h3>Je me suis trompé de classe pour un élève déjà repris</h3>
+    <p>L'assistant ne reprend pas deux fois le même élève. Utilisez, dans la Saisie de la nouvelle année, la fonction « Changer de classe en cours d'année » (voir le mode d'emploi correspondant).</p>
+    <h3>Le sélecteur « Vers » ne propose pas la nouvelle année</h3>
+    <p>Elle n'a pas encore été créée : demandez à un administrateur PLAI.</p>
+    <h3>L'assistant n'affiche aucune classe pour mon implantation</h3>
+    <p>Vérifiez les années choisies (« Reprendre depuis » doit être l'année où vos élèves sont encodés) et l'implantation sélectionnée.</p>
+    <h3>Un message parle de droit insuffisant</h3>
+    <p>Vous essayez d'écrire dans une implantation qui n'est pas la vôtre. Seul l'administrateur peut placer un élève dans une autre implantation.</p>
+  </section>
+
+  <section class="plai-section">
+    <h2>Bonnes pratiques</h2>
+    <ul>
+      <li><strong>Reprenez dès que la composition des classes est connue</strong>, avant d'envoyer les premiers liens enseignants de l'année.</li>
+      <li><strong>Relisez toujours</strong> avant de confirmer en bloc : « Tout confirmer » est une commodité, pas une formalité.</li>
+      <li><strong>Mettez le niveau de chaque classe à jour</strong> dès l'étape 1.</li>
+      <li>Un doute ou un blocage : contactez un administrateur PLAI.</li>
+    </ul>
+  </section>
+
+  <footer class="plai-footer">
+    <p>AménagActif · amenagactif.jfb4plai.com</p>
+    <p>Pôle Territorial de la Ville de Liège — Pôle Liégeois d'Accompagnement vers une École Inclusive (PLAI)</p>
+  </footer>
+</div>
+</body>
+</html>
