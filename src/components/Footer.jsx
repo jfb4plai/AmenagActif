@@ -20,6 +20,23 @@ export default function Footer() {
       >
         Modes d'emploi (nouvel onglet)
       </a>
+      <p className="w-full m-0" style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'left' }}>
+        Code :{' '}
+        <a
+          href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank" rel="noopener noreferrer"
+          className="underline text-[color:var(--text2)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]"
+        >
+          PolyForm Noncommercial 1.0.0
+        </a>
+        {' · '}Contenus :{' '}
+        <a
+          href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener noreferrer"
+          className="underline text-[color:var(--text2)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]"
+        >
+          CC BY-NC-SA 4.0
+        </a>
+        {' · '}Jean-François Beguin, jfb4plai.com
+      </p>
     </footer>
   );
 }
