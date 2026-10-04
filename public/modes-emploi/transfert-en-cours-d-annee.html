@@ -10,205 +10,233 @@
 :root {
   --bg: #faf9f7; --surface: #ffffff; --surface2: #f4f2ee;
   --border: #e8e4dd; --border2: #d4cfc6;
-  --text: #1a1814; --text2: #5a564f; --text3: #9a958c;
+  --text: #1a1814; --text2: #4a463f; --text3: #6b665d;
   --teal: #0f6e56; --teal-bg: #e1f5ee; --teal-border: #1d9e75;
   --orange: #f97316; --orange-bg: #fef1e7; --orange-border: #f97316;
-  --radius: 10px; --radius-sm: 6px;
+  --radius: 10px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
-.plai-nav {
-  background: rgba(250,249,247,0.95); border-bottom: 1px solid var(--border);
-  padding: 0.9rem 2rem; display: flex; align-items: center; gap: 12px;
-}
+body { font-family: 'DM Sans', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
+.plai-nav { background: rgba(250,249,247,0.95); border-bottom: 1px solid var(--border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 12px; }
 .plai-nav img { height: 32px; width: auto; }
-.plai-nav span { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
-.plai-container { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
-.plai-badge {
-  display: inline-flex; align-items: center; gap: 6px; margin-top: 2rem;
-  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-  color: var(--teal); background: var(--teal-bg); border: 1px solid var(--teal-border);
-  padding: 5px 14px; border-radius: 20px;
-}
-h1 { font-family: 'DM Serif Display', serif; font-size: 30px; margin: 0.85rem 0 0.4rem; color: var(--text); }
-.byline { font-size: 14px; color: var(--text3); margin-bottom: 1.75rem; }
-.lead { font-size: 17px; color: var(--text2); margin-bottom: 0.5rem; }
-.plai-section { padding: 2rem 0 1.75rem; border-top: 1px solid var(--border); }
-.plai-section h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 1rem; color: var(--text); }
-.plai-section h3 { font-family: 'DM Serif Display', serif; font-size: 17px; margin: 1.25rem 0 0.6rem; color: var(--text); }
+.plai-nav span { font-family: 'DM Serif Display', serif; font-size: 18px; }
+.plai-container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; }
+.plai-badge { display: inline-flex; margin-top: 2rem; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); background: var(--teal-bg); border: 1px solid var(--teal-border); padding: 5px 14px; border-radius: 20px; }
+h1 { font-family: 'DM Serif Display', serif; font-size: 30px; margin: 0.85rem 0 0.4rem; line-height: 1.25; }
+.byline { font-size: 14px; color: var(--text3); margin-bottom: 1.5rem; }
+.lead { font-size: 17px; color: var(--text2); margin-bottom: 0.8rem; }
+.plai-section { padding: 2rem 0 1.5rem; border-top: 1px solid var(--border); }
+.plai-section h2 { font-family: 'DM Serif Display', serif; font-size: 23px; margin-bottom: 1rem; line-height: 1.3; }
+.plai-section h3 { font-family: 'DM Serif Display', serif; font-size: 18px; margin: 1.3rem 0 0.6rem; }
 .plai-section p { margin-bottom: 0.9rem; }
 .plai-section ol, .plai-section ul { margin: 0 0 0.9rem 1.4rem; }
-.plai-section li { margin-bottom: 0.6rem; }
+.plai-section li { margin-bottom: 0.55rem; }
 .plai-section li::marker { color: var(--teal); font-weight: 700; }
-strong { color: var(--text); font-weight: 700; }
-.plai-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 1.25rem 1.5rem; margin: 1rem 0;
-}
-.rgpd {
-  background: var(--orange-bg); border: 1px solid var(--orange-border); border-radius: var(--radius);
-  padding: 1.1rem 1.4rem; margin: 1rem 0;
-}
-.rgpd h3 { margin-top: 0; color: #9a3f0a; }
-.principe {
-  background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: var(--radius);
-  padding: 1.1rem 1.4rem; margin: 1rem 0;
-}
+.principe, .rgpd, .interdit, .role { border-radius: var(--radius); padding: 1.1rem 1.4rem; margin: 1rem 0; }
+.principe { background: var(--teal-bg); border: 1px solid var(--teal-border); }
 .principe h3 { margin-top: 0; color: var(--teal); }
-.principe ul { margin: 0; }
-.principe li:last-child { margin-bottom: 0; }
-.plai-footer {
-  text-align: center; padding: 2.5rem 0 2.5rem; font-size: 13px; color: var(--text3);
-  border-top: 1px solid var(--border); margin-top: 1rem;
-}
+.rgpd { background: var(--orange-bg); border: 1px solid var(--orange-border); }
+.rgpd h3 { margin-top: 0; color: #9a3f0a; }
+.interdit { background: var(--surface2); border: 1px solid var(--border2); }
+.interdit h3 { margin-top: 0; }
+.principe ul, .rgpd ul, .interdit ul { margin-bottom: 0; }
+.role { background: var(--surface); border: 1px solid var(--border); border-left: 6px solid var(--teal); }
+.role > h2 { margin-top: 0; }
+.role .phrase { font-size: 17px; color: var(--text2); margin-bottom: 1rem; }
+.qui { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 1rem 0; list-style: none; padding: 0; }
+.qui li { margin: 0; list-style: none; }
+.qui a { display: block; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.7rem 1rem; color: var(--teal); font-weight: 700; text-decoration: none; }
+.qui a:hover, .qui a:focus { background: var(--teal-bg); border-color: var(--teal-border); outline: 2px solid var(--teal); }
+.tableau-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; background: var(--surface); }
+th, td { border: 1px solid var(--border2); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+th { background: var(--surface2); font-weight: 700; }
+td.c { text-align: center; white-space: nowrap; }
+.oui { color: var(--teal); font-weight: 700; }
+.non { color: #7a2e0e; font-weight: 700; }
+.etape { font-weight: 700; color: var(--teal); }
+.plai-footer { text-align: center; padding: 2.5rem 0; font-size: 13px; color: var(--text3); border-top: 1px solid var(--border); margin-top: 1rem; }
 .plai-footer p + p { margin-top: 6px; }
-.limite { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.5rem 1.5rem 1rem; margin: 1rem 0; }
-.limite h3 { margin-top: 0.6rem; }
-@media print {
-  .plai-nav { position: static; }
-  body { font-size: 12.5pt; }
-  .plai-section { break-inside: avoid-page; }
-}
+a { color: var(--teal); }
+@media print { body { font-size: 12pt; } .role, .plai-section { break-inside: avoid-page; } .qui { display: none; } }
+@media (max-width: 600px) { .plai-nav { padding: 0.9rem 1rem; } h1 { font-size: 25px; } }
 </style>
 </head>
 <body>
-<header class="plai-nav">
-  <img src="https://amenagactif.jfb4plai.com/plai-logo.jpg" alt="PLAI">
-  <span>AménagActif</span>
-</header>
-
-<div class="plai-container">
-  <div class="plai-badge">Mode d'emploi · Référents PLAI et directions</div>
-  <h1>Un élève change de classe ou d'implantation en cours d'année</h1>
-  <p class="byline">Pôle Territorial de la Ville de Liège (PLAI) · 3 octobre 2026</p>
-  <p class="lead">Ce mode d'emploi s'adresse aux <strong>référents PLAI et aux directions</strong> des implantations. Il explique quoi faire quand <strong>un élève change de classe, ou d'implantation, en cours d'année scolaire</strong> : sans le ressaisir, sans perdre ses aménagements, et sans que l'enseignant qui le reçoit n'applique des aménagements qui ne conviennent plus.</p>
-  <p class="lead">Il ne concerne <strong>pas</strong> le passage à la nouvelle année scolaire : pour cela, consultez le mode d'emploi « Reprendre les élèves à la rentrée ».</p>
-  <p class="lead">Sommaire : le principe, changer un élève de classe, ce qui se passe automatiquement, les dispositifs, changer d'implantation, relire avant d'envoyer un lien, prévenir les enseignants, ce qu'il ne faut pas faire.</p>
-
-  <section class="plai-section">
-    <h2>Le principe</h2>
-    <div class="principe">
-      <h3>À retenir</h3>
-      <ul>
-        <li><strong>L'élève garde sa fiche</strong> : même identité, mêmes aménagements raisonnables (AR), mêmes aménagements libres. Rien à ressaisir.</li>
-        <li>Ses AR sont <strong>marqués « à confirmer »</strong> : un aménagement choisi dans une classe ne vaut pas forcément dans l'autre (autres cours, autres enseignants). C'est à vous de les relire.</li>
-        <li>Les <strong>AU de la nouvelle classe</strong> s'appliquent d'eux-mêmes : ils sont portés par la classe, pas par l'élève.</li>
-        <li>L'élève <strong>disparaît de la fiche de l'ancienne classe</strong> et <strong>apparaît sur celle de la nouvelle</strong>, immédiatement.</li>
-      </ul>
-    </div>
-    <p>Le changement se fait dans le menu <strong>Saisie</strong>, depuis la fiche de l'élève. La classe d'arrivée doit <strong>exister déjà</strong> et appartenir à <strong>la même année scolaire</strong>.</p>
-  </section>
-
-  <section class="plai-section">
-    <h2>Changer un élève de classe (même implantation)</h2>
-    <ol>
-      <li>Menu <strong>Saisie</strong>. Choisissez l'école, l'année scolaire, puis la <strong>classe actuelle</strong> de l'élève.</li>
-      <li>Dans la liste « Élèves de la classe », <strong>cliquez sur le nom de l'élève</strong> : sa fiche s'ouvre.</li>
-      <li>Dépliez <strong>« Changer de classe en cours d'année »</strong> (en bas de la fiche, au-dessus de « Supprimer l'élève »).</li>
-      <li>Dans <strong>« Nouvelle classe »</strong>, choisissez la classe d'arrivée. Les classes de votre implantation sont regroupées sous « Cette implantation ».</li>
-      <li>Lisez les messages éventuels qui apparaissent sous la liste (voir la section « Les dispositifs » ci-dessous).</li>
-      <li>Cliquez <strong>« Changer de classe »</strong> et confirmez dans la fenêtre qui s'ouvre.</li>
-    </ol>
-    <p>C'est tout : l'élève est dans sa nouvelle classe. Ouvrez la classe d'arrivée pour relire ses aménagements.</p>
-    <p>Le bouton « Changer de classe » reste grisé tant qu'aucune classe n'est choisie, ou tant qu'un blocage est affiché. Les <strong>agents accompagnants</strong> ne voient pas cette fonction : elle est réservée aux référents PLAI, aux directions et à l'administrateur.</p>
-  </section>
-
-  <section class="plai-section">
-    <h2>Ce qui se passe automatiquement</h2>
-    <ul>
-      <li><strong>Les AR et les aménagements libres suivent l'élève</strong> et sont marqués « à confirmer ». Dans la classe d'arrivée, un <strong>bandeau orange</strong> au-dessus du tableau annonce le nombre d'aménagements à confirmer, avec un bouton par élève (« Confirmer Emilie D. ») et un bouton « Tout confirmer ». Les cases concernées sont aussi signalées dans le tableau, avec la mention « à confirmer » en toutes lettres.</li>
-      <li><strong>Confirmer</strong> signifie : « j'ai relu, ces aménagements conviennent dans cette classe ». Décocher un aménagement qui ne convient plus, ou en cocher un nouveau, suffit aussi : ce que vous cochez est enregistré comme confirmé.</li>
-      <li><strong>La fiche de l'élève garde la trace du changement</strong> : pendant 30 jours, chaque ouverture de sa fiche en Saisie affiche un encadré orange « Changement de classe le … (depuis 5LA) », avec le nombre d'aménagements encore à confirmer.</li>
-      <li><strong>Les fiches déjà figées dans le passé ne bougent pas</strong> : l'historique de l'ancienne classe est conservé.</li>
-      <li>Le <strong>commentaire de l'élève</strong> le suit lui aussi : pensez à le relire, il décrivait peut-être une situation propre à l'ancienne classe.</li>
-    </ul>
-  </section>
-
-  <section class="plai-section">
-    <h2>Les dispositifs : refus et rappel</h2>
-    <p>Un dispositif (ex. « Dispositif de régulation des comportements ») est, selon la classe, en mode <strong>AR</strong> (coché élève par élève) ou en mode <strong>AU</strong> (coché une fois pour toute la classe). Le changement de classe ne convertit jamais rien automatiquement. Deux situations peuvent se présenter :</p>
-    <div class="rgpd">
-      <h3>Le changement est refusé</h3>
-      <p style="margin-bottom:0">La classe d'arrivée applique un dispositif à <strong>toute la classe</strong>, alors que l'élève a des aménagements de ce dispositif <strong>cochés à titre individuel</strong> (ou des aménagements libres dans ce chapitre). Un message rouge nomme le dispositif et le bouton reste grisé. <strong>Pourquoi :</strong> ces cases individuelles deviendraient invisibles dans la classe d'arrivée, sans que personne ne s'en aperçoive. <strong>Que faire :</strong> décochez-les d'abord dans la colonne de l'élève (et supprimez ses aménagements libres de ce chapitre), puis relancez le changement. Les aménagements du dispositif de la classe d'arrivée couvriront l'élève.</p>
-    </div>
-    <div class="principe">
-      <h3>Le changement est permis, avec une note</h3>
-      <p style="margin-bottom:0">Au départ, le dispositif s'appliquait à <strong>toute la classe</strong> ; à l'arrivée, il se coche <strong>élève par élève</strong>. L'élève perd donc la couverture de classe dont il bénéficiait. Une note orange vous le rappelle : après le changement, <strong>cochez le dispositif pour cet élève</strong> si c'est nécessaire.</p>
-    </div>
-  </section>
-
-  <section class="plai-section">
-    <h2>Changer d'implantation</h2>
-    <p>L'élève change d'école au sein du Pôle (ex. de Pitteurs vers Léon Mignon). C'est la <strong>même fonction</strong> : l'élève garde sa fiche, ses AR et son historique, et il passe dans l'autre implantation.</p>
-    <div class="limite">
-      <h3>Qui peut le faire ?</h3>
-      <ul>
-        <li><strong>L'administrateur PLAI</strong>, toujours.</li>
-        <li>Un référent PLAI ou une direction <strong>rattaché(e) aux deux implantations</strong> concernées.</li>
-        <li><strong>Pas</strong> un référent ou une direction d'une seule implantation : il ne voit pas les classes de l'autre école. C'est voulu : un élève ne peut pas être « envoyé » dans une école dont vous n'avez pas la charge.</li>
-      </ul>
-    </div>
-    <h3>Si vous êtes référent de l'implantation de départ</h3>
-    <ol>
-      <li><strong>Prévenez un administrateur PLAI</strong> (par e-mail ou de vive voix : l'application n'envoie pas de demande). Indiquez l'élève (prénom et initiale), son implantation et sa classe de départ, et l'implantation d'arrivée.</li>
-      <li>L'administrateur effectue le changement depuis la fiche de l'élève. La liste « Nouvelle classe » lui propose les classes des autres implantations, regroupées par école.</li>
-    </ol>
-    <h3>Si vous êtes référent de l'implantation d'arrivée</h3>
-    <ol>
-      <li><strong>Créez d'abord la classe d'accueil</strong> si elle n'existe pas encore (Saisie, « + Nouvelle classe ») : l'administrateur ne peut déplacer l'élève que vers une classe existante, de la même année scolaire.</li>
-      <li>Une fois le changement fait, <strong>ouvrez la classe</strong> : l'élève y apparaît avec ses aménagements « à confirmer ». Relisez-les, confirmez-les.</li>
-    </ol>
-    <div class="rgpd">
-      <h3>Données personnelles</h3>
-      <p style="margin-bottom:0">Dès le changement, l'implantation d'arrivée voit les AR et le commentaire de l'élève, et l'implantation de départ ne le voit plus. Vérifiez que le <strong>commentaire</strong> ne contient rien qui ne doive pas être transmis, et rappelez-vous la règle habituelle : jamais de nom complet ni de diagnostic dans un champ libre.</p>
-    </div>
-  </section>
-
-  <section class="plai-section">
-    <h2>Relire avant d'envoyer, ou de renvoyer, un lien enseignant</h2>
-    <p>Un lien enseignant montre la fiche <strong>telle qu'elle est au moment où l'enseignant l'ouvre</strong> : elle n'est pas figée. Deux conséquences :</p>
-    <ul>
-      <li>Si un lien a <strong>déjà été envoyé</strong> à l'enseignant de la classe d'arrivée, l'élève et ses aménagements y apparaissent <strong>dès le changement</strong>, même s'ils ne sont pas encore relus. C'est voulu : mieux vaut des aménagements à confirmer que pas d'aménagement du tout. Relisez et confirmez donc <strong>rapidement</strong>.</li>
-      <li>Si vous <strong>générez un nouveau lien</strong> pour la classe (menu Fiches, « Copier le lien enseignant »), un <strong>encadré orange</strong> vous prévient s'il reste des aménagements « à confirmer » dans la fiche : « N aménagements « à confirmer » dans cette fiche (…). Relisez-les dans la Saisie avant d'envoyer le lien ». Il ne bloque rien : à vous de décider. Une fois tout confirmé, l'encadré disparaît.</li>
-    </ul>
-  </section>
-
-  <section class="plai-section">
-    <h2>Prévenir les enseignants</h2>
-    <p>L'application <strong>n'envoie aucune notification</strong>. Après un changement :</p>
-    <ul>
-      <li><strong>Prévenez l'enseignant (ou l'équipe) de la classe d'arrivée</strong> qu'un élève les rejoint, et qu'ils retrouveront ses aménagements sur la fiche de la classe (via leur lien habituel).</li>
-      <li><strong>Prévenez l'enseignant de l'ancienne classe</strong> que l'élève ne figure plus sur sa fiche.</li>
-      <li>Si un lien enseignant n'a plus d'objet (enseignant qui ne suit plus la classe), <strong>révoquez-le</strong> (menu « Liens enseignants »).</li>
-    </ul>
-  </section>
-
-  <section class="plai-section">
-    <h2>Ce qu'il ne faut pas faire</h2>
-    <div class="limite">
-      <ul>
-        <li><strong>Ne supprimez pas l'élève pour le recréer dans l'autre classe.</strong> Le bouton « Supprimer l'élève (ex. départ) » efface définitivement tous ses aménagements. Il ne sert qu'à un élève qui <strong>quitte réellement le suivi</strong>.</li>
-        <li><strong>Ne l'utilisez pas pour changer d'année scolaire.</strong> La classe d'arrivée doit être de la même année : l'application refuse sinon. Pour la rentrée, utilisez la <strong>Reprise d'année</strong> (menu du même nom).</li>
-        <li><strong>Pas d'annulation en un clic.</strong> Si vous vous êtes trompé de classe, refaites simplement un changement vers la bonne classe : l'élève garde son historique.</li>
-        <li><strong>Ne confirmez pas « pour faire disparaître le bandeau ».</strong> Confirmer, c'est avoir relu. Si un aménagement ne convient plus, décochez-le.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="plai-section">
-    <h2>Bonnes pratiques</h2>
-    <ul>
-      <li><strong>Faites le changement dans l'application le jour même</strong> où il est décidé : c'est elle que lisent les enseignants.</li>
-      <li><strong>Relisez les aménagements de l'élève dans la semaine</strong> qui suit son arrivée, avec l'enseignant de la nouvelle classe si possible.</li>
-      <li><strong>Mettez à jour le commentaire de l'élève</strong> s'il décrit une situation propre à l'ancienne classe (à effacer quand il n'est plus pertinent).</li>
-      <li>Un doute, un message d'erreur inattendu, un élève qui ne se laisse pas déplacer : contactez un administrateur PLAI.</li>
-    </ul>
-  </section>
-
-  <footer class="plai-footer">
-    <p>AménagActif · amenagactif.jfb4plai.com</p>
-    <p>Pôle Territorial de la Ville de Liège — Pôle Liégeois d'Accompagnement vers une École Inclusive (PLAI)</p>
-  </footer>
+<header class="plai-nav"><img src="https://amenagactif.jfb4plai.com/plai-logo.jpg" alt="PLAI"><span>AménagActif</span></header>
+<main class="plai-container">
+<span class="plai-badge">Mode d'emploi par rôle</span>
+<h1>Un élève change de classe ou d'implantation en cours d'année</h1>
+<p class="byline">Pôle Territorial de la Ville de Liège (PLAI) · 4 octobre 2026</p>
+<p class="lead">Ce mode d'emploi dit, pour chaque rôle, ce qu'il fait exactement quand un élève change de classe, dans quel ordre, et ce qu'il ne peut pas faire. Cherchez votre rôle ci-dessous.</p>
+<ul class="qui" aria-label="Aller directement à votre rôle">
+<li><a href="#admin">Je suis administrateur PLAI</a></li>
+<li><a href="#referent">Je suis référent PLAI</a></li>
+<li><a href="#referent">Je suis direction</a></li>
+<li><a href="#agent">Je suis agent accompagnant</a></li>
+<li><a href="#enseignant">Je suis enseignant (j'ai reçu un lien)</a></li>
+</ul>
+<section class="plai-section" id="ordre">
+<h2>L'essentiel : qui fait quoi quand un élève change de classe</h2>
+<div class="principe">
+<h3>À retenir</h3>
+<ul>
+<li><strong>L'élève garde sa fiche</strong> : même identité, mêmes aménagements raisonnables (AR), mêmes aménagements libres. Rien à ressaisir.</li>
+<li>Ses AR sont marqués <strong>« à confirmer »</strong> : un aménagement choisi dans une classe ne vaut pas forcément dans l'autre (autres cours, autres enseignants).</li>
+<li>Les <strong>AU de la nouvelle classe</strong> s'appliquent d'eux-mêmes : ils sont portés par la classe, pas par l'élève.</li>
+<li>L'élève disparaît de la fiche de l'ancienne classe et apparaît sur celle de la nouvelle, <strong>immédiatement</strong>.</li>
+<li>Ce document ne concerne pas le passage à la nouvelle année : voir « Reprendre les élèves à la rentrée ».</li>
+</ul>
 </div>
+<h3>L'ordre à respecter</h3>
+<ol>
+<li><span class="etape">Si l'élève change d'implantation.</span> La classe d'accueil doit exister dans l'implantation d'arrivée (le référent d'arrivée la crée).</li>
+<li><span class="etape">Référent PLAI, direction ou administrateur.</span> Ils changent l'élève de classe dans la Saisie.</li>
+<li><span class="etape">Référent PLAI, direction, agent accompagnant.</span> Ils relisent et confirment les aménagements dans la classe d'arrivée.</li>
+<li><span class="etape">Référent PLAI ou direction.</span> Ils préviennent les deux enseignants (classe de départ et classe d'arrivée).</li>
+</ol>
+<h3>Qui a le droit de faire quoi</h3>
+<div class="tableau-wrap"><table><thead><tr><th>Action</th><th>Administrateur</th><th>Référent PLAI</th><th>Direction</th><th>Agent accompagnant</th><th>Enseignant (lien)</th></tr></thead><tbody><tr><td>Changer un élève de classe dans la même implantation</td><td class="c"><span class="oui">Oui</span></td><td class="c">Oui, la sienne</td><td class="c">Oui, la sienne</td><td class="c"><span class="non">Non</span></td><td class="c"><span class="non">Non</span></td></tr><tr><td>Changer un élève d'implantation</td><td class="c">Oui, toujours</td><td class="c">Oui, si rattaché aux deux</td><td class="c">Oui, si rattachée aux deux</td><td class="c"><span class="non">Non</span></td><td class="c"><span class="non">Non</span></td></tr><tr><td>Créer la classe d'accueil</td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="non">Non</span></td><td class="c"><span class="non">Non</span></td></tr><tr><td>Relire et confirmer les aménagements dans la classe d'arrivée</td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="non">Non</span></td></tr><tr><td>Régénérer ou révoquer un lien enseignant</td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="oui">Oui</span></td><td class="c"><span class="non">Non</span></td><td class="c"><span class="non">Non</span></td></tr><tr><td>Voir l'élève apparaître sur la fiche de la classe d'arrivée</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><span class="oui">Oui</span></td></tr></tbody></table></div>
+<p>Le <strong>référent PLAI et la direction ont exactement les mêmes droits</strong> dans cette procédure : le chapitre qui les concerne est commun.</p>
+</section>
+
+<section class="plai-section role" id="admin">
+<h2>Administrateur PLAI</h2>
+<p class="phrase">Vous pouvez changer n'importe quel élève de classe, y compris vers une autre implantation, et vous êtes le recours des référents.</p>
+<h3>Changer un élève de classe (même implantation ou autre implantation)</h3>
+<ol>
+<li>Menu <strong>Saisie</strong>. Choisissez l'école, l'année scolaire, puis la classe actuelle de l'élève.</li>
+<li>Dans « Élèves de la classe », cliquez sur le nom de l'élève : sa fiche s'ouvre.</li>
+<li>Dépliez <strong>« Changer de classe en cours d'année »</strong> (en bas de la fiche, au-dessus de « Supprimer l'élève »).</li>
+<li>Dans <strong>« Nouvelle classe »</strong>, choisissez la classe d'arrivée. Les classes de l'implantation de l'élève sont sous « Cette implantation » ; celles des autres écoles sont <strong>regroupées par école</strong>.</li>
+<li>Lisez les messages sous la liste (voir « Les dispositifs » plus bas).</li>
+<li>Cliquez <strong>« Changer de classe »</strong> et confirmez dans la fenêtre qui s'ouvre.</li>
+</ol>
+<h3>Quand un référent vous demande un changement d'implantation</h3>
+<ul>
+<li>Il vous donne le prénom et l'initiale de l'élève, son implantation et sa classe de départ, et l'implantation d'arrivée (l'application n'envoie pas de demande : c'est un e-mail ou un message).</li>
+<li><strong>Vérifiez que la classe d'accueil existe</strong>, dans la <strong>même année scolaire</strong> : on ne peut déplacer l'élève que vers une classe existante.</li>
+<li>Effectuez le changement comme ci-dessus, puis dites au référent d'arrivée de relire et de confirmer.</li>
+</ul>
+<h3>Ce que vous devez savoir</h3>
+<ul>
+<li>À partir du changement, l'implantation d'arrivée voit les AR et le commentaire de l'élève, et celle de départ ne les voit plus.</li>
+<li>Pas d'annulation en un clic : en cas d'erreur, refaites un changement vers la bonne classe, l'élève garde son historique.</li>
+<li>Un élève supprimé par erreur est archivé 30 jours et peut être restauré (procédure « Restaurer une suppression »).</li>
+</ul>
+</section>
+
+<section class="plai-section role" id="referent">
+<h2>Référent PLAI et direction</h2>
+<p class="phrase">Vous changez l'élève de classe, vous relisez ses aménagements dans la nouvelle classe, puis vous prévenez les enseignants.</p>
+<h3>Cas 1 : l'élève change de classe dans votre implantation</h3>
+<ol>
+<li>Menu <strong>Saisie</strong>. Choisissez l'école, l'année scolaire, puis la classe actuelle de l'élève.</li>
+<li>Dans « Élèves de la classe », cliquez sur le nom de l'élève.</li>
+<li>Dépliez <strong>« Changer de classe en cours d'année »</strong> (en bas de la fiche, au-dessus de « Supprimer l'élève »).</li>
+<li>Dans <strong>« Nouvelle classe »</strong>, choisissez la classe d'arrivée (sous « Cette implantation »). Elle doit exister déjà et être de la même année scolaire.</li>
+<li>Lisez les messages sous la liste (voir « Les dispositifs »). Le bouton reste grisé tant qu'aucune classe n'est choisie ou tant qu'un blocage est affiché.</li>
+<li>Cliquez <strong>« Changer de classe »</strong>, confirmez.</li>
+<li><strong>Ouvrez la classe d'arrivée</strong> : un bandeau orange annonce les aménagements « à confirmer ». Relisez : décochez ce qui ne convient plus, cochez ce qui manque, puis <strong>« Confirmer »</strong> (par élève) ou <strong>« Tout confirmer »</strong>. Ne confirmez pas « pour faire disparaître le bandeau » : confirmer, c'est avoir relu.</li>
+<li>Relisez aussi le <strong>commentaire de l'élève</strong> : il suit l'élève et décrivait peut-être une situation propre à l'ancienne classe.</li>
+</ol>
+<h3>Cas 2 : l'élève change d'implantation</h3>
+<p><strong>Vous ne pouvez pas le faire seul(e)</strong>, sauf si votre compte est rattaché aux deux implantations. Sinon :</p>
+<ol>
+<li><strong>Si vous êtes référent ou direction de l'implantation de départ</strong> : écrivez à un administrateur PLAI avec le prénom et l'initiale de l'élève, sa classe de départ et l'implantation d'arrivée. L'administrateur fait le changement.</li>
+<li><strong>Si vous êtes référent ou direction de l'implantation d'arrivée</strong> : créez d'abord la classe d'accueil si elle n'existe pas (Saisie, « + Nouvelle classe »). Puis, quand l'administrateur a fait le changement, ouvrez la classe : l'élève y apparaît avec ses aménagements « à confirmer ». Relisez et confirmez.</li>
+</ol>
+<div class="rgpd">
+<h3>Données personnelles</h3>
+<p>Dès le changement, l'implantation d'arrivée voit les AR et le commentaire de l'élève. Vérifiez que le commentaire ne contient rien qui ne doive pas être transmis. Règle habituelle : jamais de nom complet ni de diagnostic dans un champ libre.</p>
+</div>
+<h3>Les dispositifs : refus et rappel</h3>
+<p>Un dispositif est, selon la classe, en mode <strong>AR</strong> (coché élève par élève) ou <strong>AU</strong> (coché une fois pour la classe). Le changement de classe ne convertit jamais rien automatiquement.</p>
+<ul>
+<li><strong>Le changement est refusé</strong> (message rouge, bouton grisé) : la classe d'arrivée applique un dispositif à toute la classe alors que l'élève a des aménagements de ce dispositif cochés individuellement. Ces cases deviendraient invisibles sans que personne ne s'en aperçoive. <strong>Que faire :</strong> décochez-les dans la colonne de l'élève (et supprimez ses aménagements libres de ce chapitre), puis relancez.</li>
+<li><strong>Le changement est permis, avec une note orange</strong> : au départ le dispositif couvrait toute la classe, à l'arrivée il se coche élève par élève. L'élève perd la couverture de classe. <strong>Que faire :</strong> cochez le dispositif pour cet élève si c'est nécessaire.</li>
+</ul>
+<h3>Prévenir les enseignants (l'application ne le fait pas)</h3>
+<ol>
+<li>Prévenez l'enseignant ou l'équipe de la <strong>classe d'arrivée</strong> : un élève les rejoint, ils trouveront ses aménagements sur la fiche de la classe via leur lien habituel.</li>
+<li>Prévenez l'enseignant de l'<strong>ancienne classe</strong> : l'élève ne figure plus sur sa fiche.</li>
+<li>Si un lien n'a plus d'objet (enseignant qui ne suit plus la classe), révoquez-le : menu <strong>Liens enseignants</strong>.</li>
+<li>Si vous générez un <strong>nouveau lien</strong>, un encadré orange vous prévient s'il reste des aménagements « à confirmer » : il ne bloque rien, relisez d'abord si possible.</li>
+</ol>
+<div class="interdit">
+<h3>Ce que vous ne pouvez pas faire, et ce qu'il ne faut pas faire</h3>
+<ul>
+<li>Vous ne pouvez pas changer un élève vers une implantation qui n'est pas la vôtre (sauf double rattachement) : c'est voulu.</li>
+<li><strong>Ne supprimez pas l'élève pour le recréer</strong> dans l'autre classe : « Supprimer l'élève » ne sert qu'à un élève qui quitte réellement le suivi. La suppression est archivée 30 jours, mais l'élève perd sa fiche active et ses aménagements.</li>
+<li>Ne l'utilisez pas pour changer d'année : la classe d'arrivée doit être de la même année (pour la rentrée, utilisez « Reprise d'année »).</li>
+</ul>
+</div>
+</section>
+
+<section class="plai-section role" id="agent">
+<h2>Agent accompagnant</h2>
+<p class="phrase">Vous ne pouvez pas changer un élève de classe, mais vous retrouvez l'élève dans sa nouvelle classe et vous relisez ses aménagements.</p>
+<h3>Ce que vous voyez</h3>
+<ul>
+<li>La fonction <strong>« Changer de classe en cours d'année » n'apparaît pas</strong> sur la fiche de l'élève : elle est réservée aux référents, aux directions et à l'administrateur.</li>
+<li>Si un élève change de classe, il apparaît dans sa nouvelle classe et disparaît de l'ancienne <strong>immédiatement</strong>.</li>
+</ul>
+<h3>Ce que vous faites, pas à pas</h3>
+<ol>
+<li>Un élève vous manque dans sa classe habituelle ? Il a peut-être changé de classe : demandez à votre référent PLAI ou à votre direction.</li>
+<li>Dans la <strong>Saisie</strong>, ouvrez la <strong>classe d'arrivée</strong>.</li>
+<li>Le <strong>bandeau orange</strong> annonce les aménagements « à confirmer », avec la mention en toutes lettres sur chaque case concernée. Sur la fiche de l'élève, pendant 30 jours, un encadré rappelle : « Changement de classe le … (depuis 5LA) ».</li>
+<li>Relisez avec ce que vous savez de l'élève : décochez ce qui ne convient plus, cochez ce qui manque, puis <strong>« Confirmer »</strong> (ou « Tout confirmer » si tout est juste).</li>
+<li>Relisez le commentaire de l'élève : s'il décrit l'ancienne classe, signalez-le au référent.</li>
+</ol>
+<div class="interdit">
+<h3>Ce que vous ne pouvez pas faire</h3>
+<ul>
+<li>Changer un élève de classe ou d'implantation, créer la classe d'accueil, <strong>retirer</strong> un aménagement universel (AU) déjà coché (vous pouvez en <em>ajouter</em> un).</li>
+<li>Générer ou révoquer un lien enseignant.</li>
+</ul>
+<p>Pour tout cela, adressez-vous à votre référent PLAI ou à votre direction.</p>
+</div>
+</section>
+
+<section class="plai-section role" id="enseignant">
+<h2>Enseignant</h2>
+<p class="phrase">Vous n'avez pas de compte : vous consultez la fiche de votre classe avec votre lien. Elle se met à jour toute seule quand un élève arrive ou part.</p>
+<h3>Si un élève rejoint votre classe</h3>
+<ol>
+<li>Rouvrez votre <strong>lien habituel</strong> (pas besoin d'un nouveau lien) : l'élève et ses aménagements y apparaissent <strong>dès le changement</strong>.</li>
+<li>Les <strong>AU de votre classe</strong> s'appliquent à lui comme aux autres.</li>
+<li>Lisez ses aménagements individuels. Ils ont été choisis dans son ancienne classe et peuvent ne pas convenir en tout point dans la vôtre : <strong>dites-le au référent PLAI</strong> si quelque chose vous paraît inadapté.</li>
+<li>Vous pouvez imprimer la fiche ou l'enregistrer en PDF (bouton « Imprimer / Enregistrer en PDF »).</li>
+</ol>
+<h3>Si un élève quitte votre classe</h3>
+<ul><li>Il disparaît de votre fiche dès le changement. Si vous ne l'y retrouvez plus et qu'on ne vous en a pas parlé, demandez au référent PLAI.</li></ul>
+<div class="rgpd">
+<h3>À savoir</h3>
+<ul>
+<li>L'application <strong>ne vous envoie aucun message</strong> : c'est le référent PLAI ou la direction qui doit vous prévenir.</li>
+<li>Votre fiche <strong>ne distingue pas</strong> les aménagements confirmés de ceux qui ne le sont pas encore : un aménagement à relire apparaît comme les autres. C'est voulu : mieux vaut un aménagement à confirmer que pas d'aménagement du tout.</li>
+<li>La fiche est en <strong>lecture seule</strong> et à <strong>diffusion restreinte</strong> : ne transmettez pas le lien. Si votre lien ne fonctionne plus (« Ce lien n'est plus actif »), demandez-en un nouveau au référent PLAI ou à la direction.</li>
+</ul>
+</div>
+<div class="interdit">
+<h3>Ce que vous ne pouvez pas faire</h3>
+<ul><li>Modifier la fiche, déplacer un élève, ajouter un aménagement. Passez par le référent PLAI ou la direction.</li></ul>
+</div>
+</section>
+
+<section class="plai-section" id="faq">
+<h2>Questions fréquentes</h2>
+<p><strong>Je me suis trompé de classe.</strong> Refaites un changement vers la bonne classe : l'élève garde son historique.</p>
+<p><strong>Le bouton « Changer de classe » reste grisé.</strong> Aucune classe n'est choisie, ou un message rouge signale un blocage lié à un dispositif.</p>
+<p><strong>La classe d'arrivée n'est pas dans la liste.</strong> Elle n'existe pas encore, ou elle est d'une autre année scolaire, ou elle est dans une implantation qui n'est pas la vôtre. Créez-la (référent, direction) ou demandez à un administrateur.</p>
+<p><strong>Un message d'erreur inattendu, un élève qui ne se laisse pas déplacer.</strong> Contactez un administrateur PLAI.</p>
+</section>
+
+</main>
+<footer class="plai-container plai-footer">
+<p>AménagActif · amenagactif.jfb4plai.com</p>
+<p>Pôle Territorial de la Ville de Liège · Pôle Liégeois d'Accompagnement vers une École Inclusive (PLAI)</p>
+</footer>
 </body>
 </html>
