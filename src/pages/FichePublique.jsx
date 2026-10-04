@@ -38,6 +38,11 @@ export default function FichePublique() {
             Voir la liste complète des aménagements possibles (AU/AR)
           </a>
         </p>
+        <p style={{ fontSize: 16 }}>
+          <a className="text-teal underline" href="/modes-emploi/enseignants.html" target="_blank" rel="noopener noreferrer">
+            Comment utiliser cette fiche (3 minutes)
+          </a>
+        </p>
       </div>
       <FicheClasseView vm={data.vm} lienEleve={false} />
     </div>

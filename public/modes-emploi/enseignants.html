@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AménagActif — votre fiche de classe en 3 minutes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f7; --surface: #ffffff; --surface2: #f4f2ee;
+  --border: #e8e4dd; --border2: #d4cfc6;
+  --text: #1a1814; --text2: #4a463f; --text3: #6b665d;
+  --teal: #0f6e56; --teal-bg: #e1f5ee; --teal-border: #1d9e75;
+  --orange: #f97316; --orange-bg: #fef1e7; --orange-border: #f97316;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
+.plai-nav { background: rgba(250,249,247,0.95); border-bottom: 1px solid var(--border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 12px; }
+.plai-nav img { height: 32px; width: auto; }
+.plai-nav span { font-family: 'DM Serif Display', serif; font-size: 18px; }
+.plai-container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; }
+.plai-badge { display: inline-flex; margin-top: 2rem; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); background: var(--teal-bg); border: 1px solid var(--teal-border); padding: 5px 14px; border-radius: 20px; }
+h1 { font-family: 'DM Serif Display', serif; font-size: 30px; margin: 0.85rem 0 0.4rem; line-height: 1.25; }
+.byline { font-size: 14px; color: var(--text3); margin-bottom: 1.5rem; }
+.lead { font-size: 17px; color: var(--text2); margin-bottom: 0.8rem; }
+.plai-section { padding: 2rem 0 1.5rem; border-top: 1px solid var(--border); }
+.plai-section h2 { font-family: 'DM Serif Display', serif; font-size: 23px; margin-bottom: 1rem; line-height: 1.3; }
+.plai-section h3 { font-family: 'DM Serif Display', serif; font-size: 18px; margin: 1.3rem 0 0.6rem; }
+.plai-section p { margin-bottom: 0.9rem; }
+.plai-section ol, .plai-section ul { margin: 0 0 0.9rem 1.4rem; }
+.plai-section li { margin-bottom: 0.55rem; }
+.plai-section li::marker { color: var(--teal); font-weight: 700; }
+.principe, .rgpd, .interdit, .role { border-radius: var(--radius); padding: 1.1rem 1.4rem; margin: 1rem 0; }
+.principe { background: var(--teal-bg); border: 1px solid var(--teal-border); }
+.principe h3 { margin-top: 0; color: var(--teal); }
+.rgpd { background: var(--orange-bg); border: 1px solid var(--orange-border); }
+.rgpd h3 { margin-top: 0; color: #9a3f0a; }
+.interdit { background: var(--surface2); border: 1px solid var(--border2); }
+.interdit h3 { margin-top: 0; }
+.principe ul, .rgpd ul, .interdit ul { margin-bottom: 0; }
+.role { background: var(--surface); border: 1px solid var(--border); border-left: 6px solid var(--teal); }
+.role > h2 { margin-top: 0; }
+.role .phrase { font-size: 17px; color: var(--text2); margin-bottom: 1rem; }
+.qui { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 1rem 0; list-style: none; padding: 0; }
+.qui li { margin: 0; list-style: none; }
+.qui a { display: block; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.7rem 1rem; color: var(--teal); font-weight: 700; text-decoration: none; }
+.qui a:hover, .qui a:focus { background: var(--teal-bg); border-color: var(--teal-border); outline: 2px solid var(--teal); }
+.tableau-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; background: var(--surface); }
+th, td { border: 1px solid var(--border2); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+th { background: var(--surface2); font-weight: 700; }
+td.c { text-align: center; white-space: nowrap; }
+.oui { color: var(--teal); font-weight: 700; }
+.non { color: #7a2e0e; font-weight: 700; }
+.etape { font-weight: 700; color: var(--teal); }
+.plai-footer { text-align: center; padding: 2.5rem 0; font-size: 13px; color: var(--text3); border-top: 1px solid var(--border); margin-top: 1rem; }
+.plai-footer p + p { margin-top: 6px; }
+a { color: var(--teal); }
+@media print { body { font-size: 12pt; } .role, .plai-section { break-inside: avoid-page; } .qui { display: none; } }
+@media (max-width: 600px) { .plai-nav { padding: 0.9rem 1rem; } h1 { font-size: 25px; } }
+</style>
+</head>
+<body>
+<header class="plai-nav"><img src="https://amenagactif.jfb4plai.com/plai-logo.jpg" alt="PLAI"><span>AménagActif</span></header>
+<main class="plai-container">
+<span class="plai-badge">Enseignants · 3 minutes</span>
+<h1>Votre fiche de classe : ce qu'elle vous épargne</h1>
+<p class="byline">Pôle Territorial de la Ville de Liège (PLAI) · 4 octobre 2026</p>
+<p class="lead">Un lien, une page, aucun compte. La fiche de votre classe est à jour sans que vous ayez rien à remplir. Voici comment en tirer le meilleur, en trois minutes.</p>
+
+<section class="plai-section" id="debut">
+<div class="principe">
+<h3>Ce que cette fiche vous épargne</h3>
+<ul>
+<li><strong>Chercher</strong> quels aménagements sont prévus pour tel élève, dans un classeur ou un tableau partagé.</li>
+<li><strong>Remplir ou mettre à jour</strong> quoi que ce soit : le référent PLAI de votre école s'en charge.</li>
+<li><strong>Créer un compte</strong>, retenir un mot de passe, installer une application.</li>
+<li><strong>Demander</strong> à chaque conseil de classe « qu'est-ce qui était prévu déjà pour lui ? ».</li>
+</ul>
+</div>
+<p>Vous avez reçu un lien. Il ouvre <strong>la fiche de votre classe</strong>, toujours à jour : ce qui est prévu pour toute la classe, et ce qui est prévu pour certains élèves. Vous la lisez, vous l'utilisez avec votre propre pédagogie. C'est tout.</p>
+</section>
+
+<section class="plai-section" id="ouvrir">
+<h2>1. Ouvrir votre fiche, en 10 secondes</h2>
+<ol>
+<li>Cliquez sur le lien reçu par e-mail. La fiche s'ouvre, <strong>sans mot de passe</strong>.</li>
+<li><strong>Gardez-la sous la main</strong> : ajoutez la page à vos favoris, ou à l'écran d'accueil de votre téléphone. Vous n'aurez plus à retrouver l'e-mail.</li>
+<li>Sur un ordinateur partagé (salle des professeurs), <strong>ne l'enregistrez pas</strong> : n'importe qui pourrait l'ouvrir.</li>
+</ol>
+<p>La fiche affiche toujours l'état du moment : à chaque ouverture, vous voyez la version la plus récente.</p>
+</section>
+
+<section class="plai-section" id="lire">
+<h2>2. La lire en une minute</h2>
+<p>Lisez de haut en bas, dans cet ordre :</p>
+<ol>
+<li><strong>« Date de mise à jour »</strong> (en haut) : vous savez tout de suite si la fiche a bougé depuis votre dernière lecture.</li>
+<li><strong>Le tableau « Référent(s) PLAI de votre classe »</strong> : c'est la personne à contacter pour toute question sur la fiche (la direction y figure aussi).</li>
+<li><strong>« Contexte de la classe »</strong>, s'il existe : quelques mots du référent sur la classe.</li>
+<li><strong>« AU applicables à toute la classe »</strong> (AU = aménagements universels) : ce que vous faites <strong>pour tous</strong>. Vous n'avez pas à savoir qui est concerné : l'aménagement profite à toute la classe.</li>
+<li><strong>« AR spécifiques à un élève »</strong> (AR = aménagements raisonnables) : ce qui est prévu pour un élève en particulier, repéré par son prénom et l'initiale de son nom.</li>
+<li><strong>« Commentaires »</strong>, s'il y en a : le contexte utile sur un élève.</li>
+</ol>
+</section>
+
+<section class="plai-section" id="usages">
+<h2>3. Quand ça vous fait gagner du temps</h2>
+<ul>
+<li><strong>Avant un cours ou une évaluation</strong> : un coup d'œil, vous savez quoi adapter. Un aménagement ne vous parle pas ? Le lien « Voir la liste complète des aménagements possibles » en haut de la fiche explique chacun.</li>
+<li><strong>Pour un conseil de classe</strong> : bouton « Imprimer / Enregistrer en PDF ». Vous arrivez avec la fiche, sans rien préparer.</li>
+<li><strong>Un collègue ou un remplaçant en a besoin</strong> : ne transmettez pas votre lien. Demandez un lien à votre référent PLAI : un lien par enseignant, c'est ce qui permet de le couper si quelqu'un quitte la classe.</li>
+<li><strong>Un élève arrive ou part en cours d'année</strong> : la fiche se met à jour toute seule. Rouvrez-la, regardez la date de mise à jour.</li>
+</ul>
+</section>
+
+<section class="plai-section" id="vous">
+<h2>4. Vous restez l'expert de votre classe</h2>
+<div class="principe">
+<h3>La fiche dit quoi. Vous décidez comment.</h3>
+<ul>
+<li>Les aménagements sont un <strong>point de départ</strong>, pas une prescription à appliquer à l'aveugle. Votre manière d'enseigner, votre discipline et ce que vous observez de l'élève comptent.</li>
+<li>Un aménagement ne convient pas, ou plus ? Un élève semble avoir besoin d'autre chose ? <strong>Dites-le au référent PLAI</strong> : votre observation est précieuse, et il peut corriger la fiche.</li>
+</ul>
+</div>
+</section>
+
+<section class="plai-section" id="aide">
+<h2>5. Si quelque chose ne va pas</h2>
+<ul>
+<li><strong>« Ce lien n'est plus actif »</strong> : le lien est arrivé à échéance (fin de l'année scolaire), il a été désactivé ou il est incorrect. Demandez un nouveau lien au référent PLAI ou à la direction. Cela arrive chaque rentrée : c'est normal.</li>
+<li><strong>« Le service est momentanément indisponible »</strong> : réessayez dans quelques minutes.</li>
+<li><strong>Un élève manque, ou ne devrait plus y être</strong> : prévenez le référent PLAI. L'application ne vous envoie pas de message : c'est lui qui vous prévient d'un changement.</li>
+<li><strong>La fiche est en lecture seule</strong> : vous ne pouvez rien y modifier, et vous n'avez rien à y remplir.</li>
+</ul>
+</section>
+
+<section class="plai-section" id="prive">
+<h2>6. Trois réflexes pour protéger les élèves</h2>
+<div class="rgpd">
+<h3>Ces fiches concernent des élèves réels</h3>
+<ul>
+<li><strong>Ne transmettez pas le lien</strong> (réseaux sociaux, messagerie, collègues non concernés).</li>
+<li><strong>Un papier imprimé se range ou se détruit</strong> : ne le laissez pas traîner en salle des professeurs ou dans le cartable d'un élève.</li>
+<li><strong>Pas de capture d'écran</strong> partagée dans une conversation.</li>
+</ul>
+</div>
+<p>Une question, un doute : contactez le <strong>référent PLAI de votre école</strong>.</p>
+</section>
+
+</main>
+<footer class="plai-container plai-footer">
+<p>AménagActif · amenagactif.jfb4plai.com</p>
+<p>Pôle Territorial de la Ville de Liège · Pôle Liégeois d'Accompagnement vers une École Inclusive (PLAI)</p>
+</footer>
+</body>
+</html>
