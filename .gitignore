@@ -6,3 +6,8 @@ dist
 *.log
 .claude/worktrees/
 supabase/.temp/
+
+# Dependances et secrets (ajoute 2026-10-04)
+.env
+.env.*
+!.env*.example
