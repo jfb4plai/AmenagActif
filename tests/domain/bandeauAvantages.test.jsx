@@ -21,14 +21,15 @@ afterEach(() => {
 });
 
 describe('bandeau d\'avantages', () => {
-  it('affiche les 7 avantages dans une région nommée, un seul visible à la fois', () => {
+  it('affiche tous les avantages dans une région nommée, un seul visible à la fois', () => {
     const { container } = render(<BandeauAvantages />);
     expect(screen.getByRole('region', { name: /Pourquoi AménagActif/ })).toBeTruthy();
-    expect(AVANTAGES).toHaveLength(7);
-    expect(container.querySelectorAll('p[data-actif]')).toHaveLength(7);
+    const n = AVANTAGES.length;
+    expect(n).toBe(11);
+    expect(container.querySelectorAll('p[data-actif]')).toHaveLength(n);
     expect(container.querySelectorAll('[data-actif="true"]')).toHaveLength(1);
     // les messages inactifs sont cachés aux lecteurs d'écran
-    expect(container.querySelectorAll('p[aria-hidden="true"]')).toHaveLength(6);
+    expect(container.querySelectorAll('p[aria-hidden="true"]')).toHaveLength(n - 1);
   });
 
   it('passe au message suivant après 10 s, pas avant', () => {
@@ -40,11 +41,11 @@ describe('bandeau d\'avantages', () => {
     expect(titreActif(container)).not.toBe(premier);
   });
 
-  it('couvre les 7 messages puis reboucle, sans en répéter un avant la fin du cycle', () => {
+  it('couvre tous les messages puis reboucle, sans en répéter un avant la fin du cycle', () => {
     const { container } = render(<BandeauAvantages />);
     const vus = [titreActif(container)];
-    for (let i = 0; i < 6; i += 1) { avancer(10100); vus.push(titreActif(container)); }
-    expect(new Set(vus).size).toBe(7);
+    for (let i = 0; i < AVANTAGES.length - 1; i += 1) { avancer(10100); vus.push(titreActif(container)); }
+    expect(new Set(vus).size).toBe(AVANTAGES.length);
     avancer(10100);
     expect(titreActif(container)).toBe(vus[0]);
   });

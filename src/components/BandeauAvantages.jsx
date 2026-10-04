@@ -20,6 +20,10 @@ export const AVANTAGES = [
   { titre: 'Un vocabulaire commun', texte: 'plus de 130 aménagements classés en chapitres, avec recherche par mot-clé.' },
   { titre: 'RGPD', texte: 'prénom et initiale seulement, liens expirés supprimés, accès limité à son école.' },
   { titre: 'Ouvert aux autres apps PLAI', texte: 'le profil de classe peut leur être transmis.' },
+  { titre: 'Une rentrée sans ressaisie', texte: 'les classes et les élèves de l’an dernier se reprennent en trois étapes, avec leurs aménagements à relire.' },
+  { titre: 'Un élève change de classe', texte: 'sa fiche le suit, ses aménagements sont marqués « à confirmer » pour la nouvelle classe, rien à ressaisir.' },
+  { titre: 'Rien n’est acquis sans relecture', texte: 'tout ce qui est repris reste « à confirmer » tant que vous ne l’avez pas relu.' },
+  { titre: 'Une erreur se rattrape', texte: 'une classe ou un élève supprimé par erreur peut être restauré pendant 30 jours, sur demande à l’administrateur PLAI.' },
 ];
 
 function melanger(n) {
