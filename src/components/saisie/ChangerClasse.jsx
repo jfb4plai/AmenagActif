@@ -52,6 +52,11 @@ export default function ChangerClasse({ eleve, cibles, ecoles = [], ecoleId, don
     <details className="pt-2 border-t border-[color:var(--border)]">
       <summary className="text-sm cursor-pointer">Changer de classe en cours d'année</summary>
       <div className="space-y-1 mt-2">
+        <p style={{ fontSize: 16 }}>
+          <a href="/modes-emploi/transfert-en-cours-d-annee.html" target="_blank" rel="noopener noreferrer" className="underline text-[color:var(--teal)]">
+            Mode d'emploi du changement de classe (nouvel onglet)
+          </a>
+        </p>
         {classes.length === 0 ? (
           <p className="text-xs text-[color:var(--text3)]">Aucune autre classe disponible pour cette année scolaire.</p>
         ) : (

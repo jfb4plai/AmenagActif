@@ -63,6 +63,11 @@ export default function Reprise() {
         Les fiches de l'année précédente restent intactes. Les élèves repris arrivent avec leurs aménagements marqués « à confirmer » :
         c'est à vous de les revoir (progrès de l'élève, niveau, changement de filière) avant de les considérer comme acquis.
       </p>
+      <p style={{ fontSize: 16 }}>
+        <a href="/modes-emploi/reprise-nouvelle-annee.html" target="_blank" rel="noopener noreferrer" className="underline text-[color:var(--teal)]">
+          Mode d'emploi de la reprise (nouvel onglet)
+        </a>
+      </p>
 
       <div className="flex flex-wrap gap-4 items-end">
         <div>

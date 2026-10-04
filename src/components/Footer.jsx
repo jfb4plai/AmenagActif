@@ -13,6 +13,13 @@ export default function Footer() {
       >
         Avantages de l'application PLAI
       </Link>
+      <a
+        href="/modes-emploi/index.html" target="_blank" rel="noopener noreferrer"
+        className="underline text-[color:var(--teal)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]"
+        style={{ fontSize: 16 }}
+      >
+        Modes d'emploi (nouvel onglet)
+      </a>
     </footer>
   );
 }
