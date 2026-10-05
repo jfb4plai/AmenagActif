@@ -36,6 +36,12 @@ GROUPES = [
         ("Sortie u-1 (trois profils)", "ab-test-multi/u-1.md", ""), ("Sortie u-2 (trois profils)", "ab-test-multi/u-2.md", ""),
         ("Sortie v-1 (synthèse)", "ab-test-multi/v-1.md", ""), ("Sortie v-2 (synthèse)", "ab-test-multi/v-2.md", ""),
     ]),
+    ("Essai 5 : consigne de production (un seul support, variantes minimales)", [
+        ("Résultats", "ab-test-production/01-resultats.md", "Nombre de documents 8 → 4,5, niveaux supprimés dans une sortie sur deux."),
+        ("Rubrique fixée avant", "ab-test-production/00-rubrique-fixee-avant.md", ""),
+        ("Entrée C : trois profils + consigne de production", "ab-test-production/entrees/C-trois-profils-plus-consigne-de-production.md", ""),
+        ("Sortie w-1 (avec la consigne)", "ab-test-production/w-1.md", ""), ("Sortie w-2 (avec la consigne)", "ab-test-production/w-2.md", ""),
+    ]),
 ]
 
 docs = []

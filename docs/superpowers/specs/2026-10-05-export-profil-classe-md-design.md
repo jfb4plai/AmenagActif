@@ -1,6 +1,6 @@
 # Export du profil de classes en Markdown (multi-classes)
 
-Date : 2026-10-05. Statut : version 3, orientation validée par JF (multi-classes = chemin direct, synthèse précalculée retirée). Une ligne de l'en-tête dépend d'un essai en cours (voir « Consigne de production »). À relire par JF avant plan d'implémentation.
+Date : 2026-10-05. Statut : version 3, orientation validée par JF (multi-classes = chemin direct, synthèse précalculée retirée). Une ligne de l'en-tête (la consigne de production) reste à retester après reformulation. À relire par JF avant plan d'implémentation.
 
 ## Problème
 
@@ -66,7 +66,7 @@ Essai (2 exécutions avec la règle, 2 sans) : sans la règle, 0 % de consignes 
 
 Texte proposé pour l'en-tête : « Produis un seul support pour toutes les classes. Ajoute une variante d'un document uniquement là où deux classes ont des aménagements qui s'excluent. Ne multiplie pas les documents : une même fiche de travail sert toutes les classes ; la police et le format d'impression se règlent à l'impression et ne comptent pas comme des documents distincts. »
 
-Statut : **à confirmer par essai** (essai du 2026-10-05, 2 exécutions avec la consigne contre 2 exécutions de référence sans). Règle de décision fixée avant l'essai : la consigne reste dans l'en-tête si le nombre de documents élèves distincts baisse d'au moins 3 en moyenne (référence : 8), avec les trois niveaux de difficulté conservés, aucune violation d'incompatibilité, socle appliqué partout (5 sur 5) et au moins 9 compléments sur 10 attribués aux bonnes classes. Sinon, elle sort de l'en-tête et le nombre de documents reste à traiter autrement. Résultat à ajouter ci-dessous.
+Statut : **testée, non retenue telle qu'écrite** (essai du 2026-10-05, 2 exécutions avec la consigne contre 2 de référence sans). Elle réduit le nombre de documents de 8 à 4,5 en moyenne, mais l'une des deux sorties a supprimé les trois niveaux de difficulté (voir « Résultat de l'essai 5 »). La formulation corrigée est à retester avant de l'inscrire dans l'en-tête.
 
 ### 4. Serveur : `api/profil-export.js`
 
@@ -115,11 +115,15 @@ Documents et sorties : `docs/essais/2026-10-05-chaine-profil-md/`, consultables 
 2. **Deux consignes d'en-tête** (AR dans toutes les versions ; statut par code), 2 exécutions avec, 2 sans : aucun bénéfice mesurable. Non retenues. Dossier `ab-test/`.
 3. **Règle des consignes** : retenue (voir plus haut). Dossier `ab-test-consignes/`.
 4. **Synthèse multi-classes précalculée contre trois profils séparés** (3 classes fictives aux aménagements incompatibles, 4 exécutions) : écart 0,5 pour un seuil de 2. Avec trois profils séparés, l'IA repère seule les incompatibilités et ne les viole nulle part ; la synthèse ne réduit pas le nombre de documents (9 documents dans 2 sorties sur 4) et une des deux sorties avec synthèse a lu « trois versions » comme « trois classes » en supprimant les niveaux. Synthèse retirée. Dossier `ab-test-multi/`. Limites : comptage non en aveugle, un cas fictif, 2 exécutions par condition.
-5. **Consigne de production** (un seul support, variantes minimales) : en cours, résultat ci-dessous.
+5. **Consigne de production** (un seul support, variantes minimales) : documents 8 → 4,5, mais niveaux supprimés dans une sortie sur deux, donc non retenue telle qu'écrite (résultat ci-dessous). Dossier `ab-test-production/`.
 
 ### Résultat de l'essai 5
 
-À compléter à la fin de l'essai.
+Nombre de documents élèves distincts : 8 en moyenne sans la consigne (9 et 7), 4,5 avec (6 et 3). Aucune violation d'incompatibilité, socle appliqué 5 sur 5, 10 compléments sur 10 bien attribués dans les quatre sorties. Mais l'une des deux sorties avec la consigne (w-2) a fusionné les trois niveaux de difficulté en une seule fiche, ce qui ne respecte pas la condition « niveaux conservés » fixée avant l'essai. **Selon la règle fixée, la consigne n'est pas retenue telle qu'écrite.** Cause : « un seul support » est ambigu sur les niveaux. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test-production/01-resultats.md`.
+
+Reformulation à retester : « Produis un seul support pour toutes les classes. Garde les trois niveaux de difficulté de la séance : une même fiche par niveau sert toutes les classes. Ajoute une variante d'un document uniquement là où deux classes ont des aménagements qui s'excluent. La police et le format d'impression ne comptent pas comme des documents distincts. »
+
+Décision pédagogique de JF à prendre : la fiche unique de w-2 (étayage ouvert à tous, un seul document, aucune étiquette de niveau) est défendable, mais remplace les trois fiches de `seance-differenciee` par une conception à une fiche.
 
 ## Hors périmètre
 
