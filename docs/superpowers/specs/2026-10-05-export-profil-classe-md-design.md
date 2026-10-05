@@ -33,8 +33,6 @@ Structure du fichier, dans cet ordre :
    - ne pas chercher à identifier ni deviner d'élève ;
    - ne pas attribuer un aménagement à une personne précise ;
    - un code désigne un aménagement du catalogue AménagActif ; un code que l'agent ne sait pas appliquer est signalé comme « non appliqué », avec son libellé, jamais ignoré en silence ;
-   - les aménagements raisonnables ne dépendent pas du niveau de difficulté des élèves : les appliquer à toutes les versions d'un support, jamais seulement à la version la plus étayée ;
-   - pour chaque code de la liste de contrôle, indiquer un statut : « appliqué », « non applicable » (avec la raison) ou « non appliqué » (avec la raison) ; aucun code ne reste sans statut ;
    - le fichier est valable jusqu'à `expire_le` ; au-delà, redemander un export.
 4. **`## Aménagements universels (AU)`** : toute la classe. Une sous-section par chapitre (code du chapitre), puis `- <libellé> (`code`)`. Section vide : « Aucun ».
 5. **`## Aménagements raisonnables (AR)`** : même présentation avec l'effectif : `- <libellé> (`code`), effectif : 3-5`. Section vide : « Aucun ».
@@ -68,6 +66,10 @@ Le profil est calculé côté client : `chargerDonneesClasse(classeId)` (donnée
 
 L'export client n'émet pas de jeton : le fichier est une copie statique. La révocation d'un lien enseignant ne l'affecte pas ; c'est dit dans le texte d'aide (valable jusqu'à `expire_le`, copie à usage de l'enseignant).
 
+## Essai comparatif du 2026-10-05
+
+Deux consignes supplémentaires (AR dans toutes les versions ; statut obligatoire par code) ont été testées à froid, 2 exécutions par variante, et n'ont montré aucun bénéfice mesurable : la liste de contrôle suffit à produire les deux comportements. Elles ne sont pas retenues. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test/`.
+
 ## Gestion d'erreurs
 
 - Échec du chargement ou du calcul : message d'erreur visible (`role="alert"`), aucun fichier partiel.
@@ -83,7 +85,6 @@ L'export client n'émet pas de jeton : le fichier est une copie statique. La ré
   - le nom de l'école n'apparaît pas ;
   - neutralisation des retours à la ligne et du Markdown dans un libellé ;
   - `nomFichierProfil` : caractères spéciaux assainis.
-- Test de contrat de l'en-tête de lecture : les deux consignes ajoutées après l'essai du 2026-10-05 (aménagements raisonnables dans toutes les versions ; statut obligatoire par code) sont présentes. Origine : `docs/essais/2026-10-05-chaine-profil-md/`.
 - `tests/domain/exportProfilBoutons.test.jsx` : boutons présents pour un référent, absents pour `agent_plai` ; clic « Exporter » déclenche le téléchargement ; clic « Copier » écrit dans le presse-papiers et affiche « Copié » ; erreur de copie affichée.
 
 ## Hors périmètre
