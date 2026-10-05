@@ -33,6 +33,8 @@ Structure du fichier, dans cet ordre :
    - ne pas chercher à identifier ni deviner d'élève ;
    - ne pas attribuer un aménagement à une personne précise ;
    - un code désigne un aménagement du catalogue AménagActif ; un code que l'agent ne sait pas appliquer est signalé comme « non appliqué », avec son libellé, jamais ignoré en silence ;
+   - les aménagements raisonnables ne dépendent pas du niveau de difficulté des élèves : les appliquer à toutes les versions d'un support, jamais seulement à la version la plus étayée ;
+   - pour chaque code de la liste de contrôle, indiquer un statut : « appliqué », « non applicable » (avec la raison) ou « non appliqué » (avec la raison) ; aucun code ne reste sans statut ;
    - le fichier est valable jusqu'à `expire_le` ; au-delà, redemander un export.
 4. **`## Aménagements universels (AU)`** : toute la classe. Une sous-section par chapitre (code du chapitre), puis `- <libellé> (`code`)`. Section vide : « Aucun ».
 5. **`## Aménagements raisonnables (AR)`** : même présentation avec l'effectif : `- <libellé> (`code`), effectif : 3-5`. Section vide : « Aucun ».
@@ -81,6 +83,7 @@ L'export client n'émet pas de jeton : le fichier est une copie statique. La ré
   - le nom de l'école n'apparaît pas ;
   - neutralisation des retours à la ligne et du Markdown dans un libellé ;
   - `nomFichierProfil` : caractères spéciaux assainis.
+- Test de contrat de l'en-tête de lecture : les deux consignes ajoutées après l'essai du 2026-10-05 (aménagements raisonnables dans toutes les versions ; statut obligatoire par code) sont présentes. Origine : `docs/essais/2026-10-05-chaine-profil-md/`.
 - `tests/domain/exportProfilBoutons.test.jsx` : boutons présents pour un référent, absents pour `agent_plai` ; clic « Exporter » déclenche le téléchargement ; clic « Copier » écrit dans le presse-papiers et affiche « Copié » ; erreur de copie affichée.
 
 ## Hors périmètre
