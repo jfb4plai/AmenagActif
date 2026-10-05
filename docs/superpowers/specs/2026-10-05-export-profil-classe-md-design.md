@@ -1,96 +1,129 @@
-# Export du profil de classe en Markdown (pour IA et autres apps)
+# Export du profil de classes en Markdown : synthèse multi-classes pour l'enseignant
 
-Date : 2026-10-05. Statut : conception validée par JF (option 1, liste de contrôle incluse).
+Date : 2026-10-05. Statut : version 2, révisée après essai (voir « Historique »). À relire par JF avant plan d'implémentation.
+
+## Problème réel
+
+En secondaire, tout enseignant est multi-classes : 22 périodes par semaine en classe, au plus 9 périodes par matière, donc au moins 3 classes. Un lien enseignant couvre 1 à 10 classes de la même école et de la même année (`MAX_CLASSES_PAR_LIEN`).
+
+Pour préparer un support (seul ou avec une IA), l'enseignant doit aujourd'hui lire plusieurs fiches et faire de tête la synthèse : qu'est-ce qui vaut pour toutes mes classes, qu'est-ce qui ne vaut que pour l'une d'elles, qu'est-ce qui est incompatible entre deux classes. Ce calcul est la valeur ajoutée à apporter. Un simple rendu du profil d'une classe en .md n'apporte presque rien (essai du 2026-10-05).
 
 ## Objectif
 
-Permettre à un enseignant ou à un référent d'exporter le profil d'aménagements d'une classe en fichier `.md`, pour le fournir à un agent (Claude, skills PLAI) ou à une autre app. Le fichier ne contient aucun nom, prénom, initiale, surnom, pseudo, commentaire ni texte libre d'élève.
+Pour un ensemble de classes d'un même enseignant, produire un fichier `.md` qui donne :
+1. le **socle commun** : aménagements présents dans toutes les classes, à appliquer d'office à un support unique ;
+2. les **compléments par classe** : aménagements présents dans certaines classes seulement, à prévoir en option ou en variante ;
+3. les **incompatibilités entre classes** : deux aménagements qui ne peuvent pas être satisfaits par un seul support (exemple : carte mentale en 3B, pas de carte mentale en 3C) ;
+4. la **liste de contrôle** pour vérifier un support code par code.
 
-Le .md est lisible par une IA sans ambiguïté : structure fixe, codes stables, tranches d'effectif.
+Le fichier est utilisable tel quel dans Claude, ChatGPT ou un skill PLAI. La même synthèse sert aussi aux apps (sortie JSON), pour que chaque usage en profite.
+
+Aucun nom, prénom, initiale, surnom, pseudo, commentaire ni texte libre d'élève ne figure dans le fichier.
 
 ## Décisions
 
-- **Profil collectif uniquement** (décision JF, 2026-10-05). Pas de profil par élève, même en codes neutres : risque de ré-identification en classe, et commentaires susceptibles de contenir des noms.
-- **Pas de nouvelle logique de données.** Le .md est un rendu de `computeProfilClasse` (contrat `plai.profil-classe` v1, `docs/contrat-profil-classe.md`). Ses exclusions absolues, le drapeau `partage_profil`, le seuil `k` (1) et les tranches d'effectif (`1-2`, `3-5`, `6+`) s'appliquent tels quels.
-- **Nom de l'école omis.** Seuls le libellé de classe et le niveau sont conservés.
-- **Une classe à la fois.** Pas d'export des fiches groupées dans cette version.
+- **Profil collectif par classe, jamais par élève** (décision JF, 2026-10-05). Risque de ré-identification en classe, et commentaires susceptibles de contenir des noms.
+- **Entrée principale : la fiche enseignant** (`/fiche/:token`), car c'est là qu'arrive l'enseignant. L'export couvre toutes les classes de son lien. Les référents ont le même export sur leurs pages (une classe, ou un groupe validé).
+- **Pas de nouvelle logique de données.** On réutilise `computeProfilClasse` (contrat `plai.profil-classe` v1, `docs/contrat-profil-classe.md`) pour chaque classe, puis une synthèse pure par-dessus. Exclusions absolues, `partage_profil`, seuil `k` = 1 et tranches d'effectif (`1-2`, `3-5`, `6+`) s'appliquent tels quels.
+- **Aucun effectif cumulé.** Les tranches restent par classe ; on n'additionne jamais (pas d'effectif exact déductible).
+- **Nom de l'école omis.** Libellé de classe et niveau conservés.
+- **En-tête de lecture minimal** (texte figé, voulu : instruction technique). Les deux consignes testées en plus ont été écartées (voir « Historique »).
+- **Format des supports** : l'aide indique qu'Arial 14, interligne et A4 ne se vérifient pas dans un .md.
 
 ## Composants
 
-### 1. `src/domain/projections/profilClasseMarkdown.js`
+### 1. Synthèse : `src/domain/projections/synthesePourClasses.js`
 
-`profilClasseEnMarkdown(profil) -> string`. Fonction pure, déterministe, sans accès aux données brutes : elle reçoit uniquement la sortie de `computeProfilClasse`. Elle ne peut donc rien ajouter au-delà du contrat.
+`synthesePourClasses(profils) -> synthèse`. Fonction pure, déterministe. `profils` = tableau de sorties de `computeProfilClasse` (1 à 10).
 
-Exporte aussi `nomFichierProfil(profil) -> string` : `profil-classe-<libellé assaini>-<AAAA-MM-JJ>.md` (libellé en minuscules, caractères non alphanumériques remplacés par `-`).
+Contenu de la synthèse :
+- `classes` : pour chaque classe `{ libelle, niveau, elements_non_transmis_present, libres_present }`.
+- `socle` : éléments (AU et AR) dont le `code` figure dans **toutes** les classes. Pour un AR : tranche par classe `{ code, chapitre, libelle, type, parClasse: { <libellé>: tranche } }`.
+- `complements` : éléments présents dans certaines classes seulement : `{ code, chapitre, libelle, type, classes: [{ libelle, effectif? }] }`.
+- `incompatibilites` :
+  - `intra` : paires de `conflits` d'une même classe (reprises du profil) ;
+  - `inter` : paires de `REGLES_CONFLIT` dont un code est publié dans une classe et l'autre dans une autre classe, avec les classes concernées.
+- `sans_code` : éléments sans code, par classe.
+- Avec une seule classe, `socle` = tout le profil, `complements` et `inter` sont vides.
 
-Structure du fichier, dans cet ordre :
+Tri déterministe (chapitre, puis code). Les libellés de classe sont désambiguïsés s'ils sont identiques (suffixe « (2) »).
 
-1. **En-tête YAML** : `schema`, `version`, `emis_le`, `fiche_du`, `expire_le`, `classe`, `niveau`. Pas d'école.
-2. **`# Profil d'aménagements de la classe <libellé>`**
-3. **`## Comment lire ce fichier`** (texte figé, voulu : instruction technique, pas texte pédagogique) :
-   - ce sont les aménagements d'une classe entière, sans donnée d'élève ;
-   - les effectifs sont des tranches, jamais un nombre exact ;
-   - ne pas chercher à identifier ni deviner d'élève ;
-   - ne pas attribuer un aménagement à une personne précise ;
-   - un code désigne un aménagement du catalogue AménagActif ; un code que l'agent ne sait pas appliquer est signalé comme « non appliqué », avec son libellé, jamais ignoré en silence ;
-   - le fichier est valable jusqu'à `expire_le` ; au-delà, redemander un export.
-4. **`## Aménagements universels (AU)`** : toute la classe. Une sous-section par chapitre (code du chapitre), puis `- <libellé> (`code`)`. Section vide : « Aucun ».
-5. **`## Aménagements raisonnables (AR)`** : même présentation avec l'effectif : `- <libellé> (`code`), effectif : 3-5`. Section vide : « Aucun ».
-6. **`## Éléments sans code`** : seulement si `non_codes` n'est pas vide (filet de sécurité), libellé et chapitre.
-7. **`## Points d'attention`** :
-   - chaque paire de `conflits` : `Incompatibles dans cette classe : <code A> et <code B>` ;
-   - si `elements_non_transmis_present` : « Certains aménagements de la classe ne sont pas transmis. Le profil est incomplet. » ;
-   - si `libres_present` : « Des aménagements individuels libres existent. Leur contenu n'est pas transmis. » ;
-   - section omise s'il n'y a rien à signaler.
-8. **`## Liste de contrôle`** : une ligne `- [ ] <code> : <libellé>` par AU, puis par AR (ordre du profil). Sert de consigne à `/au` (appliquer) et de grille à `/verif` (vérifier le support code par code). Ne contient aucune donnée absente du profil. Les éléments sans code sont listés `- [ ] (sans code) : <libellé>`.
+### 2. Rendu Markdown : `src/domain/projections/syntheseMarkdown.js`
+
+`syntheseEnMarkdown(synthese, { emisLe, expireLe }) -> string` et `nomFichierSynthese(synthese, emisLe) -> string` (`profil-classes-<libellés assainis>-<AAAA-MM-JJ>.md`, tronqué à 80 caractères).
+
+Structure, dans cet ordre :
+1. **En-tête YAML** : `schema: plai.profil-classes`, `version: 1`, `emis_le`, `expire_le`, `classes` (libellés), `niveaux`. Pas d'école.
+2. **`# Profil d'aménagements de mes classes : <libellés>`**
+3. **`## Comment lire ce fichier`** : décrit des classes entières, sans donnée d'élève ; effectifs en tranches par classe, jamais cumulés ; ne pas identifier ni deviner d'élève, ne rien attribuer à une personne ; un code désigne un aménagement du catalogue AménagActif, et un code qui n'est pas appliqué est signalé avec son libellé, jamais ignoré en silence ; valable jusqu'à `expire_le`.
+4. **`## À appliquer à toutes les classes`** (socle) : par chapitre, `- <libellé> (`code`)` ; pour un AR, effectif par classe.
+5. **`## À prévoir pour certaines classes`** (compléments) : par classe, avec effectif.
+6. **`## Incompatibilités`** :
+   - entre classes : « Un seul support ne peut pas satisfaire <code A> (3B) et <code B> (3C) : prévoir deux variantes » ;
+   - dans une même classe : « Incompatibles dans <classe> : <code A> et <code B> ».
+   Section omise s'il n'y a rien.
+7. **`## Points d'attention`** : classes dont `elements_non_transmis_present` (« profil incomplet ») ; classes dont `libres_present` (« aménagements individuels libres, contenu non transmis ») ; éléments sans code. Omise si rien.
+8. **`## Liste de contrôle`** : `- [ ] <code> : <libellé>` pour le socle, puis pour chaque complément avec ses classes (« 3B uniquement »).
 9. **`## Rappel`** : l'IA propose, l'enseignant décide et personnalise ; aucune décision automatique sur un élève.
 
-Échappement : les libellés viennent du catalogue (saisie admin), jamais des élèves. Le rendu neutralise tout de même les retours à la ligne et les caractères Markdown de début de ligne dans un libellé, pour qu'un libellé ne puisse pas casser la structure.
+Neutralisation : les libellés viennent du catalogue (saisie admin) et des noms de classe. Retours à la ligne et caractères Markdown de début de ligne sont neutralisés pour qu'un libellé ne casse pas la structure.
 
-### 2. Interface : `src/pages/FicheClassePage.jsx` (`FicheClasseContenu`)
+### 3. Export JSON pour les apps : même synthèse
 
-À côté de « Imprimer / Enregistrer en PDF », deux boutons, masqués pour `agent_plai` (comme le lien enseignant) :
+Les apps reçoivent la synthèse en JSON (`schema: plai.profil-classes`, `version: 1`), même contenu que le .md. Le contrat est documenté dans `docs/contrat-profil-classe.md` (nouvelle section). Aucune app cible ne le consomme pour l'instant : pas d'engagement de compatibilité hors version 1.
 
-- **« Exporter pour une IA (.md) »** : télécharge le fichier (Blob + lien temporaire, type `text/markdown;charset=utf-8`).
-- **« Copier le profil »** : copie le texte dans le presse-papiers, avec retour visuel « Copié ».
+### 4. Serveur : `api/profil-export.js`
 
-Texte d'aide sous les boutons (guidage contextuel PLAI) : ce que le fichier contient (aménagements de la classe, effectifs en tranches), ce qu'il ne contient pas (noms, prénoms, commentaires, aménagements individuels libres), où l'utiliser (Claude, skills PLAI, autre app), et sa durée de validité.
+`GET /api/profil-export?token=<secret du lien>&format=md|json` (défaut `md`).
 
-Texte des boutons et de l'aide en 16 px minimum, focus visible, `aria-live` pour « Copié ». Exemples FWB, pas de vocabulaire franco-français.
+- Lien opaque uniquement. Lien inconnu, révoqué, expiré, ou ancien lien JWT : même réponse 410 et même message que `fiche-token` (pas d'oracle).
+- Charge les classes du lien (`loadClassesData`), calcule `computeProfilClasse` par classe, puis `synthesePourClasses` et le rendu. Les données brutes (prénoms, commentaires, AR libres) ne quittent jamais le serveur.
+- `expire_le` = 30 jours (`DUREE_JOURS_DEFAUT`) plafonné à l'expiration du lien (`plafonnerExpirationProfil`).
+- Réponse : `{ markdown, nomFichier, expire_le }` ou la synthèse JSON. `Cache-Control: private, no-store`. Erreurs serveur loguées sans donnée.
+- Un export n'est pas compté comme une ouverture du lien.
 
-Un petit module `src/lib/exporterProfil.js` porte le téléchargement et la copie (comme `imprimerFiche.js`), pour garder la page mince.
+### 5. Interface
 
-### 3. Données et accès
+**Fiche enseignant** (`FichePublique.jsx`), à côté de « Imprimer / Enregistrer en PDF » :
+- **« Exporter pour une IA (.md) »** : télécharge le fichier.
+- **« Copier le profil »** : copie le texte, retour « Copié ».
+- Aide sous les boutons : ce que contient le fichier (aménagements communs et propres à chaque classe, incompatibilités, liste de contrôle), ce qu'il ne contient pas (noms, prénoms, commentaires, aménagements individuels libres), où l'utiliser, durée de validité, et que ce sont des classes entières : l'IA ne sait pas qui a quoi, c'est à l'enseignant de décider.
+- Si le lien ne permet pas l'export (ancien lien) : message invitant à demander un nouveau lien.
 
-Le profil est calculé côté client : `chargerDonneesClasse(classeId)` (données déjà chargées par la fiche via RLS) puis `computeProfilClasse`. Le calcul se fait au clic, pour que `emis_le` et `expire_le` soient ceux du moment de l'export. Aucune nouvelle API, aucune nouvelle table, aucune migration. L'accès reste celui de la fiche.
+**Référents** (`FicheClassePage.jsx`) : mêmes deux boutons, masqués pour `agent_plai`. Une classe (`FicheClasseContenu`) ou un groupe validé (`Picker`). Calcul côté client à partir des données déjà chargées par RLS (`chargerDonneesClasse`), avec la même fonction pure.
 
-L'export client n'émet pas de jeton : le fichier est une copie statique. La révocation d'un lien enseignant ne l'affecte pas ; c'est dit dans le texte d'aide (valable jusqu'à `expire_le`, copie à usage de l'enseignant).
-
-## Essai comparatif du 2026-10-05
-
-Deux consignes supplémentaires (AR dans toutes les versions ; statut obligatoire par code) ont été testées à froid, 2 exécutions par variante, et n'ont montré aucun bénéfice mesurable : la liste de contrôle suffit à produire les deux comportements. Elles ne sont pas retenues. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test/`.
+Texte et aide en 16 px minimum, focus visible, `aria-live` pour « Copié ». Exemples FWB, pas de vocabulaire franco-français. Le code d'interface est dans `src/lib/exporterProfil.js` (téléchargement par Blob `text/markdown;charset=utf-8`, copie dans le presse-papiers).
 
 ## Gestion d'erreurs
 
-- Échec du chargement ou du calcul : message d'erreur visible (`role="alert"`), aucun fichier partiel.
-- Échec de la copie (presse-papiers refusé) : message invitant à utiliser le téléchargement.
+- Lien inactif ou inconnu : 410, même message que la fiche.
+- Échec de chargement ou de calcul : message visible (`role="alert"`), aucun fichier partiel.
+- Échec de la copie : message invitant à utiliser le téléchargement.
+- Plus de 10 classes : impossible par construction (limite du lien).
 
 ## Tests
 
-- `tests/domain/profilClasseMarkdown.test.js` :
-  - structure complète et ordre des sections ;
-  - sections vides (« Aucun »), points d'attention conditionnels ;
-  - liste de contrôle identique aux codes publiés (AU puis AR), sans code manquant ni en trop ;
-  - **non-fuite** : sur la fixture de `profilClasse.test.js` enrichie de prénoms, initiales, commentaires, AR libres et nom de référent, aucune de ces chaînes n'apparaît dans le .md ; aménagements à `partage_profil` faux absents ;
-  - le nom de l'école n'apparaît pas ;
-  - neutralisation des retours à la ligne et du Markdown dans un libellé ;
-  - `nomFichierProfil` : caractères spéciaux assainis.
-- `tests/domain/exportProfilBoutons.test.jsx` : boutons présents pour un référent, absents pour `agent_plai` ; clic « Exporter » déclenche le téléchargement ; clic « Copier » écrit dans le presse-papiers et affiche « Copié » ; erreur de copie affichée.
+- `tests/domain/synthesePourClasses.test.js` : socle et compléments sur 3 classes ; classe unique ; incompatibilité inter-classes (carte mentale oui/non) et intra-classe ; tranches par classe jamais cumulées ; libellés de classe en double ; éléments sans code ; `partage_profil` faux absent ; `k` appliqué via `computeProfilClasse`.
+- `tests/domain/syntheseMarkdown.test.js` : structure et ordre des sections ; sections omises ; liste de contrôle égale aux codes publiés ; neutralisation Markdown ; nom de fichier assaini.
+- **Non-fuite** : sur la fixture de `profilClasse.test.js` enrichie de prénoms, initiales, commentaires, AR libres, nom de référent et nom d'école, aucune de ces chaînes n'apparaît dans le .md ni dans le JSON.
+- `tests/api/profilExport.test.js` : lien actif OK ; lien inconnu, révoqué, expiré et JWT ancien donnent le même 410 ; `no-store` ; expiration plafonnée ; aucune donnée brute dans la réponse.
+- `tests/domain/exportProfilBoutons.test.jsx` : boutons sur la fiche enseignant et la fiche de classe ; absents pour `agent_plai` ; téléchargement et copie ; message d'erreur.
+
+## Validation de la pertinence (avant diffusion)
+
+Critère de réussite : un enseignant réel à plusieurs classes obtient, en moins de 5 minutes, un support commun ou des variantes qu'il juge utilisables, plus vite et plus sûrement qu'à partir des fiches séparées.
+
+Essai à froid sur un cas réel (3 classes, un support), comparé à la préparation à partir de 3 fiches : si la synthèse n'apporte pas de différence observable, la fonctionnalité est écartée. Le test de la consigne « un verbe par consigne » (point faible des 4 essais) reste à faire séparément.
+
+## Historique : essai du 2026-10-05
+
+- Chaîne `/seance-differenciee`, puis `/au-reformatage`, puis `/verif` sur un export fictif d'une seule classe : 74 %, « à retravailler ». Défauts venus de l'exécution de l'étape 2 (texte non recopié, correction mal formée), pas du profil. La liste de contrôle a servi à `/verif`.
+- Deux consignes ajoutées à l'en-tête (AR dans toutes les versions ; statut par code) testées à froid, 2 exécutions par variante : aucun bénéfice mesurable, la liste de contrôle suffit. Non retenues. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test/`.
+- Limite des essais : ils mesuraient le comportement d'un agent sur une seule classe. Ils ne montraient pas de valeur pour l'enseignant, d'où la révision autour du cas multi-classes.
 
 ## Hors périmètre
 
 - Profil par élève, même en codes neutres.
-- Export des fiches groupées.
-- API d'export par jeton au format Markdown (le JSON de `api/profil-classe.js` reste la voie pour une app qui appelle le serveur).
-- Références RISS : aucune référence scientifique n'est ajoutée dans le fichier.
+- Export de plusieurs liens à la fois (un enseignant avec plusieurs liens de plusieurs écoles).
+- Références RISS : aucune référence scientifique n'est ajoutée au fichier.
 - Vignette portail : aucune modification de `portail-plai/src/data/apps.ts` sans accord de JF.
