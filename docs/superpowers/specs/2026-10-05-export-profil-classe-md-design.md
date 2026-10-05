@@ -68,7 +68,7 @@ Structure, dans cet ordre :
 
 **Règle de rédaction des consignes** (décision JF, 2026-10-05), reprise telle quelle dans « Comment lire ce fichier » : chaque consigne destinée aux élèves est une puce qui commence par un verbe d'action à l'infinitif (« Lire », « Surligner », pas « Lis », « Surligne »), avec un seul verbe d'action par puce. Une consigne qui demande trois actions s'écrit sur trois puces. Elle s'applique à toutes les classes : c'est le socle AU2, qui précède les AR (`ar_supports_consignes_epurees`).
 
-Statut : règle imposée, bénéfice à vérifier par essai à froid. Dans les 4 exécutions du 2026-10-05, aucune n'a respecté « un seul verbe par consigne » dans tous les documents, et toutes ont écrit à l'impératif.
+Statut : règle imposée et vérifiée par essai à froid le 2026-10-05 (2 exécutions avec, 2 sans). Sans la règle : 0 % de consignes à l'infinitif et 63 % à un seul verbe. Avec la règle : 100 % et 99 %. Elle reste dans l'en-tête. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test-consignes/`.
 
 Neutralisation : les libellés viennent du catalogue (saisie admin) et des noms de classe. Retours à la ligne et caractères Markdown de début de ligne sont neutralisés pour qu'un libellé ne casse pas la structure.
 
@@ -117,7 +117,7 @@ Texte et aide en 16 px minimum, focus visible, `aria-live` pour « Copié ». Ex
 
 Critère de réussite : un enseignant réel à plusieurs classes obtient, en moins de 5 minutes, un support commun ou des variantes qu'il juge utilisables, plus vite et plus sûrement qu'à partir des fiches séparées.
 
-Essai à froid sur un cas réel (3 classes, un support), comparé à la préparation à partir de 3 fiches : si la synthèse n'apporte pas de différence observable, la fonctionnalité est écartée. Essai de la règle des consignes : 2 variantes (profil avec et sans la règle), 2 exécutions chacune, même séance. Mesure mécanique sur les puces de consigne des documents élèves : part qui commence par un verbe à l'infinitif, part qui contient un seul verbe d'action. Décision fixée avant l'essai : la règle reste dans l'en-tête si la variante avec règle fait nettement mieux sur les deux mesures ; sinon elle sort de l'en-tête et devient un contrôle de `/verif`.
+Essai à froid sur un cas réel (3 classes, un support), comparé à la préparation à partir de 3 fiches : si la synthèse n'apporte pas de différence observable, la fonctionnalité est écartée. Essai de la règle des consignes : fait le 2026-10-05, règle conservée (voir ci-dessus). Reste à vérifier sur la synthèse multi-classes elle-même.
 
 ## Historique : essai du 2026-10-05
 
