@@ -1,6 +1,6 @@
 # Export du profil de classes en Markdown : synthèse multi-classes pour l'enseignant
 
-Date : 2026-10-05. Statut : version 2, révisée après essai (voir « Historique »). À relire par JF avant plan d'implémentation.
+Date : 2026-10-05. Statut : version 2, **à revoir** : l'essai de pertinence du 2026-10-05 n'a pas atteint le seuil de décision fixé pour la synthèse multi-classes (voir « Validation de la pertinence »). Décision de JF requise avant tout plan d'implémentation.
 
 ## Problème réel
 
@@ -117,7 +117,11 @@ Texte et aide en 16 px minimum, focus visible, `aria-live` pour « Copié ». Ex
 
 Critère de réussite : un enseignant réel à plusieurs classes obtient, en moins de 5 minutes, un support commun ou des variantes qu'il juge utilisables, plus vite et plus sûrement qu'à partir des fiches séparées.
 
-Essai à froid sur un cas réel (3 classes, un support), comparé à la préparation à partir de 3 fiches : si la synthèse n'apporte pas de différence observable, la fonctionnalité est écartée. Essai de la règle des consignes : fait le 2026-10-05, règle conservée (voir ci-dessus). Reste à vérifier sur la synthèse multi-classes elle-même.
+Essai à froid sur un cas réel (3 classes, un support), comparé à la préparation à partir de 3 fiches : si la synthèse n'apporte pas de différence observable, la fonctionnalité est écartée. Essai de la règle des consignes : fait le 2026-10-05, règle conservée (voir ci-dessus).
+
+**Résultat de l'essai de pertinence (2026-10-05) : seuil non atteint.** 4 exécutions à froid, 3 classes fictives aux aménagements incompatibles, trois profils séparés (u) contre synthèse (v). Écart mesuré sur la règle fixée avant l'essai : 0,5 pour un seuil de 2. Avec trois profils séparés, l'IA repère seule les incompatibilités et ne les viole nulle part ; la justesse ne distingue pas les deux conditions. La synthèse ne réduit pas non plus le nombre de documents (9 documents dans 2 des 4 sorties, une classe de variantes confondue avec des niveaux dans une 3e). Limites : comptage non en aveugle, un cas, mesure du comportement de l'IA et pas de l'enseignant. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test-multi/01-resultats.md`.
+
+Pistes à trancher par JF : (1) export par classe ou par lien sans synthèse, avec liste de contrôle (ce que les trois profils séparés ont déjà permis) ; (2) synthèse conservée mais avec une consigne de production « un support commun et des variantes minimales », à tester sur le nombre de documents ; (3) abandon.
 
 ## Historique : essai du 2026-10-05
 

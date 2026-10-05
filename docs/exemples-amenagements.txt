@@ -1,0 +1,132 @@
+1.1|En S2, la fiche d'histoire est en deux colonnes alignées à gauche, avec un titre par partie et un blanc entre chaque paragraphe.|Le professeur de sciences remplace son exercice dense d'une page par trois blocs aérés, chacun avec sa consigne et son espace de réponse.
+1.2|En S3, le professeur de français imprime l'interrogation avec des lignes de réponse deux fois plus hautes.|En mathématiques, le cadre « Calcul » est agrandi pour laisser la place de poser toutes les étapes sans les écraser.
+1.3|En S4, le professeur d'histoire donne la matière sous forme de plan numéroté (1, 1.1, 1.2) plutôt que de schéma fléché.|En géographie, les causes d'un phénomène sont listées dans l'ordre de lecture au lieu d'être dispersées en bulles sur la page.
+1.4|En S1, la leçon sur le cycle de l'eau est résumée en une carte mentale en couleurs, une couleur par étape.|En S5, avant le chapitre sur la Première Guerre mondiale, le professeur projette une carte mentale qui montre d'un coup les liens entre causes, événements et conséquences.
+1.5|Une élève absente trois jours retrouve le cours de chimie complet sur la plateforme de l'école et peut compléter ses notes.|En S3, le professeur de néerlandais dépose chaque semaine la version complète du cours dans le dossier de classe, en PDF et en papier.
+1.6|En S2, le professeur écrit « Pour jeudi : exercices 4 et 5 p. 62 » dans un coin fixe du tableau et le laisse jusqu'à la fin du cours.|En fin d'heure, le professeur de religion laisse au tableau la phrase de synthèse à copier dans le cours.
+1.7|En S4, l'élève photographie le tableau avant que le professeur de comptabilité ne l'efface et complète ses notes le soir.|En S6, le schéma de physique tracé en cinq minutes est pris en photo, puis recopié à tête reposée.
+1.8|En S3, « Lis le texte et souligne en rouge les verbes d'action » remplace « Dans le cadre de notre étude, tu vas lire attentivement le texte ci-dessous et tâcher de repérer… ».|Une consigne de mathématiques passe de six lignes à « Calcule l'aire du rectangle. Écris l'unité. ».
+1.9|En S2, les consignes de l'exercice sont dans un cadre gris avec un pictogramme crayon, bien séparées de l'énoncé.|Le professeur de sciences écrit toujours le verbe d'action de la consigne en gras.
+1.10|« 1. Lis le texte. 2. Souligne les verbes. 3. Recopie-les. » devient trois consignes présentées une à une, chacune avec sa case à cocher.|En atelier, la fiche de montage est découpée en quatre étapes, et l'élève ne passe à la suivante qu'après avoir fait valider la précédente.
+1.11|Le professeur dit « Vous allez comparer deux textes, rangez vos stylos et écoutez » avant de distribuer les deux feuilles.|En S5, la consigne de la dissertation est donnée à l'oral, puis seulement ensuite le dossier documentaire est remis.
+1.12|Après avoir expliqué l'exercice, le professeur demande à un élève : « Dis-moi avec tes mots ce que tu vas faire en premier ».|En S1, le professeur passe dans les rangs et pose à chacun la question : « Qu'est-ce que tu dois rendre à la fin ? ».
+1.13|Le professeur de français reformule « rédiger un récit à la première personne » par « tu racontes une histoire en disant "je" », avec un début de phrase en exemple.|Avant un problème de proportionnalité, il montre une recette de gaufres pour 4 puis pour 8 personnes.
+1.14|Le syllabus de géographie est imprimé en A3 pour une élève qui s'y repère mieux.|En S2, la carte de Belgique à compléter est agrandie en A3, les noms de provinces sont plus faciles à lire.
+1.15|Le tableau des conjugaisons a une ligne sur deux en bleu clair, le regard suit la ligne du verbe sans glisser.|En comptabilité, le tableau d'amortissements est grisé une ligne sur deux.
+1.16|En S2, l'élève colle une petite vignette « chat » à côté du mot « félin » dans son dictionnaire personnel.|En néerlandais, il note à côté du mot « fiets » un dessin de vélo et sa phrase à lui : « Je vais à l'école en fiets ».
+1.17|Pendant le CE1D de mathématiques, l'élève utilise sa fiche outil validée (formules d'aires, tables de conversion).|En cours de comptabilité, l'élève garde sur son banc son procédurier validé par le titulaire.
+1.18|En début de séquence, le professeur de pratique professionnelle distribue la liste : tablier, gants, clés, classeur.|En S1, la liste « Cours de sciences : cahier, règle, blouse » est collée sur la page du JDC.
+1.19|Les feuilles d'exercices sont imprimées en recto uniquement, et l'élève classe chaque page dans son classeur sans en manquer.|En histoire, le professeur renonce au recto-verso : tout le contenu de la leçon est visible sur la page posée devant l'élève.
+2.1|Le professeur de français donne la consigne en se plaçant face à l'élève et en articulant, plutôt qu'en écrivant au tableau, le dos tourné.|En néerlandais, il fait face à la classe quand il lit la phrase à répéter.
+2.2|En cours de langue, le professeur ralentit le débit de la dictée de mots, avec une pause entre chaque mot.|Dans un audio d'anglais, l'élève écoute la version au rythme ralenti du fichier.
+2.3|Le professeur élève la voix au moment de donner la consigne finale, malgré le bruit de la chaise du voisin.|Dans un local très sonore (atelier, gymnase), il se rapproche de l'élève et parle plus fort pour l'essentiel.
+2.4|Le professeur reste devant le tableau pendant qu'il dicte la consigne, au lieu de circuler entre les bancs.|Pendant les explications de sciences, il explique d'un endroit fixe avant d'aller voir les élèves.
+2.5|Avant d'expliquer l'étape clé du labo, le professeur demande : « Silence complet pendant une minute, j'explique le plus important ».|Pour la lecture d'un texte difficile en S4, la classe fait silence et le professeur lit sans interruption.
+2.6|Après avoir posé la question, le professeur compte mentalement jusqu'à dix avant de reprendre la parole.|En français, il donne : « Prends ton temps, je repasse dans deux minutes pour t'écouter ».
+2.7|Le professeur règle la routine d'entrée : on s'assoit, on sort son matériel, il n'y a pas de discussion avant le démarrage.|Pendant les exercices individuels, le professeur fait redescendre le volume dès que les conversations montent.
+2.8|Le professeur dit le prénom, attend le regard, puis seulement donne la consigne.|En S3, il pose une main sur le banc ou un geste discret avant d'annoncer le devoir.
+2.9|En histoire, il accompagne « avant » et « après » de gestes de la main et d'une frise dessinée.|En sciences, il montre un pictogramme « flamme » quand il dit « attention au feu ».
+2.10|Pendant le CE1D de langues, l'élève dispose d'une pause d'une minute entre deux écoutes pour terminer sa réponse.|En cours d'anglais, le professeur arrête l'audio après chaque question et attend que tout le monde ait écrit.
+2.11|Le professeur de sciences lit l'énoncé du problème à voix haute avant le contrôle (la lecture n'est pas évaluée).|En S4, un adulte lit les consignes d'une épreuve de mathématiques.
+2.12|En sciences, le professeur montre l'expérience en direct, puis la vidéo en sous-titres pour que chacun la revoie.|En histoire, il montre une photo d'époque en plus d'expliquer le contexte.
+2.13|Le professeur projette trois mots clés pendant qu'il explique la bataille de Waterloo.|En sciences, il écrit le schéma au tableau en même temps qu'il parle, puis le laisse affiché.
+2.14|En compréhension à l'audition de néerlandais, un adulte reprend à voix basse chaque phrase, au rythme de l'élève.|L'accompagnateur répète deux fois la question avant de laisser l'élève noter.
+2.15|En S2, le professeur donne les explications à l'oral, puis il laisse cinq minutes pour copier la synthèse.|En S5, la classe écoute d'abord l'exposé, puis reçoit le plan à compléter.
+3.1|Le professeur vérifie, depuis le fond de la classe, que l'élève lit bien ce qu'il écrit en petit.|Il rapproche le banc ou réduit les reflets du soleil sur le tableau blanc.
+3.2|En S1, l'élève est placé au premier rang, à droite, proche du tableau.|Pour la leçon de géographie, il s'assoit au premier rang pour suivre la carte projetée.
+3.3|Le banc est tourné pour que l'élève regarde droit vers le tableau sans se tordre le cou.|En atelier, il s'installe à un poste face à la démonstration.
+3.4|Le professeur place l'élève à côté d'un camarade qui explique volontiers, pour demander discrètement une reformulation.|En mathématiques, les deux élèves se vérifient mutuellement la première ligne de calcul.
+3.5|L'élève est placé au fond de la classe, côté mur, et ne voit plus la cour.|En S4, le banc est reculé loin de la fenêtre qui donne sur le terrain de sport.
+3.6|L'élève est installé au deuxième rang, à un mètre du bureau du professeur.|Pour les évaluations, le professeur peut lui murmurer « relis la consigne » en passant.
+3.7|Pendant les exercices, l'élève travaille seul à un banc de deux.|Lors des contrôles, il est assis seul, sans voisin.
+3.8|La tablette de l'élève est branchée sur la prise du fond et se connecte au Wifi de l'école.|Dans la classe de S5, l'élève s'installe près de la prise pour recharger son ordinateur.
+3.9|L'élève s'assoit à la même place tous les jours, dans tous les cours du titulaire.|En début d'année, un plan de classe fixe est affiché.
+3.10|Pendant la leçon, le banc contient seulement le cahier, la trousse et le manuel ouvert.|Avant l'exercice, le professeur demande : « Rangez tout sauf la feuille et le stylo ».
+3.11|Sur le banc, un set de table indique où poser la feuille et le matériel.|En atelier, un carré de ruban adhésif délimite la zone de travail de l'élève.
+3.12|Pour l'interrogation, l'élève dresse un paravent en carton entre lui et les voisins.|En S3, il utilise un petit paravent pendant le travail individuel.
+3.13|L'élève travaille debout au fond de la classe pendant l'exercice d'écriture.|Il s'assoit sur un ballon pendant la lecture du texte.
+3.14|À la fin du cours, le professeur demande de vérifier que la feuille est dans la bonne pochette du classeur.|Une fois par semaine, l'élève et l'éducateur rangent ensemble le classeur.
+3.15|L'exercice de calcul mental n'est pas chronométré, l'élève répond à son rythme.|En S4, le test de vocabulaire est donné sans minuterie.
+3.16|Un sablier ou une minuterie visible est posé sur le bureau pendant l'activité.|En atelier, un timer projeté au tableau montre le temps restant.
+3.17|Au début du cours : « Aujourd'hui, je sais calculer l'aire d'un triangle » est écrit au tableau.|Le professeur d'histoire affiche l'objectif de la séance en haut du tableau et y revient en fin d'heure.
+3.18|Chaque cours de français commence par la même séquence : ouvrir le cahier, date, titre, objectif.|En atelier, l'entrée se fait toujours dans le même ordre : vestiaire, tablier, consignes.
+3.19|Le jour d'un changement de local, le professeur l'annonce la veille avec le motif.|En cas de remplacement, l'élève est prévenu dès le matin.
+3.20|Une interrogation prévue pour le 14 est annoncée le 29 du mois précédent, avec la matière.|Le professeur indique les dates d'évaluations sur le planning commun dès le début du trimestre.
+3.21|Pour le travail de fin d'année, un échéancier mural indique les étapes : plan, premier jet, relecture, remise.|L'élève coche chaque étape sur un calendrier en couleurs placé dans son classeur.
+3.22|La veille de la remise, le professeur rappelle : « Demain, remise du dossier ».|L'élève reçoit un rappel hebdomadaire de ce qui est à rendre dans les deux semaines.
+3.23|Chaque matière a sa pochette de couleur dans le casier de l'élève.|Une boîte « devoirs à rendre » est dans le cartable de façon permanente.
+3.24|Avant de craquer, l'élève va cinq minutes dans le coin lecture, avec une carte signalant sa sortie.|Après un moment difficile, il se rend au local de l'éducateur dix minutes, puis revient au cours.
+3.25|L'élève arrive en retard, s'assoit, et le professeur lui indique la consigne sans commentaire.|La règle est connue : l'élève entre sans remarque devant la classe.
+4.1|Le professeur passe par le banc de l'élève et tapote doucement la feuille pour qu'il reprenne.|En S2, un geste convenu à l'avance (deux doigts sur le bord du banc) signale « on y revient », sans un mot.
+4.2|Pendant l'exercice individuel, l'élève porte un casque anti-bruit.|En évaluation, il utilise des boules Quies dans le local.
+4.3|En travail individuel de calcul, l'élève écoute une playlist instrumentale sur ses écouteurs.|Il retire les écouteurs pour la correction collective.
+4.4|L'élève manipule une balle anti-stress sous le banc pendant l'exposé.|Il garde un fidget discret en silence pendant la lecture.
+4.5|Pendant le cours oral, l'élève griffonne un coin de sa feuille sans que cela dérange.|Il dessine en marge pendant la lecture du texte.
+4.6|L'élève s'assoit sur un coussin dynamique pendant l'exercice.|Il va chercher le matériel au fond de la classe quand il a besoin de bouger.
+4.7|Au bout de 20 minutes, l'élève ferme les yeux deux minutes à sa place.|Il pose son stylo et respire calmement avant de reprendre.
+4.8|Le professeur demande à l'élève d'aller distribuer les feuilles à mi-cours.|Un élève efface le tableau entre deux activités.
+5.1|En S3, l'élève écoute le roman en audio tout en suivant le texte.|Pour l'épreuve de français, il utilise le livre audio de l'œuvre au programme.
+5.2|L'élève passe son stylo lecteur sur le mot inconnu pour l'entendre.|En néerlandais, il écoute la prononciation du mot pointé.
+5.3|La veille du cours, l'élève lit le texte à la maison, à son rythme, et arrive avec ses annotations.|Le professeur distribue le chapitre une semaine avant la leçon.
+5.4|L'élève pose une latte de lecture sous la ligne qu'il lit.|Il utilise un cache en carton qui laisse voir une seule ligne.
+5.5|Pendant la lecture silencieuse, l'élève lit à voix très basse avec son chuchoteur.|En classe de langue, il s'entend lire sans déranger les autres.
+5.6|Pour mémoriser un paragraphe de sciences, l'élève le lit à voix haute dans un coin.|Il relit sa consigne à voix haute avant de commencer.
+5.7|Le texte est imprimé avec une ligne sur deux en jaune clair.|L'élève passe un surligneur de couleur alternée sur les lignes de l'exercice.
+5.8|Le professeur prévient la veille : « Demain, tu liras le deuxième paragraphe », et l'élève le prépare.|L'élève lit d'abord à un adulte avant de lire devant la classe.
+5.9|La lecture à voix haute devant la classe est remplacée par une lecture en binôme avec le professeur.|L'élève commente le texte sans le lire à voix haute.
+5.10|Dans le texte de S4, les lignes sont numérotées de 5 en 5 : « relis les lignes 12 à 15 ».|Après une interruption, l'élève retrouve la ligne 20 sans tout relire.
+5.11|L'élève agrandit les notes de bas de page avec sa loupe.|En géographie, il lit la légende de la carte avec une loupe.
+5.12|L'élève surligne la consigne et les mots clés avant de répondre.|Le professeur surligne en jaune les trois mots importants de chaque paragraphe.
+5.13|La consigne est soulignée au crayon plutôt que surlignée en couleur.|L'élève encadre les mots clés d'un trait simple.
+6.1|L'élève active le correcteur orthographique pour rédiger son récit.|En néerlandais, il relit son texte avec l'aide du correcteur.
+6.2|Dans son traitement de texte, la liste des mots probables aide l'élève à écrire « photosynthèse ».|Il tape « bou » et choisit « bouillonnement » dans la liste.
+6.3|Pendant une rédaction, l'élève cherche « Philosophie » en tapant « filosophie » dans un dictionnaire en ligne.|En langue, il vérifie le sens du mot « neerslag » dans un dictionnaire en ligne.
+6.4|L'élève utilise un stylo plume ou un feutre, selon ce qui lui convient.|Il garde son crayon à grosse prise pour les exercices.
+6.5|L'alphabet affiché sur le banc l'aide à former les majuscules cursives.|Il consulte l'alphabet collé dans son cahier avant de copier.
+6.6|L'élève dicte son texte de français au téléphone, puis le corrige.|En S5, il dicte sa synthèse dans le traitement de texte avant de la mettre en forme.
+6.7|L'élève fait lire à voix haute sa consigne par son téléphone.|Il écoute sa rédaction pour repérer les phrases bancales.
+6.8|L'élève utilise un grip sur son stylo et un plan incliné pour écrire.|Il a un guide-doigts pour tenir son crayon plus relâché.
+6.9|Au lieu d'un exposé écrit, l'élève enregistre un audio de 3 minutes.|Pour son travail d'histoire, l'élève fait une vidéo montée.
+6.10|L'élève présente son exposé au professeur seul, ou en vidéo envoyée avant le cours.|Il passe son oral devant deux camarades au lieu de toute la classe.
+6.11|Le travail de sciences est rempli de ratures, mais les réponses sont justes : la note reflète le contenu.|Le professeur de sciences accepte un rapport de labo présenté en notes, si les résultats et la conclusion sont corrects.
+6.12|En histoire, l'orthographe n'entre pas dans la note de la question de cours.|En sciences, le professeur évalue le raisonnement, pas la dictée.
+6.13|Le professeur de mathématiques n'enlève pas de points pour l'écriture des chiffres.|En géographie, le soin de l'écriture ne compte pas dans la note.
+6.14|L'élève écrit sa réponse sur une feuille annexe, avec le numéro de la question.|Pour sa rédaction, il utilise une feuille de brouillon grand format.
+6.15|Pendant la leçon, un adulte écrit les mots que l'élève lui dicte.|En évaluation, l'élève dit ses réponses et un adulte les écrit.
+7.1|En S3, l'élève utilise la calculatrice pour un problème de proportionnalité dont le but est de choisir la bonne opération.|Au labo de physique, il calcule la vitesse avec la calculatrice et se concentre sur la démarche.
+7.2|En S2, l'élève pose l'addition à la verticale sur la feuille quadrillée.|Il écrit l'opération en colonne pour la soustraction.
+7.3|L'élève trace avec une équerre à encoche et un compas à roulette.|En S4, il construit le triangle avec Géogebra.
+7.4|Le professeur n'enlève pas de points si l'angle est tracé à deux degrés près : il évalue le raisonnement.|L'élève décrit sa construction plutôt que de la tracer au millimètre.
+7.5|L'énoncé « Léa a 12 billes... » est réduit à « Léa a 12 billes. Elle en perd 5. Combien lui en reste-t-il ? ».|Le professeur retire les informations inutiles (nom du chien, couleur de la voiture) de l'énoncé.
+8.1|Le professeur annonce l'interrogation de jeudi dès lundi, avec la matière.|Le planning de la semaine affiche chaque test à l'avance.
+8.2|En tête du contrôle : « Partie 1 : 5 points. Partie 2 : 10 points. »|Le professeur indique « Orthographe : 2 points sur 20 » dès la première page.
+8.3|Avant l'évaluation, la grille de critères est projetée et lue avec la classe.|Le professeur donne la grille de cotation de l'exposé une semaine avant.
+8.4|L'élève passe les épreuves du matin et celles de l'après-midi sur deux jours pour ne pas finir à 18 h.|Le temps supplémentaire est réparti sur deux demi-journées pour éviter une journée de dix heures de présence.
+8.5|Le contrôle de géographie est composé de QCM et de textes à trous.|En histoire, l'élève relie des événements à leurs dates.
+8.6|Le contrôle de sciences ne retire pas de point pour une mauvaise réponse au QCM.|Le professeur compte uniquement les bonnes réponses.
+8.7|L'élève répond par écrit à la place de l'exposé oral.|Il rédige un court texte au lieu de répondre en direct.
+8.8|À l'oral, l'élève explique son raisonnement en mathématiques.|Il complète son écrit lacunaire par un entretien de cinq minutes.
+8.9|Le professeur réduit l'exercice de 12 à 9 questions, en gardant une question par compétence.|Le devoir à domicile passe de 20 à 15 exercices.
+8.10|L'élève dispose de 80 minutes au lieu de 60 pour le même contrôle.|En évaluation de sciences, il garde le tiers-temps.
+8.11|L'élève passe l'écoute d'anglais dans un local calme avec un adulte.|Pour le CE1D de néerlandais, la compréhension à l'audition se déroule dans un local séparé.
+8.12|En néerlandais, l'élève est dispensé de l'écoute et évalué sur la lecture et l'écriture.|Le conseil de classe acte la dispense et la note en tient compte autrement.
+9.1|L'élève consulte un dictionnaire imagé pour le mot « marmite ».|En S2, il cherche un mot de sciences avec une photo.
+9.2|L'élève filme l'expérience de chimie pour la revoir le soir.|Le professeur partage une vidéo de la manipulation au labo.
+9.3|L'élève rédige sa synthèse sur ordinateur et la range dans un dossier.|Il utilise une tablette en classe pour prendre ses notes.
+9.4|Le syllabus de français est envoyé en PDF la veille du cours.|L'élève ouvre le PDF sur sa tablette et agrandit la page.
+10.1|Le professeur dit : « Tu as repris ton exercice trois fois, c'est du sérieux ».|Dans le journal de classe, il note : « Bon effort sur la rédaction ».
+10.2|À la fin de l'exercice, le professeur dit : « Relis avant de rendre ».|L'élève relit sa copie avec la liste de vérification affichée.
+10.3|Le professeur corrige la première phrase pendant l'exercice, pas le lendemain.|Il écrit un mot précis sur la copie : « Ajoute l'unité ».
+10.4|L'élève coche sur sa liste : feuilles, calculatrice, trousse.|Avant de rendre, il parcourt : titre, nom, date, relecture.
+10.5|L'élève pose un feu tricolore sur son banc : vert = ça va, orange = j'ai besoin d'aide, rouge = je suis bloqué.|Il lève discrètement un petit panneau pour signaler qu'il n'a pas compris.
+10.6|Le professeur vérifie chaque vendredi que le cours est complet.|L'éducateur contrôle le journal de classe le lundi.
+11.1|« Mais où est donc Ornicar » pour retenir les conjonctions de coordination.|En sciences, il utilise une phrase pour retenir l'ordre des planètes.
+11.2|Le cours commence par « Qu'avait-on vu la semaine dernière sur les fractions ? ».|Cinq minutes en début d'heure servent à retrouver ce qui a été vu.
+11.3|Le professeur encadre en rouge les 5 notions à retenir pour le contrôle.|Il ajoute « À retenir » en fin de chapitre.
+11.4|La fiche de lexique explique « photosynthèse » en une phrase simple.|En comptabilité, le lexique donne la définition courte de « créance ».
+12.1|Le professeur dit : « Ça, c'est une blague, je ne le pense pas vraiment ».|Il explique l'expression « il pleut des cordes » avant de la lire dans le texte.
+12.2|En S4, l'élève réalise l'exposé seul plutôt qu'en groupe.|En atelier, il fait la tâche seul avant de la mettre en commun.
+12.3|L'élève indique son humeur sur une échelle de 1 à 5 sur le banc.|Le professeur utilise des visages pour parler de colère et de calme.
+12.4|« En classe, on lève la main pour parler » est affiché en positif.|La fiche de règles dit « On range le matériel avant la sonnerie ».
+12.5|Le professeur ne réagit pas à un petit tic sonore pendant l'exercice.|Il laisse passer un soupir bruyant et poursuit le cours, puis salue l'effort en fin d'heure.
+12.6|L'élève utilise la respiration du carré avant l'interrogation.|Il s'éloigne cinq minutes pour souffler avant de reprendre.

@@ -1,0 +1,187 @@
+<title>Dossier d'essais export profil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : colonne de navigation à gauche (groupes d'essais), lecture à droite. Charte PLAI du portail. */
+:root {
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --fg: #1d2a27;
+  --fg2: #4a5a56;
+  --fg3: #6b7a76;
+  --line: #e3dfd8;
+  --teal: #0a9370;
+  --teal-ink: #07694f;
+  --teal-soft: #e3f3ee;
+  --orange: #f97316;
+  --code-bg: #f1efea;
+  --mark: #fff2a8;
+  --font-display: "DM Serif Display", Georgia, "Times New Roman", serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14201d; --surface: #1b2a26; --fg: #e8efec; --fg2: #b4c4be; --fg3: #8ea19a; --line: #2e4039;
+    --teal: #2ec29a; --teal-ink: #6fe0c0; --teal-soft: #17352d; --orange: #fb923c; --code-bg: #0f1a17; --mark: #5a4d10;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14201d; --surface: #1b2a26; --fg: #e8efec; --fg2: #b4c4be; --fg3: #8ea19a; --line: #2e4039;
+  --teal: #2ec29a; --teal-ink: #6fe0c0; --teal-soft: #17352d; --orange: #fb923c; --code-bg: #0f1a17; --mark: #5a4d10;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+* { box-sizing: border-box; }
+.page { max-width: 1240px; margin-inline: auto; padding-inline: 16px; padding-block: 20px 56px; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; padding-bottom: 14px; border-bottom: 2px solid var(--teal); }
+header.top h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.5rem, 3.4vw, 2.1rem); line-height: 1.15; margin: 0; text-wrap: balance; }
+header.top p { margin: 0; color: var(--fg2); font-size: 0.95rem; max-width: 62ch; }
+.layout { display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 28px; margin-top: 22px; align-items: start; }
+nav.sommaire { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 40px); overflow-y: auto; padding-right: 6px; }
+nav.sommaire h2 { font-size: 0.75rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--fg3); margin: 18px 0 6px; font-weight: 700; }
+nav.sommaire h2:first-child { margin-top: 0; }
+nav.sommaire a { display: block; padding: 7px 10px; border-radius: 4px; color: var(--fg); text-decoration: none; font-size: 0.95rem; line-height: 1.3; border-left: 3px solid transparent; }
+nav.sommaire a:hover { background: var(--teal-soft); }
+nav.sommaire a[aria-current="true"] { background: var(--teal-soft); border-left-color: var(--teal); font-weight: 700; color: var(--teal-ink); }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+.mobile-nav { display: none; }
+article { min-width: 0; }
+.barre { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 14px; }
+.barre .nom { font-family: var(--font-display); font-size: 1.45rem; line-height: 1.2; margin: 0; flex: 1 1 280px; text-wrap: balance; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+button { font: inherit; font-size: 0.9rem; padding: 8px 14px; border-radius: 4px; border: 1px solid var(--teal); background: var(--surface); color: var(--teal-ink); cursor: pointer; font-weight: 500; }
+button[aria-pressed="true"], button.plein { background: var(--teal); color: #fff; }
+:root[data-theme="dark"] button[aria-pressed="true"], :root[data-theme="dark"] button.plein { color: #07241c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button[aria-pressed="true"], :root:not([data-theme="light"]) button.plein { color: #07241c; } }
+.meta { color: var(--fg3); font-size: 0.85rem; font-family: var(--font-mono); overflow-wrap: anywhere; margin: 0 0 6px; }
+.note { margin: 0 0 14px; color: var(--fg2); }
+.etat { color: var(--fg2); font-size: 0.9rem; min-height: 1.4em; margin: 0 0 8px; }
+.lecture { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 22px clamp(16px, 3vw, 34px); overflow-wrap: break-word; }
+.lecture > :first-child { margin-top: 0; }
+.lecture h1, .lecture h2, .lecture h3, .lecture h4 { font-family: var(--font-display); font-weight: 400; line-height: 1.2; text-wrap: balance; }
+.lecture h1 { font-size: 1.7rem; margin: 1.4em 0 0.5em; }
+.lecture h2 { font-size: 1.35rem; margin: 1.5em 0 0.5em; color: var(--teal-ink); }
+.lecture h3 { font-size: 1.12rem; margin: 1.3em 0 0.4em; }
+.lecture p, .lecture li { max-width: 78ch; }
+.lecture li { margin: 0.2em 0; }
+.lecture hr { border: 0; border-top: 1px solid var(--line); margin: 1.8em 0; }
+.lecture code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+.lecture pre { background: var(--code-bg); padding: 12px 14px; border-radius: 4px; overflow-x: auto; margin: 1em 0; }
+.lecture pre code { background: none; padding: 0; overflow-wrap: normal; }
+.lecture blockquote { margin: 1em 0; padding: 4px 16px; border-left: 3px solid var(--orange); color: var(--fg2); }
+.lecture mark { background: var(--mark); color: inherit; padding: 0 2px; }
+.lecture .tableau { overflow-x: auto; margin: 1em 0; }
+.lecture table { border-collapse: collapse; font-size: 0.93rem; min-width: 420px; }
+.lecture th, .lecture td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+.lecture th { background: var(--teal-soft); }
+.brut { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.5; }
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  nav.sommaire { display: none; }
+  .mobile-nav { display: block; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  .mobile-nav summary { padding: 12px 14px; cursor: pointer; font-weight: 700; }
+  .mobile-nav .liste { padding: 0 8px 10px; max-height: 60vh; overflow-y: auto; }
+  .mobile-nav h2 { font-size: 0.75rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--fg3); margin: 14px 6px 4px; }
+  .mobile-nav a { display: block; padding: 10px; border-radius: 4px; color: var(--fg); text-decoration: none; }
+  .mobile-nav a[aria-current="true"] { background: var(--teal-soft); font-weight: 700; color: var(--teal-ink); }
+}
+</style>
+
+<div class="page">
+  <header class="top">
+    <h1>Dossier d'essais : export du profil de classes</h1>
+    <p>AménagActif, 5 octobre 2026. Les documents d'origine (profils, séance) et toutes les sorties produites. Classes et élèves fictifs.</p>
+  </header>
+  <div class="layout">
+    <nav class="sommaire" id="nav" aria-label="Documents"></nav>
+    <div>
+      <details class="mobile-nav" id="mnav"><summary>Choisir un document</summary><div class="liste" id="mliste"></div></details>
+      <article id="doc" aria-live="polite"></article>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+/*__DONNEES__*/
+(function () {
+  var byId = {}; DATA.docs.forEach(function (d) { byId[d.id] = d; });
+  var vue = 'rendu'; var courant = DATA.docs[0].id;
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+
+  function construireNav() {
+    var h = '', m = '';
+    DATA.groupes.forEach(function (g) {
+      h += '<h2>' + esc(g.titre) + '</h2>'; m += '<h2>' + esc(g.titre) + '</h2>';
+      g.items.forEach(function (id) {
+        var l = '<a href="#' + id + '" data-id="' + id + '">' + esc(byId[id].nom) + '</a>';
+        h += l; m += l;
+      });
+    });
+    document.getElementById('nav').innerHTML = h;
+    document.getElementById('mliste').innerHTML = m;
+  }
+
+  function marquerNav() {
+    document.querySelectorAll('[data-id]').forEach(function (a) {
+      if (a.getAttribute('data-id') === courant) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+  }
+
+  function afficher() {
+    var d = byId[courant];
+    var zone = document.getElementById('doc');
+    var corps;
+    if (vue === 'brut') {
+      corps = '<pre class="brut">' + esc(d.md) + '</pre>';
+    } else if (window.marked) {
+      corps = marked.parse(d.md, { gfm: true, breaks: false });
+    } else {
+      corps = '<pre class="brut">' + esc(d.md) + '</pre>';
+    }
+    zone.innerHTML =
+      '<div class="barre"><h2 class="nom">' + esc(d.nom) + '</h2><div class="btns">' +
+      '<button type="button" id="bRendu" aria-pressed="' + (vue === 'rendu') + '">Lecture</button>' +
+      '<button type="button" id="bBrut" aria-pressed="' + (vue === 'brut') + '">Markdown brut</button>' +
+      '<button type="button" id="bCopier" class="plein">Copier le texte</button></div></div>' +
+      '<p class="meta">' + esc(d.fichier) + '</p>' +
+      (d.note ? '<p class="note">' + esc(d.note) + '</p>' : '') +
+      '<p class="etat" id="etat" role="status"></p>' +
+      '<div class="lecture">' + corps + '</div>';
+    zone.querySelectorAll('.lecture table').forEach(function (t) {
+      var w = document.createElement('div'); w.className = 'tableau'; t.parentNode.insertBefore(w, t); w.appendChild(t);
+    });
+    document.getElementById('bRendu').onclick = function () { vue = 'rendu'; afficher(); };
+    document.getElementById('bBrut').onclick = function () { vue = 'brut'; afficher(); };
+    document.getElementById('bCopier').onclick = copier;
+    marquerNav();
+  }
+
+  function copier() {
+    var d = byId[courant], etat = document.getElementById('etat');
+    function repli() {
+      vue = 'brut'; afficher();
+      var pre = document.querySelector('.brut'); var r = document.createRange(); r.selectNodeContents(pre);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      document.getElementById('etat').textContent = 'La copie automatique est refusée ici. Le texte est sélectionné : copiez-le avec Ctrl+C.';
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(d.md).then(function () { etat.textContent = 'Texte copié.'; }, repli);
+    } else { repli(); }
+  }
+
+  function depuisHash() {
+    var id = (location.hash || '').replace('#', '');
+    courant = byId[id] ? id : DATA.docs[0].id;
+    afficher();
+    window.scrollTo(0, 0);
+  }
+
+  construireNav();
+  window.addEventListener('hashchange', function () { document.getElementById('mnav').open = false; depuisHash(); });
+  depuisHash();
+})();
+</script>

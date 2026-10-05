@@ -1,0 +1,76 @@
+{
+ "socle": [
+  "ar_lecture_numeroter_lignes",
+  "ar_supports_consigne_avant_support",
+  "ar_supports_consignes_epurees",
+  "ar_supports_mise_en_page",
+  "ar_supports_reformuler_consignes"
+ ],
+ "complements": {
+  "ar_supports_arial_14": [
+   "3LA",
+   "3LC"
+  ],
+  "ar_lecture_fluo_oui": [
+   "3LA"
+  ],
+  "ar_supports_carte_mentale_oui": [
+   "3LA",
+   "3LC"
+  ],
+  "ar_lecture_lire_voix_haute": [
+   "3LA"
+  ],
+  "ar_lecture_fluo_non": [
+   "3LB"
+  ],
+  "ar_supports_carte_mentale_non": [
+   "3LB"
+  ],
+  "ar_lecture_voix_haute_jamais": [
+   "3LB"
+  ],
+  "ar_lecture_preparer_textes_longs": [
+   "3LB"
+  ],
+  "ar_supports_dictionnaire_annote": [
+   "3LC"
+  ],
+  "ar_supports_cours_a3": [
+   "3LC"
+  ]
+ },
+ "inter": [
+  [
+   "ar_supports_carte_mentale_oui",
+   "ar_supports_carte_mentale_non",
+   [
+    "3LA",
+    "3LC"
+   ],
+   [
+    "3LB"
+   ]
+  ],
+  [
+   "ar_lecture_lire_voix_haute",
+   "ar_lecture_voix_haute_jamais",
+   [
+    "3LA"
+   ],
+   [
+    "3LB"
+   ]
+  ],
+  [
+   "ar_lecture_fluo_oui",
+   "ar_lecture_fluo_non",
+   [
+    "3LA"
+   ],
+   [
+    "3LB"
+   ]
+  ]
+ ]
+}
