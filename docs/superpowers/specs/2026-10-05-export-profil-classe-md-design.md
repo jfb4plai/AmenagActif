@@ -55,7 +55,7 @@ Tri déterministe (chapitre, puis code). Les libellés de classe sont désambigu
 Structure, dans cet ordre :
 1. **En-tête YAML** : `schema: plai.profil-classes`, `version: 1`, `emis_le`, `expire_le`, `classes` (libellés), `niveaux`. Pas d'école.
 2. **`# Profil d'aménagements de mes classes : <libellés>`**
-3. **`## Comment lire ce fichier`** : décrit des classes entières, sans donnée d'élève ; effectifs en tranches par classe, jamais cumulés ; ne pas identifier ni deviner d'élève, ne rien attribuer à une personne ; un code désigne un aménagement du catalogue AménagActif, et un code qui n'est pas appliqué est signalé avec son libellé, jamais ignoré en silence ; valable jusqu'à `expire_le`.
+3. **`## Comment lire ce fichier`** : décrit des classes entières, sans donnée d'élève ; effectifs en tranches par classe, jamais cumulés ; ne pas identifier ni deviner d'élève, ne rien attribuer à une personne ; un code désigne un aménagement du catalogue AménagActif, et un code qui n'est pas appliqué est signalé avec son libellé, jamais ignoré en silence ; règle de rédaction des consignes destinées aux élèves (voir ci-dessous) ; valable jusqu'à `expire_le`.
 4. **`## À appliquer à toutes les classes`** (socle) : par chapitre, `- <libellé> (`code`)` ; pour un AR, effectif par classe.
 5. **`## À prévoir pour certaines classes`** (compléments) : par classe, avec effectif.
 6. **`## Incompatibilités`** :
@@ -65,6 +65,10 @@ Structure, dans cet ordre :
 7. **`## Points d'attention`** : classes dont `elements_non_transmis_present` (« profil incomplet ») ; classes dont `libres_present` (« aménagements individuels libres, contenu non transmis ») ; éléments sans code. Omise si rien.
 8. **`## Liste de contrôle`** : `- [ ] <code> : <libellé>` pour le socle, puis pour chaque complément avec ses classes (« 3B uniquement »).
 9. **`## Rappel`** : l'IA propose, l'enseignant décide et personnalise ; aucune décision automatique sur un élève.
+
+**Règle de rédaction des consignes** (décision JF, 2026-10-05), reprise telle quelle dans « Comment lire ce fichier » : chaque consigne destinée aux élèves est une puce qui commence par un verbe d'action à l'infinitif (« Lire », « Surligner », pas « Lis », « Surligne »), avec un seul verbe d'action par puce. Une consigne qui demande trois actions s'écrit sur trois puces. Elle s'applique à toutes les classes : c'est le socle AU2, qui précède les AR (`ar_supports_consignes_epurees`).
+
+Statut : règle imposée, bénéfice à vérifier par essai à froid. Dans les 4 exécutions du 2026-10-05, aucune n'a respecté « un seul verbe par consigne » dans tous les documents, et toutes ont écrit à l'impératif.
 
 Neutralisation : les libellés viennent du catalogue (saisie admin) et des noms de classe. Retours à la ligne et caractères Markdown de début de ligne sont neutralisés pour qu'un libellé ne casse pas la structure.
 
@@ -104,7 +108,7 @@ Texte et aide en 16 px minimum, focus visible, `aria-live` pour « Copié ». Ex
 ## Tests
 
 - `tests/domain/synthesePourClasses.test.js` : socle et compléments sur 3 classes ; classe unique ; incompatibilité inter-classes (carte mentale oui/non) et intra-classe ; tranches par classe jamais cumulées ; libellés de classe en double ; éléments sans code ; `partage_profil` faux absent ; `k` appliqué via `computeProfilClasse`.
-- `tests/domain/syntheseMarkdown.test.js` : structure et ordre des sections ; sections omises ; liste de contrôle égale aux codes publiés ; neutralisation Markdown ; nom de fichier assaini.
+- `tests/domain/syntheseMarkdown.test.js` : l'en-tête contient la règle des consignes (infinitif, un verbe d'action par puce, trois actions sur trois puces) ; structure et ordre des sections ; sections omises ; liste de contrôle égale aux codes publiés ; neutralisation Markdown ; nom de fichier assaini.
 - **Non-fuite** : sur la fixture de `profilClasse.test.js` enrichie de prénoms, initiales, commentaires, AR libres, nom de référent et nom d'école, aucune de ces chaînes n'apparaît dans le .md ni dans le JSON.
 - `tests/api/profilExport.test.js` : lien actif OK ; lien inconnu, révoqué, expiré et JWT ancien donnent le même 410 ; `no-store` ; expiration plafonnée ; aucune donnée brute dans la réponse.
 - `tests/domain/exportProfilBoutons.test.jsx` : boutons sur la fiche enseignant et la fiche de classe ; absents pour `agent_plai` ; téléchargement et copie ; message d'erreur.
@@ -113,7 +117,7 @@ Texte et aide en 16 px minimum, focus visible, `aria-live` pour « Copié ». Ex
 
 Critère de réussite : un enseignant réel à plusieurs classes obtient, en moins de 5 minutes, un support commun ou des variantes qu'il juge utilisables, plus vite et plus sûrement qu'à partir des fiches séparées.
 
-Essai à froid sur un cas réel (3 classes, un support), comparé à la préparation à partir de 3 fiches : si la synthèse n'apporte pas de différence observable, la fonctionnalité est écartée. Le test de la consigne « un verbe par consigne » (point faible des 4 essais) reste à faire séparément.
+Essai à froid sur un cas réel (3 classes, un support), comparé à la préparation à partir de 3 fiches : si la synthèse n'apporte pas de différence observable, la fonctionnalité est écartée. Essai de la règle des consignes : 2 variantes (profil avec et sans la règle), 2 exécutions chacune, même séance. Mesure mécanique sur les puces de consigne des documents élèves : part qui commence par un verbe à l'infinitif, part qui contient un seul verbe d'action. Décision fixée avant l'essai : la règle reste dans l'en-tête si la variante avec règle fait nettement mieux sur les deux mesures ; sinon elle sort de l'en-tête et devient un contrôle de `/verif`.
 
 ## Historique : essai du 2026-10-05
 
