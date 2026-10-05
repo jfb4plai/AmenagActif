@@ -1,6 +1,6 @@
 # Export du profil de classes en Markdown (multi-classes)
 
-Date : 2026-10-05. Statut : version 3, orientation validée par JF (multi-classes = chemin direct, synthèse précalculée retirée). Une ligne de l'en-tête (la consigne de production) reste à retester après reformulation. À relire par JF avant plan d'implémentation.
+Date : 2026-10-05. Statut : version 3, orientation validée par JF (multi-classes = chemin direct, synthèse précalculée retirée, consigne de production non retenue après deux essais). À relire par JF avant plan d'implémentation.
 
 ## Problème
 
@@ -44,7 +44,6 @@ Structure du fichier :
    - ne pas identifier ni deviner d'élève, ne rien attribuer à une personne ;
    - un code désigne un aménagement du catalogue AménagActif ; un code non appliqué est signalé avec son libellé, jamais ignoré en silence ;
    - **règle de rédaction des consignes** (voir ci-dessous) ;
-   - **consigne de production** (voir ci-dessous) ;
    - valable jusqu'à `expire_le` ; au-delà, redemander un export.
 3. **Un profil par classe**, séparés par une ligne horizontale. Pour chaque classe :
    - en-tête YAML : `schema: plai.profil-classe`, `version: 1`, `emis_le`, `expire_le`, `classe`, `niveau` ;
@@ -62,11 +61,15 @@ Décision JF (2026-10-05), vérifiée par essai à froid. Chaque consigne destin
 
 Essai (2 exécutions avec la règle, 2 sans) : sans la règle, 0 % de consignes à l'infinitif et 63 % à un seul verbe ; avec la règle, 100 % et 99 %. Elle reste dans l'en-tête. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test-consignes/`.
 
-### 3. Consigne de production : un seul support, variantes minimales
+### 3. Consigne de production : non retenue
 
-Texte proposé pour l'en-tête : « Produis un seul support pour toutes les classes. Ajoute une variante d'un document uniquement là où deux classes ont des aménagements qui s'excluent. Ne multiplie pas les documents : une même fiche de travail sert toutes les classes ; la police et le format d'impression se règlent à l'impression et ne comptent pas comme des documents distincts. »
+Testée deux fois, la consigne « un seul support pour toutes les classes, variantes seulement là où deux classes s'excluent » ne figure pas dans l'en-tête.
 
-Statut : **testée, non retenue telle qu'écrite** (essai du 2026-10-05, 2 exécutions avec la consigne contre 2 de référence sans). Elle réduit le nombre de documents de 8 à 4,5 en moyenne, mais l'une des deux sorties a supprimé les trois niveaux de difficulté (voir « Résultat de l'essai 5 »). La formulation corrigée est à retester avant de l'inscrire dans l'en-tête.
+- **Première formulation** : documents de 8 à 4,5 en moyenne, mais une sortie sur deux a supprimé les trois niveaux de difficulté (une fiche unique). Non retenue selon la règle fixée.
+- **Formulation corrigée** (« garde les trois niveaux : une même fiche par niveau sert toutes les classes ») : niveaux conservés dans les deux sorties, mais 7 documents contre 8 sans consigne, pour un seuil de 5. Gain non démontré. Non retenue selon la règle fixée.
+- **Pourquoi** : avec trois niveaux conservés, le nombre de documents plafonne à 6 ou 7 (trois fiches, un texte, une ou deux annexes). Seule la suppression des niveaux (fiche unique, étayage ouvert à tous) fait descendre à 3, et c'est un choix pédagogique qui remplace les trois fiches du skill de différenciation : il revient à JF.
+
+Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test-production/` et `ab-test-production-reformulee/`.
 
 ### 4. Serveur : `api/profil-export.js`
 
@@ -98,7 +101,7 @@ Texte et aide en 16 px minimum, focus visible, `aria-live` pour « Copié ». Ex
 
 ## Tests
 
-- `tests/domain/profilsClassesMarkdown.test.js` : un profil par classe dans l'ordre ; classe unique ; en-tête contenant la règle des consignes et la consigne de production (si retenue) ; liste de contrôle égale aux codes publiés ; points d'attention conditionnels ; neutralisation Markdown ; nom de fichier assaini ; libellés de classe en double désambiguïsés.
+- `tests/domain/profilsClassesMarkdown.test.js` : un profil par classe dans l'ordre ; classe unique ; en-tête contenant la règle des consignes ; liste de contrôle égale aux codes publiés ; points d'attention conditionnels ; neutralisation Markdown ; nom de fichier assaini ; libellés de classe en double désambiguïsés.
 - **Non-fuite** : sur la fixture de `profilClasse.test.js` enrichie de prénoms, initiales, commentaires, AR libres, nom de référent et nom d'école, aucune de ces chaînes n'apparaît dans le .md ni dans le JSON ; élément à `partage_profil` faux absent.
 - `tests/api/profilExport.test.js` : lien actif OK ; lien inconnu, révoqué, expiré et JWT ancien donnent le même 410 ; `no-store` ; expiration plafonnée ; aucune donnée brute dans la réponse.
 - `tests/domain/exportProfilBoutons.test.jsx` : boutons sur la fiche enseignant et la fiche de classe ; absents pour `agent_plai` ; téléchargement et copie ; message d'erreur.
@@ -115,15 +118,11 @@ Documents et sorties : `docs/essais/2026-10-05-chaine-profil-md/`, consultables 
 2. **Deux consignes d'en-tête** (AR dans toutes les versions ; statut par code), 2 exécutions avec, 2 sans : aucun bénéfice mesurable. Non retenues. Dossier `ab-test/`.
 3. **Règle des consignes** : retenue (voir plus haut). Dossier `ab-test-consignes/`.
 4. **Synthèse multi-classes précalculée contre trois profils séparés** (3 classes fictives aux aménagements incompatibles, 4 exécutions) : écart 0,5 pour un seuil de 2. Avec trois profils séparés, l'IA repère seule les incompatibilités et ne les viole nulle part ; la synthèse ne réduit pas le nombre de documents (9 documents dans 2 sorties sur 4) et une des deux sorties avec synthèse a lu « trois versions » comme « trois classes » en supprimant les niveaux. Synthèse retirée. Dossier `ab-test-multi/`. Limites : comptage non en aveugle, un cas fictif, 2 exécutions par condition.
-5. **Consigne de production** (un seul support, variantes minimales) : documents 8 → 4,5, mais niveaux supprimés dans une sortie sur deux, donc non retenue telle qu'écrite (résultat ci-dessous). Dossier `ab-test-production/`.
+5. **Consigne de production** : première formulation (documents 8 → 4,5, mais niveaux supprimés dans une sortie sur deux), puis formulation corrigée (niveaux conservés, mais 7 documents contre 8, gain non démontré). Non retenue. Dossiers `ab-test-production/` et `ab-test-production-reformulee/`.
 
-### Résultat de l'essai 5
+### Pistes pour réduire le nombre de documents
 
-Nombre de documents élèves distincts : 8 en moyenne sans la consigne (9 et 7), 4,5 avec (6 et 3). Aucune violation d'incompatibilité, socle appliqué 5 sur 5, 10 compléments sur 10 bien attribués dans les quatre sorties. Mais l'une des deux sorties avec la consigne (w-2) a fusionné les trois niveaux de difficulté en une seule fiche, ce qui ne respecte pas la condition « niveaux conservés » fixée avant l'essai. **Selon la règle fixée, la consigne n'est pas retenue telle qu'écrite.** Cause : « un seul support » est ambigu sur les niveaux. Détail : `docs/essais/2026-10-05-chaine-profil-md/ab-test-production/01-resultats.md`.
-
-Reformulation à retester : « Produis un seul support pour toutes les classes. Garde les trois niveaux de difficulté de la séance : une même fiche par niveau sert toutes les classes. Ajoute une variante d'un document uniquement là où deux classes ont des aménagements qui s'excluent. La police et le format d'impression ne comptent pas comme des documents distincts. »
-
-Décision pédagogique de JF à prendre : la fiche unique de w-2 (étayage ouvert à tous, un seul document, aucune étiquette de niveau) est défendable, mais remplace les trois fiches de `seance-differenciee` par une conception à une fiche.
+Avec trois niveaux de difficulté, le plancher est de 6 à 7 documents. Une réduction supplémentaire passe par un choix pédagogique de JF : fiche unique avec étayage ouvert à tous et approfondissement facultatif (3 documents, essai w-2), au prix de la différenciation en trois fiches. À décider ; aucun essai supplémentaire n'est prévu sans cette décision.
 
 ## Hors périmètre
 

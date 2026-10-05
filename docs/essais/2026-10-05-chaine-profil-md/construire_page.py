@@ -42,6 +42,12 @@ GROUPES = [
         ("Entrée C : trois profils + consigne de production", "ab-test-production/entrees/C-trois-profils-plus-consigne-de-production.md", ""),
         ("Sortie w-1 (avec la consigne)", "ab-test-production/w-1.md", ""), ("Sortie w-2 (avec la consigne)", "ab-test-production/w-2.md", ""),
     ]),
+    ("Essai 6 : consigne de production reformulée (niveaux conservés)", [
+        ("Résultats", "ab-test-production-reformulee/01-resultats.md", "Niveaux conservés, 7 documents contre 8 : gain non démontré."),
+        ("Rubrique fixée avant", "ab-test-production-reformulee/00-rubrique-fixee-avant.md", ""),
+        ("Entrée D : trois profils + consigne reformulée", "ab-test-production-reformulee/entrees/D-trois-profils-plus-consigne-reformulee.md", ""),
+        ("Sortie z-1 (consigne reformulée)", "ab-test-production-reformulee/z-1.md", ""), ("Sortie z-2 (consigne reformulée)", "ab-test-production-reformulee/z-2.md", ""),
+    ]),
 ]
 
 docs = []
