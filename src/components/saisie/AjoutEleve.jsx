@@ -27,9 +27,10 @@ export default function AjoutEleve({ onCreate }) {
   const enCours = etat === 'creation';
 
   return (
-    <form className="plai-card p-3 flex flex-wrap gap-2 items-end" onSubmit={soumettre}>
+    <form className="plai-card p-3 flex flex-wrap gap-2 items-start" onSubmit={soumettre}>
       <label className="text-sm">Prénom
         <input className="plai-input block" required value={f.prenom} onChange={set('prenom')} placeholder="Emilie" disabled={enCours} />
+        <span className="block text-xs text-[color:var(--text3)] font-normal">Affiché sur les fiches.</span>
       </label>
       <label className="text-sm">Nom de famille complet
         <input className="plai-input block" value={f.nomFamille} onChange={set('nomFamille')} placeholder="Dupont" disabled={enCours} />
