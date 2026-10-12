@@ -36,15 +36,25 @@ describe('computeFicheClasse', () => {
     expect(emilie.amenagements).toContain('Vérifier oralement la consigne avant de commencer');
   });
 
-  it('ne compte pas l\'AR « recto » comme AR spécifique affiché', () => {
+  it("l'AR recto s'affiche comme tout AR spécifique (plus de compteur dédié)", () => {
     const vm = computeFicheClasse(args());
     const emilie = vm.parEleve.find((x) => x.eleve === 'Emilie D.');
-    expect(emilie.amenagements).not.toContain('Cours uniquement en recto');
+    expect(emilie.amenagements).toContain('Cours uniquement en recto');
+    expect(vm.nbRecto).toBeUndefined();
   });
 
-  it('nbRecto = nombre d\'élèves ayant l\'AR recto', () => {
-    const vm = computeFicheClasse(args());
-    expect(vm.nbRecto).toBe(2);
+  it('elevesListe : prénom + nom de famille complet, à défaut prénom + initiales', () => {
+    const eleves = f.eleves.map((e) => (e.id === 'e1' ? { ...e, nom_famille: 'Dupont' } : e));
+    const vm = computeFicheClasse({ ...args(), eleves });
+    expect(vm.elevesListe.map((x) => x.nom)).toEqual(['Emilie Dupont', 'Karim B.', 'Lea M.']);
+    // Le tableau des AR garde prénom + initiales.
+    expect(vm.parEleve.map((x) => x.eleve)).toContain('Emilie D.');
+  });
+
+  it('initiales vides : le tableau des AR affiche le prénom seul', () => {
+    const eleves = f.eleves.map((e) => (e.id === 'e1' ? { ...e, initiale_nom: '' } : e));
+    const vm = computeFicheClasse({ ...args(), eleves });
+    expect(vm.parEleve.map((x) => x.eleve)).toContain('Emilie');
   });
 
   it('tableauReferents sépare PIA (référent·e·s PLAI de la classe, texte libre) et PAR (direction)', () => {
@@ -75,11 +85,11 @@ describe('computeFicheClasse', () => {
     expect(vm.dateMaj).toBe('2026-09-03T08:00:00Z');
   });
 
-  it('classe vide → pourTous et parEleve vides, nbRecto 0, dateMaj = création de la classe', () => {
+  it('classe vide → pourTous, parEleve et elevesListe vides, dateMaj = création de la classe', () => {
     const vm = computeFicheClasse({ ...args(), eleves: [], selectionsAR: [], auClasse: [], libres: [] });
     expect(vm.pourTous).toEqual([]);
     expect(vm.parEleve).toEqual([]);
-    expect(vm.nbRecto).toBe(0);
+    expect(vm.elevesListe).toEqual([]);
     expect(vm.dateMaj).toBe('2026-08-20T08:00:00Z');
   });
 
@@ -99,6 +109,7 @@ describe('computeFicheClasse', () => {
     const vm = computeFicheClasse(args());
     expect(vm.parAmenagement.map((x) => x.libelle)).toEqual([
       'Doubler les espaces de réponse',
+      'Cours uniquement en recto',
       'Utiliser les livres audio pour la lecture',
       'Vérifier oralement la consigne avant de commencer',
     ]);
@@ -108,7 +119,6 @@ describe('computeFicheClasse', () => {
 
   it('parAmenagement : ne contient pas l\'AR recto ni les commentaires', () => {
     const vm = computeFicheClasse(args());
-    expect(vm.parAmenagement.some((x) => x.libelle === 'Cours uniquement en recto')).toBe(false);
     expect(vm.parAmenagement.some((x) => x.libelle.includes('grand-mère'))).toBe(false);
   });
 

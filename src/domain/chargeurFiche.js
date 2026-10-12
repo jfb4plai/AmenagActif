@@ -7,7 +7,7 @@
  */
 
 export const COLONNES_CLASSE = 'id, nom, niveau, referent_plai_nom, commentaire, commentaire_modifie_le, ecole_id, annee_id, created_at, ar_ecoles(nom), ar_annees(libelle)';
-export const COLONNES_ELEVES = 'id, classe_id, prenom, initiale_nom, commentaire, statut, created_at';
+export const COLONNES_ELEVES = 'id, classe_id, prenom, nom_famille, initiale_nom, commentaire, statut, created_at';
 export const COLONNES_AMENAGEMENTS = 'id, chapitre_id, ordre, libelle, type, code, partage_profil';
 export const COLONNES_CHAPITRES = 'id, ordre, titre, code, est_dispositif';
 export const COLONNES_MODES_DISPOSITIFS = 'chapitre_id, pour_toute_la_classe, modifie_le';

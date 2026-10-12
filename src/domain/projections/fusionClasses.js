@@ -30,7 +30,8 @@ export function fusionnerDonneesClasses(parties, nomGroupe) {
   const classesSources = parties.map((p) => p.contexte.classeNom);
   const premiere = parties[0];
 
-  const eleves = parties.flatMap((p) => p.eleves);
+  // classe_nom : permet d'indiquer la classe de chaque élève dans l'en-tête d'une fiche groupée.
+  const eleves = parties.flatMap((p) => p.eleves.map((e) => ({ ...e, classe_nom: p.contexte.classeNom })));
   const auClasse = [...new Map(parties.flatMap((p) => p.auClasse).map((x) => [x.amenagement_id, x])).values()];
   // Le mode d'un dispositif est propre à chaque classe : on écarte avant fusion les sélections résiduelles
   // des classes où il est en mode AU, et on fige un bloc par classe (étiqueté de son nom).

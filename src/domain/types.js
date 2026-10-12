@@ -58,10 +58,11 @@
  * @property {{ libelle: string, eleves: { nom: string, eleveId: string, statut: string }[] }[]} parAmenagement
  * @property {{ eleve: string, statut: string, texte: string }[]} commentaires
  * @property {{ classe: string, texte: string, modifieLe: string|null }[]} commentairesClasses
- * @property {number} nbRecto
+ * @property {{ nom: string, classe: string|null }[]} elevesListe
  *
  * @typedef {Object} FicheEleveVM
  * @property {string} eleve
+ * @property {string} eleveComplet
  * @property {string} classeNom
  * @property {string} ecoleNom
  * @property {string} statut

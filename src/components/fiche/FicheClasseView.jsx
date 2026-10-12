@@ -14,6 +14,14 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
         {vm.ecoleNom} · {vm.anneeLibelle}
         {vm.classesSources && <> · Classes regroupées : {vm.classesSources.join(', ')}</>}
       </p>
+      {vm.elevesListe.length > 0 && (
+        <p className="text-sm mb-4">
+          <strong>{vm.elevesListe.length > 1 ? 'Élèves' : 'Élève'} :</strong>{' '}
+          {vm.elevesListe.map((e, i) => (
+            <span key={i}>{i > 0 && ', '}{e.nom}{vm.classesSources && e.classe ? ` (${e.classe})` : ''}</span>
+          ))}
+        </p>
+      )}
 
       <table className="w-full border border-black mb-4 text-sm">
         <thead><tr>
@@ -84,13 +92,6 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
             </tr>
           ))}
         </tbody>
-      </table>
-
-      <table className="border border-black text-sm">
-        <tbody><tr>
-          <td className="border border-black p-2">Nombre de cours à imprimer en recto</td>
-          <td className="border border-black p-2 text-center w-16">{vm.nbRecto}</td>
-        </tr></tbody>
       </table>
 
       {vm.commentaires.length > 0 && (

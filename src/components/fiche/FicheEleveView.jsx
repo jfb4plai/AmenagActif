@@ -7,7 +7,7 @@ export default function FicheEleveView({ vm }) {
       </header>
       <p className="text-sm text-gray-600 mb-2">{vm.ecoleNom}</p>
       <h1 className="text-center bg-gray-200 py-2 font-bold text-lg mb-4">
-        Aménagements — {vm.eleve}{' '}
+        Aménagements — {vm.eleveComplet}{' '}
         <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-white border border-gray-400 align-middle">{vm.statut}</span>
         {' '}({vm.classeNom})
       </h1>
@@ -26,7 +26,7 @@ export default function FicheEleveView({ vm }) {
           <ul className="list-disc pl-6">{d.items.map((a, i) => <li key={i}>{a}</li>)}</ul>
         </section>
       ))}
-      <h2 className="font-bold underline mb-1">Aménagements de {vm.eleve} :</h2>
+      <h2 className="font-bold underline mb-1">Aménagements de {vm.eleveComplet} :</h2>
       {vm.parChapitre.length === 0 && <p className="text-gray-500">Aucun aménagement spécifique enregistré.</p>}
       {vm.parChapitre.map((ch) => (
         <section key={ch.chapitreTitre} className="mb-3">

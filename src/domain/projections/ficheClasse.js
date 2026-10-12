@@ -1,4 +1,4 @@
-import { normaliseLibelle, LIBELLE_RECTO_NORMALISE } from '../normalise.js';
+import { normaliseLibelle } from '../normalise.js';
 import { dispositifsAU, selectionsActives } from '../dispositifs.js';
 
 const LIBELLE_MISE_EN_PAGE = normaliseLibelle('Mise en page');
@@ -51,6 +51,9 @@ export function computeFicheClasse(input) {
     ?? (texteClasse ? [{ classe: contexte.classeNom, texte: texteClasse, modifieLe: input.classe?.commentaire_modifie_le ?? null }] : []);
 
   const nomEleve = (e) => `${e.prenom}${e.initiale_nom ? ' ' + e.initiale_nom + '.' : ''}`;
+  // Nom complet (prénom + nom de famille) : en-tête de la fiche ; à défaut de nom saisi, prénom + initiales.
+  const nomComplet = (e) => (e.nom_famille ?? '').trim() ? `${e.prenom} ${e.nom_famille.trim()}` : nomEleve(e);
+  const elevesListe = eleves.map((e) => ({ nom: nomComplet(e), classe: e.classe_nom ?? null }));
   const commentaires = eleves
     .filter((e) => (e.commentaire ?? '').trim())
     .map((e) => ({ eleve: nomEleve(e), statut: e.statut, texte: e.commentaire.trim() }));
@@ -58,7 +61,6 @@ export function computeFicheClasse(input) {
   for (const s of selectionsAR) {
     const a = amgtById.get(s.amenagement_id);
     if (!a || a.type !== 'AR') continue;
-    if (normaliseLibelle(a.libelle) === LIBELLE_RECTO_NORMALISE) continue;
     if (!arParEleveId.has(s.eleve_id)) arParEleveId.set(s.eleve_id, []);
     arParEleveId.get(s.eleve_id).push(a);
   }
@@ -86,7 +88,6 @@ export function computeFicheClasse(input) {
   for (const [eleveId, amgts] of arParEleveId.entries()) {
     const e = eleves.find((x) => x.id === eleveId);
     if (!e) continue;
-    // arParEleveId exclut déjà l'AR recto (filtré plus haut à sa construction).
     for (const a of amgts) ajouterEleveAAmenagement(a.libelle, chapOrdre(a), a.ordre, nomEleve(e), e.id, e.statut);
   }
   // Les aménagements libres n'ont pas d'ordre de catalogue : ils se placent
@@ -100,16 +101,6 @@ export function computeFicheClasse(input) {
   const parAmenagement = [...parAmenagementMap.entries()]
     .sort(([, a], [, b]) => a.chapOrdreVal - b.chapOrdreVal || a.ordreVal - b.ordreVal)
     .map(([libelle, { eleves: es }]) => ({ libelle, eleves: es }));
-
-  const eleveIds = new Set(eleves.map((e) => e.id));
-  const nbRecto = new Set(
-    selectionsAR
-      .filter((s) => {
-        const a = amgtById.get(s.amenagement_id);
-        return a && eleveIds.has(s.eleve_id) && normaliseLibelle(a.libelle) === LIBELLE_RECTO_NORMALISE;
-      })
-      .map((s) => s.eleve_id)
-  ).size;
 
   // PIA = référent(s) PLAI de la classe (texte libre, un ou plusieurs noms séparés par une
   // virgule, saisi une fois pour la classe — pas dérivé des élèves individuels).
@@ -147,6 +138,6 @@ export function computeFicheClasse(input) {
     parAmenagement,
     commentaires,
     commentairesClasses,
-    nbRecto,
+    elevesListe,
   };
 }

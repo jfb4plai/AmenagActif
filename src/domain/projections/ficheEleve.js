@@ -41,6 +41,8 @@ export function computeFicheEleve(input) {
 
   const nomEleve = `${eleve.prenom}${eleve.initiale_nom ? ' ' + eleve.initiale_nom + '.' : ''}`;
 
+  const eleveComplet = (eleve.nom_famille ?? '').trim() ? `${eleve.prenom} ${eleve.nom_famille.trim()}` : nomEleve;
+
   const parChapId = new Map();
   const push = (chapId, ordre, libelle) => {
     if (!parChapId.has(chapId)) parChapId.set(chapId, []);
@@ -67,5 +69,5 @@ export function computeFicheEleve(input) {
     .sort((a, b) => a.ordre - b.ordre)
     .map(({ chapitreTitre, amenagements }) => ({ chapitreTitre, amenagements }));
 
-  return { eleve: nomEleve, classeNom, ecoleNom, statut: eleve.statut, parChapitre, pourTous, dispositifsClasse, commentaire: (eleve.commentaire ?? '').trim() };
+  return { eleve: nomEleve, eleveComplet, classeNom, ecoleNom, statut: eleve.statut, parChapitre, pourTous, dispositifsClasse, commentaire: (eleve.commentaire ?? '').trim() };
 }

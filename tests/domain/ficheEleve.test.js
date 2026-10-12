@@ -44,4 +44,10 @@ describe('computeFicheEleve', () => {
     expect(vm.ecoleNom).toBe('Athénée X');
     expect(vm.statut).toBe('PAR');
   });
+
+  it('eleveComplet : prénom + nom de famille, à défaut prénom + initiales', () => {
+    const avec = { ...args('e1'), eleve: { ...f.eleves[0], nom_famille: 'Dupont' } };
+    expect(computeFicheEleve(avec).eleveComplet).toBe('Emilie Dupont');
+    expect(computeFicheEleve(args('e1')).eleveComplet).toBe('Emilie D.');
+  });
 });
