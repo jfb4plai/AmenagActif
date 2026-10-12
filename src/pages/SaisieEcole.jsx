@@ -209,18 +209,24 @@ export default function SaisieEcole() {
           <RecapDispositifs dispositifs={dispositifs} modes={modesClasse} />
 
           {/* Bloc flottant : reste visible sous la barre de navigation (52 px) pendant tout le défilement de la saisie. */}
-          <div className="sticky top-[52px] z-30 bg-[color:var(--bg)] py-2 border-b border-[color:var(--border)] space-y-1">
+          <div className="sticky top-[52px] z-30 -mx-2 px-3 py-3 rounded-lg space-y-2 bg-white no-print"
+            style={{ border: '2px solid var(--teal)', boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }}>
+            <label htmlFor="recherche-saisie" className="block text-base font-semibold text-teal">
+              Rechercher un aménagement (AU ou AR)
+            </label>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <input type="search" aria-label="Rechercher un aménagement" className="plai-input w-full max-w-sm" placeholder="Rechercher un AU ou un AR (ex : bruit, temps, oral)…"
+              <input id="recherche-saisie" type="search" className="plai-input w-full max-w-md text-base"
+                style={{ borderColor: 'var(--teal)', borderWidth: 2 }}
+                placeholder="Cliquez ici, puis tapez un mot (ex : bruit, temps, oral)…"
                 value={recherche} onChange={(e) => setRecherche(e.target.value)} />
-              <p className="text-sm font-medium" aria-live="polite">
+              <p className="text-base font-semibold" aria-live="polite">
                 {recherche.trim() ? resultats : ''}
               </p>
             </div>
-            <BarreSaut chapitres={chapitres} />
-            <p className="text-xs text-[color:var(--text3)]">
-              Filtre les AU et les AR de tous les chapitres, sans les déplier. Videz le champ pour revenir à la vue normale.
+            <p className="text-sm text-[color:var(--text2)]">
+              <strong>Cliquez dans le champ et tapez un mot</strong> : seuls les AU et les AR qui le contiennent restent affichés, dans tous les chapitres, sans les déplier. Ce bloc vous suit pendant que vous défilez. Videz le champ pour revenir à la vue normale.
             </p>
+            <BarreSaut chapitres={chapitres} />
           </div>
 
           <BandeauAU classe={classe} auCatalogue={auCat} chapitres={chapitres}
