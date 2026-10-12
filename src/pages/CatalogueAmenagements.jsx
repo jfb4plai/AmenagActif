@@ -19,6 +19,8 @@ const normaliser = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase
 export default function CatalogueAmenagements() {
   const { session } = useAuth();
   const [recherche, setRecherche] = useState('');
+  const [voirAU, setVoirAU] = useState(true);
+  const [voirAR, setVoirAR] = useState(true);
   useEffect(() => {
     const meta = document.createElement('meta');
     meta.name = 'robots';
@@ -43,7 +45,11 @@ export default function CatalogueAmenagements() {
 
   const { chapitres, amenagements } = data;
   const correspond = (a) => termes.every((t) => normaliser(a.libelle).includes(t));
-  const visibles = termes.length ? amenagements.filter(correspond) : amenagements;
+  const dispositifIds = new Set(chapitres.filter((c) => c.est_dispositif).map((c) => c.id));
+  // Un dispositif est AU ou AR selon la classe : il reste visible dès qu'un des deux types est coché.
+  const typeVisible = (a) => (dispositifIds.has(a.chapitre_id) ? voirAU || voirAR : a.type === 'AU' ? voirAU : voirAR);
+  const filtres = termes.length || !voirAU || !voirAR;
+  const visibles = amenagements.filter((a) => typeVisible(a) && (!termes.length || correspond(a)));
 
   return (
     <div className="min-h-screen bg-[color:var(--bg)] py-8 px-4">
@@ -63,6 +69,21 @@ export default function CatalogueAmenagements() {
           </p>
         </header>
 
+        <fieldset className="no-print">
+          <legend className="block text-base font-medium">Types d'aménagements à afficher</legend>
+          <div className="flex flex-wrap gap-x-6 gap-y-1 mt-1">
+            <label className="flex items-center gap-2 text-base">
+              <input type="checkbox" checked={voirAU} onChange={(e) => setVoirAU(e.target.checked)} />
+              <span><strong>AU</strong> : universels (toute la classe)</span>
+            </label>
+            <label className="flex items-center gap-2 text-base">
+              <input type="checkbox" checked={voirAR} onChange={(e) => setVoirAR(e.target.checked)} />
+              <span><strong>AR</strong> : raisonnables (propres à un élève)</span>
+            </label>
+          </div>
+          <p className="text-sm text-[color:var(--text3)]">Les aménagements restent rangés par chapitre. Les dispositifs, AU ou AR selon la classe, s'affichent dès qu'un des deux types est coché.</p>
+        </fieldset>
+
         <div className="space-y-1 no-print">
           <label htmlFor="recherche-amenagement" className="block text-base font-medium">Rechercher un aménagement</label>
           <div className="flex gap-2">
@@ -79,15 +100,18 @@ export default function CatalogueAmenagements() {
             )}
           </div>
           <p className="text-sm text-[color:var(--text3)]" aria-live="polite">
-            {termes.length
+            {filtres
               ? `${visibles.length} aménagement${visibles.length > 1 ? 's' : ''} trouvé${visibles.length > 1 ? 's' : ''}. `
               : ''}
             Tapez un ou plusieurs mots : seuls les aménagements qui les contiennent tous restent affichés. Les accents et les majuscules sont ignorés.
           </p>
         </div>
 
-        {termes.length > 0 && visibles.length === 0 && (
-          <p className="plai-empty">Aucun aménagement ne correspond. Essayez un mot plus court ou un seul mot.</p>
+        {!voirAU && !voirAR && (
+          <p className="plai-empty">Cochez AU, AR ou les deux pour afficher des aménagements.</p>
+        )}
+        {(voirAU || voirAR) && filtres && visibles.length === 0 && (
+          <p className="plai-empty">Aucun aménagement ne correspond. Essayez un mot plus court ou un seul mot, ou cochez AU et AR.</p>
         )}
 
         {chapitres.map((ch) => {

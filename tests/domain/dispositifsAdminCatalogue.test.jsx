@@ -137,3 +137,38 @@ describe('Administration : catalogue et dispositifs', () => {
     expect(h.ajouterChapitre.mutate).toHaveBeenCalledWith({ titre: 'Ordinaire', estDispositif: false });
   });
 });
+
+describe('Catalogue public : sélecteurs AU / AR', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ chapitres, amenagements }) })));
+  });
+  const rendre = () => render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter><CatalogueAmenagements /></MemoryRouter>
+    </QueryClientProvider>,
+  );
+
+  it('AU seuls, AR seuls, ou les deux ; dispositifs visibles tant qu\'un type est coché', async () => {
+    rendre();
+    await screen.findByText('Coin calme');
+    const au = screen.getByRole('checkbox', { name: /AU/ });
+    const ar = screen.getByRole('checkbox', { name: /AR/ });
+
+    fireEvent.click(ar); // AU seuls
+    expect(screen.getByText('Consignes courtes')).toBeTruthy();
+    expect(screen.queryByText('Temps supplémentaire')).toBeNull();
+    expect(screen.getByText('Coin calme')).toBeTruthy();
+
+    fireEvent.click(ar); fireEvent.click(au); // AR seuls
+    expect(screen.queryByText('Consignes courtes')).toBeNull();
+    expect(screen.getByText('Temps supplémentaire')).toBeTruthy();
+
+    fireEvent.click(ar); // aucun
+    expect(screen.queryByText('Coin calme')).toBeNull();
+    expect(screen.getByText(/Cochez AU, AR ou les deux/)).toBeTruthy();
+
+    fireEvent.click(au); fireEvent.click(ar); // les deux
+    expect(screen.getByText('Consignes courtes')).toBeTruthy();
+    expect(screen.getByText('Temps supplémentaire')).toBeTruthy();
+  });
+});
