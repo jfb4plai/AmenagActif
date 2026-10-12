@@ -3,7 +3,7 @@ import { render, screen, fireEvent, cleanup, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const h = vi.hoisted(() => ({ cat: null, ajouterChapitre: null, majAmenagement: null, ajouterAmenagement: null }));
+const h = vi.hoisted(() => ({ cat: null, ajouterChapitre: null, majAmenagement: null, ajouterAmenagement: null, supprimerAmenagement: null, supprimerChapitre: null }));
 
 vi.mock('../../src/hooks/useAdmin.js', () => ({
   useAnnees: () => ({ data: [] }),
@@ -15,6 +15,8 @@ vi.mock('../../src/hooks/useAdmin.js', () => ({
     majAmenagement: h.majAmenagement,
     ajouterAmenagement: h.ajouterAmenagement,
     ajouterChapitre: h.ajouterChapitre,
+    supprimerAmenagement: h.supprimerAmenagement,
+    supprimerChapitre: h.supprimerChapitre,
   }),
 }));
 vi.mock('../../src/hooks/useMembres.js', () => ({
@@ -76,9 +78,37 @@ describe('Administration : catalogue et dispositifs', () => {
     h.ajouterChapitre = { mutate: vi.fn(), isError: false };
     h.majAmenagement = { mutate: vi.fn(), isError: false };
     h.ajouterAmenagement = { mutate: vi.fn(), isError: false };
+    h.supprimerAmenagement = { mutate: vi.fn(), isError: false, isPending: false };
+    h.supprimerChapitre = { mutate: vi.fn(), isError: false, isPending: false };
   });
 
   const rendre = () => render(<MemoryRouter><Administration /></MemoryRouter>);
+
+  it('supprimer un aménagement : confirmation puis mutation ; annulation = rien', () => {
+    rendre();
+    fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
+    const boutons = screen.getAllByRole('button', { name: 'Supprimer' });
+    vi.stubGlobal('confirm', vi.fn(() => false));
+    fireEvent.click(boutons[0]);
+    expect(h.supprimerAmenagement.mutate).not.toHaveBeenCalled();
+    vi.stubGlobal('confirm', vi.fn(() => true));
+    fireEvent.click(boutons[0]);
+    expect(h.supprimerAmenagement.mutate).toHaveBeenCalledWith({ id: 'a1' });
+  });
+
+  it('supprimer un chapitre : confirmation puis mutation', () => {
+    rendre();
+    fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
+    vi.stubGlobal('confirm', vi.fn(() => true));
+    fireEvent.click(screen.getByRole('button', { name: 'Supprimer ce chapitre' }));
+    expect(h.supprimerChapitre.mutate).toHaveBeenCalledWith({ id: 'c1' });
+  });
+
+  it('refus de la base : le message (avec décompte) est affiché tel quel', () => {
+    h.supprimerAmenagement = { mutate: vi.fn(), isError: true, isPending: false, error: new Error('Suppression refusée : cet aménagement est coché pour 3 élève(s) et 1 classe(s). Désactivez-le plutôt.') };
+    rendre();
+    expect(screen.getByRole('alert').textContent).toContain('coché pour 3 élève(s) et 1 classe(s)');
+  });
 
   it('entête de dispositif : compte et pas de sélecteur de type', () => {
     rendre();

@@ -186,7 +186,7 @@ function MembreRow({ m, ecoles, besoinEcole, mut }) {
 /* ─────────────── Catalogue des aménagements ─────────────── */
 function SectionCatalogue() {
   const { data } = useCatalogueAdmin();
-  const { majAmenagement, ajouterAmenagement, ajouterChapitre } = useCatalogueMutations();
+  const { majAmenagement, ajouterAmenagement, ajouterChapitre, supprimerAmenagement, supprimerChapitre } = useCatalogueMutations();
   const [ouvert, setOuvert] = useState(null);
   const chapitres = data?.chapitres ?? [];
   const amenagements = data?.amenagements ?? [];
@@ -197,7 +197,7 @@ function SectionCatalogue() {
       <p className="text-base text-[color:var(--text2)]">
         Repris du classeur source. <strong>AU</strong> = universel (coché par classe, bloc « AU applicable(s) à toute la classe »). <strong>AR</strong> = raisonnable (coché par élève).
         Changer un type ne touche pas aux cases déjà cochées, mais celles-ci peuvent devenir sans effet sur la fiche — vérifiez ensuite les classes concernées.
-        Désactiver retire l'aménagement des écrans sans le supprimer.
+        Désactiver retire l'aménagement des écrans sans le supprimer. Supprimer n'est possible que pour un aménagement ou un chapitre jamais coché (sinon la base refuse et indique combien d'élèves et de classes sont concernés).
         Le code de chaque aménagement est généré automatiquement à la création et ne change plus.
       </p>
       <p className="text-base">
@@ -271,6 +271,15 @@ function SectionCatalogue() {
                             onChange={(e) => majAmenagement.mutate({ id: a.id, actif: e.target.checked })} />
                           actif
                         </label>
+                        <button type="button" className="underline text-red-600"
+                          onClick={() => {
+                            if (confirm(`Supprimer définitivement « ${a.libelle} » ?
+
+Possible seulement s'il n'a jamais été coché pour un élève ou une classe ; sinon, désactivez-le. Son code ${a.code ?? ''} ne sera plus utilisé.`)) supprimerAmenagement.mutate({ id: a.id });
+                          }}
+                          disabled={supprimerAmenagement.isPending}>
+                          Supprimer
+                        </button>
                       </div>
                       <div>
                         <label htmlFor={`np-${a.id}`} className="flex items-center gap-2 font-medium">
@@ -284,6 +293,17 @@ function SectionCatalogue() {
                     </div>
                   ))}
                   <AjoutAmenagement chapitreId={ch.id} estDispositif={ch.est_dispositif === true} onAdd={ajouterAmenagement.mutate} />
+                  <div className="pt-1">
+                    <button type="button" className="underline text-red-600 text-base"
+                      onClick={() => {
+                        if (confirm(`Supprimer définitivement le chapitre « ${ch.titre} » et ses ${items.length} aménagement(s) ?
+
+Possible seulement si aucun n'a jamais été coché ; sinon, désactivez ses aménagements.`)) supprimerChapitre.mutate({ id: ch.id });
+                      }}
+                      disabled={supprimerChapitre.isPending}>
+                      Supprimer ce chapitre
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -293,6 +313,9 @@ function SectionCatalogue() {
       <AjoutChapitre onAdd={ajouterChapitre.mutate} />
       {[majAmenagement, ajouterAmenagement, ajouterChapitre].filter((m) => m.isError).map((m, i) => (
         <p key={i} role="alert" className="plai-error" style={{ fontSize: 16 }}>Action impossible : {m.error?.message ?? 'erreur inconnue'}. Réessayez.</p>
+      ))}
+      {[supprimerAmenagement, supprimerChapitre].filter((m) => m.isError).map((m, i) => (
+        <p key={`s${i}`} role="alert" className="plai-error" style={{ fontSize: 16 }}>{m.error?.message ?? 'Suppression impossible.'}</p>
       ))}
     </section>
   );

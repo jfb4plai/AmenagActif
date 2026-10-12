@@ -217,7 +217,17 @@ export function useCatalogueMutations() {
     onSuccess: inval,
   });
 
-  return { majAmenagement, ajouterAmenagement, ajouterChapitre, majPartageProfil };
+  // Suppression : le refus « déjà utilisé » vient de la base (déclencheurs BEFORE DELETE, migration 20261012b),
+  // avec le décompte dans le message. Une RLS qui refuse un DELETE renvoie 0 ligne sans erreur : on le détecte.
+  const supprimer = (table) => async ({ id }) => {
+    const { data, error } = await supabase.from(table).delete().eq('id', id).select('id');
+    if (error) throw error;
+    if (!data || data.length === 0) throw new Error('Suppression impossible (droits insuffisants ou élément introuvable).');
+  };
+  const supprimerAmenagement = useMutation({ mutationFn: supprimer('ar_amenagements'), onSuccess: inval });
+  const supprimerChapitre = useMutation({ mutationFn: supprimer('ar_chapitres'), onSuccess: inval });
+
+  return { majAmenagement, ajouterAmenagement, ajouterChapitre, majPartageProfil, supprimerAmenagement, supprimerChapitre };
 }
 
 // Fonction pure déplacée dans src/domain/basculeAnnee.js ; ré-exportée pour compatibilité.
