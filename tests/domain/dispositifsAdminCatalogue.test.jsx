@@ -3,7 +3,7 @@ import { render, screen, fireEvent, cleanup, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const h = vi.hoisted(() => ({ cat: null, ajouterChapitre: null, majAmenagement: null, ajouterAmenagement: null, supprimerAmenagement: null, supprimerChapitre: null }));
+const h = vi.hoisted(() => ({ cat: null, ajouterChapitre: null, majAmenagement: null, ajouterAmenagement: null, supprimerAmenagement: null, supprimerChapitre: null, usage: undefined }));
 
 vi.mock('../../src/hooks/useAdmin.js', () => ({
   useAnnees: () => ({ data: [] }),
@@ -11,6 +11,7 @@ vi.mock('../../src/hooks/useAdmin.js', () => ({
   useEcolesAdmin: () => ({ data: [] }),
   useAdminMutations: () => ({ ajouterAnnee: {}, activerAnnee: {}, ajouterEcole: {}, majEcole: {} }),
   useCatalogueAdmin: () => ({ data: h.cat }),
+  useUsageCatalogue: () => ({ data: h.usage, isLoading: false, error: null }),
   useCatalogueMutations: () => ({
     majAmenagement: h.majAmenagement,
     ajouterAmenagement: h.ajouterAmenagement,
@@ -202,3 +203,40 @@ describe('Catalogue public : sélecteurs AU / AR', () => {
     expect(screen.getByText('Temps supplémentaire')).toBeTruthy();
   });
 });
+
+describe('Administration : où un aménagement est utilisé', () => {
+  beforeEach(() => {
+    h.cat = { chapitres, amenagements };
+    h.ajouterChapitre = { mutate: vi.fn(), isError: false };
+    h.majAmenagement = { mutate: vi.fn(), isError: false };
+    h.ajouterAmenagement = { mutate: vi.fn(), isError: false };
+    h.supprimerAmenagement = { mutate: vi.fn(), isError: false, isPending: false };
+    h.supprimerChapitre = { mutate: vi.fn(), isError: false, isPending: false };
+    h.usage = { vide: false, nbEleves: 2, nbClassesAU: 0, nbEcoles: 1, ecoles: [{
+      ecoleId: 'e1', ecole: 'Pitteurs', referents: ['Hélène (référent PLAI)'],
+      classes: [{ annee: '2026-2027', classe: '5LA', au: [], eleves: [{ nom: 'Emilie Dupont', libelles: ['Consignes courtes'] }, { nom: 'Karim B.', libelles: ['Consignes courtes'] }] }],
+    }] };
+  });
+  afterEach(() => { h.usage = undefined; });
+
+  it('ouvre une fenêtre avec implantation, référents, classe et élèves ; Fermer la ferme', () => {
+    render(<MemoryRouter><Administration /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
+    fireEvent.click(screen.getAllByRole('button', { name: "Voir où c'est utilisé" })[0]);
+    const fenetre = screen.getByRole('dialog');
+    expect(within(fenetre).getByText('Pitteurs')).toBeTruthy();
+    expect(within(fenetre).getByText(/Hélène \(référent PLAI\)/)).toBeTruthy();
+    expect(within(fenetre).getByText(/Classe 5LA/)).toBeTruthy();
+    expect(within(fenetre).getByText(/Emilie Dupont/)).toBeTruthy();
+    fireEvent.click(within(fenetre).getByRole('button', { name: 'Fermer' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('jamais utilisé : message explicite', () => {
+    h.usage = { vide: true, ecoles: [], nbEleves: 0, nbClassesAU: 0, nbEcoles: 0 };
+    render(<MemoryRouter><Administration /></MemoryRouter>);
+    fireEvent.click(screen.getAllByRole('button', { name: "Voir où c'est utilisé" })[0]);
+    expect(screen.getByText(/Jamais coché/)).toBeTruthy();
+  });
+});
+

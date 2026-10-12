@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   useAnnees, useEcoles, useEcolesAdmin, useAdminMutations,
-  useCatalogueAdmin, useCatalogueMutations,
+  useCatalogueAdmin, useCatalogueMutations, useUsageCatalogue,
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 import { traverseDispositif } from '../domain/dispositifs.js';
@@ -188,6 +188,7 @@ function SectionCatalogue() {
   const { data } = useCatalogueAdmin();
   const { majAmenagement, ajouterAmenagement, ajouterChapitre, supprimerAmenagement, supprimerChapitre } = useCatalogueMutations();
   const [ouvert, setOuvert] = useState(null);
+  const [usage, setUsage] = useState(null); // { type: 'amenagement' | 'chapitre', id, titre }
   const chapitres = data?.chapitres ?? [];
   const amenagements = data?.amenagements ?? [];
 
@@ -221,6 +222,10 @@ function SectionCatalogue() {
                     ? `(dispositif : ${items.length} aménagement(s), AR ou AU selon la classe)`
                     : `(${items.filter((i) => i.type === 'AU').length} AU · ${items.filter((i) => i.type === 'AR').length} AR)`}
                 </span>
+              </button>
+              <button type="button" className="underline text-teal text-sm shrink-0"
+                onClick={() => setUsage({ type: 'chapitre', id: ch.id, titre: ch.titre })}>
+                Voir où c'est utilisé
               </button>
               <button type="button" className="underline text-red-600 text-sm shrink-0"
                 onClick={() => {
@@ -282,6 +287,10 @@ Possible seulement si aucun n'a jamais été coché ; sinon, désactivez ses am�
                             onChange={(e) => majAmenagement.mutate({ id: a.id, actif: e.target.checked })} />
                           actif
                         </label>
+                        <button type="button" className="underline text-teal"
+                          onClick={() => setUsage({ type: 'amenagement', id: a.id, titre: a.libelle })}>
+                          Voir où c'est utilisé
+                        </button>
                         <button type="button" className="underline text-red-600"
                           onClick={() => {
                             if (confirm(`Supprimer définitivement « ${a.libelle} » ?
@@ -315,9 +324,71 @@ Possible seulement s'il n'a jamais été coché pour un élève ou une classe ; 
         <p key={i} role="alert" className="plai-error" style={{ fontSize: 16 }}>Action impossible : {m.error?.message ?? 'erreur inconnue'}. Réessayez.</p>
       ))}
       {[supprimerAmenagement, supprimerChapitre].filter((m) => m.isError).map((m, i) => (
-        <p key={`s${i}`} role="alert" className="plai-error" style={{ fontSize: 16 }}>{m.error?.message ?? 'Suppression impossible.'}</p>
+        <p key={`s${i}`} role="alert" className="plai-error" style={{ fontSize: 16 }}>
+          {m.error?.message ?? 'Suppression impossible.'} Cliquez sur « Voir où c'est utilisé » pour savoir qui contacter.
+        </p>
       ))}
+      {usage && <FenetreUsage cible={usage} onClose={() => setUsage(null)} />}
     </section>
+  );
+}
+
+/** Fenêtre : où un aménagement / un chapitre est coché (implantations, classes, élèves) et qui contacter. */
+function FenetreUsage({ cible, onClose }) {
+  const { data, isLoading, error } = useUsageCatalogue(cible);
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const resume = data && !data.vide
+    ? `${data.nbEleves} élève(s) et ${data.nbClassesAU} classe(s) (AU) dans ${data.nbEcoles} implantation(s)`
+    : '';
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 no-print" style={{ background: 'rgba(0,0,0,0.45)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="usage-titre"
+        className="bg-white rounded-lg w-full max-w-3xl max-h-[85vh] overflow-y-auto p-5 space-y-3" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+        <div className="flex items-start justify-between gap-3">
+          <h2 id="usage-titre" className="font-semibold text-lg">
+            Où {cible.type === 'chapitre' ? 'ce chapitre est-il utilisé' : 'cet aménagement est-il utilisé'} ?
+          </h2>
+          <button type="button" className="plai-btn shrink-0" onClick={onClose}>Fermer</button>
+        </div>
+        <p className="text-base text-[color:var(--text2)]">{cible.titre}</p>
+        {isLoading && <p>Chargement…</p>}
+        {error && <p role="alert" className="plai-error">{error.message}</p>}
+        {data?.vide && <p className="plai-empty">Jamais coché : il peut être supprimé sans conséquence.</p>}
+        {data && !data.vide && (
+          <>
+            <p className="text-base font-medium">{resume}. Contactez les référents concernés pour décocher cet aménagement avant de le supprimer, ou désactivez-le.</p>
+            {data.ecoles.map((e) => (
+              <section key={e.ecoleId} className="border border-[color:var(--border)] rounded p-3 space-y-2">
+                <h3 className="font-semibold">{e.ecole}</h3>
+                <p className="text-sm text-[color:var(--text2)]">
+                  À contacter : {e.referents.length ? e.referents.join(', ') : 'aucun référent ni direction rattaché à cette implantation'}
+                </p>
+                {e.classes.map((c) => (
+                  <div key={`${c.annee}|${c.classe}`} className="text-base">
+                    <p className="font-medium">Classe {c.classe} <span className="text-[color:var(--text3)] font-normal">({c.annee})</span></p>
+                    {c.au.length > 0 && (
+                      <p className="text-sm">AU pour toute la classe : {c.au.join(' · ')}</p>
+                    )}
+                    {c.eleves.length > 0 && (
+                      <ul className="list-disc pl-6 text-sm">
+                        {c.eleves.map((el) => (
+                          <li key={el.nom}>{el.nom}{cible.type === 'chapitre' || el.libelles.length > 1 ? <span className="text-[color:var(--text3)]"> : {el.libelles.join(' · ')}</span> : null}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </section>
+            ))}
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 

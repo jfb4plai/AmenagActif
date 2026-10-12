@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase.js';
 import { useAuth } from '../lib/auth.jsx';
 import { useAnnees, useEcoles, useEcolesAdmin } from './useEcoleGrid.js';
+import { regrouperUsage } from '../domain/usageCatalogue.js';
 
 export { useAnnees, useEcoles, useEcolesAdmin };
 
@@ -228,6 +229,63 @@ export function useCatalogueMutations() {
   const supprimerChapitre = useMutation({ mutationFn: supprimer('ar_chapitres'), onSuccess: inval });
 
   return { majAmenagement, ajouterAmenagement, ajouterChapitre, majPartageProfil, supprimerAmenagement, supprimerChapitre };
+}
+
+const LIEU = 'ar_classes(nom, ecole_id, ar_annees(libelle), ar_ecoles(nom, implantation_nom))';
+const lieuDe = (classe) => ({
+  ecoleId: classe?.ecole_id ?? '?',
+  ecole: classe?.ar_ecoles?.implantation_nom || classe?.ar_ecoles?.nom || '?',
+  annee: classe?.ar_annees?.libelle ?? '?',
+  classe: classe?.nom ?? '?',
+});
+const nomEleve = (e) => ((e?.nom_famille ?? '').trim() ? `${e.prenom} ${e.nom_famille.trim()}` : `${e?.prenom ?? '?'}${e?.initiale_nom ? ' ' + e.initiale_nom + '.' : ''}`);
+
+/**
+ * Cases cochées pour un aménagement (cible.type = 'amenagement') ou pour tous ceux d'un chapitre
+ * ('chapitre'), toutes implantations (l'admin lit tout). Chaque lecture est contrôlée : jamais de
+ * liste partielle silencieuse. Les référents sont facultatifs (leur absence ne bloque pas la liste).
+ */
+export async function chargerUsageCatalogue({ type, id }) {
+  const ok = (r, ctx) => { if (r.error) throw new Error(`Lecture impossible (${ctx}) : ${r.error.message}`); return r.data ?? []; };
+  let ids = [id];
+  if (type === 'chapitre') ids = ok(await supabase.from('ar_amenagements').select('id').eq('chapitre_id', id), 'aménagements').map((a) => a.id);
+  const vide = Promise.resolve({ data: [], error: null });
+  const libellesRes = ids.length ? await supabase.from('ar_amenagements').select('id, libelle').in('id', ids) : { data: [], error: null };
+  const libelle = new Map(ok(libellesRes, 'libellés').map((a) => [a.id, a.libelle]));
+  const [sel, au, lib] = await Promise.all([
+    ids.length ? supabase.from('ar_selections').select(`amenagement_id, ar_eleves(prenom, nom_famille, initiale_nom, ${LIEU})`).in('amenagement_id', ids) : vide,
+    ids.length ? supabase.from('ar_amenagements_classe').select(`amenagement_id, ${LIEU}`).in('amenagement_id', ids) : vide,
+    type === 'chapitre' ? supabase.from('ar_amenagements_libres').select(`texte, ar_eleves(prenom, nom_famille, initiale_nom, ${LIEU})`).eq('chapitre_id', id) : vide,
+  ]);
+  const ar = ok(sel, 'élèves').map((r) => ({ ...lieuDe(r.ar_eleves?.ar_classes), eleve: nomEleve(r.ar_eleves), libelle: libelle.get(r.amenagement_id) ?? '?' }));
+  const auRows = ok(au, 'classes').map((r) => ({ ...lieuDe(r.ar_classes), libelle: libelle.get(r.amenagement_id) ?? '?' }));
+  const libres = ok(lib, 'aménagements libres').map((r) => ({ ...lieuDe(r.ar_eleves?.ar_classes), eleve: nomEleve(r.ar_eleves), texte: r.texte }));
+
+  // Référents à contacter par implantation (direction + référent PLAI), comptes mono et multi-écoles.
+  const referents = {};
+  const [prof, multi] = await Promise.all([
+    supabase.from('ar_profils_acces').select('user_id, nom, role, ecole_id').in('role', ['referent_plai', 'direction']),
+    supabase.from('ar_profils_acces_ecoles').select('user_id, ecole_id'),
+  ]);
+  if (!prof.error && !multi.error) {
+    const ecolesDe = new Map();
+    for (const m of multi.data ?? []) ecolesDe.set(m.user_id, [...(ecolesDe.get(m.user_id) ?? []), m.ecole_id]);
+    for (const p of prof.data ?? []) {
+      for (const eid of new Set([p.ecole_id, ...(ecolesDe.get(p.user_id) ?? [])].filter(Boolean))) {
+        referents[eid] = [...(referents[eid] ?? []), `${p.nom ?? '?'} (${p.role === 'direction' ? 'direction' : 'référent PLAI'})`];
+      }
+    }
+  }
+  return regrouperUsage({ ar, au: auRows, libres, referents });
+}
+
+export function useUsageCatalogue(cible) {
+  return useQuery({
+    queryKey: ['usage-catalogue', cible?.type, cible?.id],
+    enabled: !!cible,
+    staleTime: 0,
+    queryFn: () => chargerUsageCatalogue(cible),
+  });
 }
 
 // Fonction pure déplacée dans src/domain/basculeAnnee.js ; ré-exportée pour compatibilité.
