@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   useAnnees, useEcoles, useEcolesAdmin, useAdminMutations,
-  useCatalogueAdmin, useCatalogueMutations, useUsageCatalogue,
+  useCatalogueAdmin, useCatalogueMutations, useUsageCatalogue, chargerUsageCatalogue,
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 import { traverseDispositif } from '../domain/dispositifs.js';
@@ -188,7 +188,27 @@ function SectionCatalogue() {
   const { data } = useCatalogueAdmin();
   const { majAmenagement, ajouterAmenagement, ajouterChapitre, supprimerAmenagement, supprimerChapitre } = useCatalogueMutations();
   const [ouvert, setOuvert] = useState(null);
-  const [usage, setUsage] = useState(null); // { type: 'amenagement' | 'chapitre', id, titre }
+  const [usage, setUsage] = useState(null); // { type: 'amenagement' | 'chapitre', id, titre, refus? }
+  const [verification, setVerification] = useState(false);
+  const [erreurVerif, setErreurVerif] = useState('');
+
+  // Vérifie d'abord si l'élément a déjà servi : si oui, la fenêtre explique le refus et dit qui contacter ;
+  // sinon, une confirmation rassurante (rien n'est affecté) avant de supprimer.
+  const demanderSuppression = async (cible, quoi, mutation) => {
+    setVerification(true);
+    setErreurVerif('');
+    try {
+      const u = await chargerUsageCatalogue(cible);
+      if (!u.vide) { setUsage({ ...cible, refus: true }); return; }
+      if (confirm(`Ce n'a jamais été coché : aucune fiche n'est concernée.
+
+Supprimer définitivement ${quoi} ?`)) mutation.mutate({ id: cible.id });
+    } catch (e) {
+      setErreurVerif(e.message || 'Vérification impossible, réessayez.');
+    } finally {
+      setVerification(false);
+    }
+  };
   const chapitres = data?.chapitres ?? [];
   const amenagements = data?.amenagements ?? [];
 
@@ -228,12 +248,8 @@ function SectionCatalogue() {
                 Voir où c'est utilisé
               </button>
               <button type="button" className="underline text-red-600 text-sm shrink-0"
-                onClick={() => {
-                  if (confirm(`Supprimer définitivement le chapitre « ${ch.titre} » et ses ${items.length} aménagement(s) ?
-
-Possible seulement si aucun n'a jamais été coché ; sinon, désactivez ses aménagements.`)) supprimerChapitre.mutate({ id: ch.id });
-                }}
-                disabled={supprimerChapitre.isPending}>
+                onClick={() => demanderSuppression({ type: 'chapitre', id: ch.id, titre: ch.titre }, `le chapitre « ${ch.titre} » et ses ${items.length} aménagement(s)`, supprimerChapitre)}
+                disabled={supprimerChapitre.isPending || verification}>
                 Supprimer ce chapitre
               </button>
               </div>
@@ -292,12 +308,8 @@ Possible seulement si aucun n'a jamais été coché ; sinon, désactivez ses am�
                           Voir où c'est utilisé
                         </button>
                         <button type="button" className="underline text-red-600"
-                          onClick={() => {
-                            if (confirm(`Supprimer définitivement « ${a.libelle} » ?
-
-Possible seulement s'il n'a jamais été coché pour un élève ou une classe ; sinon, désactivez-le. Son code ${a.code ?? ''} ne sera plus utilisé.`)) supprimerAmenagement.mutate({ id: a.id });
-                          }}
-                          disabled={supprimerAmenagement.isPending}>
+                          onClick={() => demanderSuppression({ type: 'amenagement', id: a.id, titre: a.libelle }, `« ${a.libelle} »`, supprimerAmenagement)}
+                          disabled={supprimerAmenagement.isPending || verification}>
                           Supprimer
                         </button>
                       </div>
@@ -328,6 +340,8 @@ Possible seulement s'il n'a jamais été coché pour un élève ou une classe ; 
           {m.error?.message ?? 'Suppression impossible.'} Cliquez sur « Voir où c'est utilisé » pour savoir qui contacter.
         </p>
       ))}
+      {verification && <p role="status" className="text-base">Vérification de l'utilisation en cours…</p>}
+      {erreurVerif && <p role="alert" className="plai-error" style={{ fontSize: 16 }}>{erreurVerif}</p>}
       {usage && <FenetreUsage cible={usage} onClose={() => setUsage(null)} />}
     </section>
   );
@@ -358,10 +372,16 @@ function FenetreUsage({ cible, onClose }) {
         <p className="text-base text-[color:var(--text2)]">{cible.titre}</p>
         {isLoading && <p>Chargement…</p>}
         {error && <p role="alert" className="plai-error">{error.message}</p>}
+        {cible.refus && data && !data.vide && (
+          <p role="alert" className="rounded p-2 font-medium" style={{ background: '#fff3e6', border: '1px solid #f97316', color: '#9a3412' }}>
+            Suppression impossible pour l'instant : {cible.type === 'chapitre' ? 'des aménagements de ce chapitre sont' : 'cet aménagement est'} coché(s) dans des fiches.
+            Rien n'a été supprimé et aucune fiche n'a été modifiée.
+          </p>
+        )}
         {data?.vide && <p className="plai-empty">Jamais coché : il peut être supprimé sans conséquence.</p>}
         {data && !data.vide && (
           <>
-            <p className="text-base font-medium">{resume}. Contactez les référents concernés pour décocher cet aménagement avant de le supprimer, ou désactivez-le.</p>
+            <p className="text-base font-medium">{resume}. Pour le supprimer, les référents concernés doivent d'abord le décocher ; ou désactivez-le : il disparaît des écrans sans toucher aux fiches existantes.</p>
             {data.ecoles.map((e) => (
               <section key={e.ecoleId} className="border border-[color:var(--border)] rounded p-3 space-y-2">
                 <h3 className="font-semibold">{e.ecole}</h3>

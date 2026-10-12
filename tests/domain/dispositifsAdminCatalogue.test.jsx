@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -12,6 +12,7 @@ vi.mock('../../src/hooks/useAdmin.js', () => ({
   useAdminMutations: () => ({ ajouterAnnee: {}, activerAnnee: {}, ajouterEcole: {}, majEcole: {} }),
   useCatalogueAdmin: () => ({ data: h.cat }),
   useUsageCatalogue: () => ({ data: h.usage, isLoading: false, error: null }),
+  chargerUsageCatalogue: async () => h.usage ?? { vide: true, ecoles: [], nbEleves: 0, nbClassesAU: 0, nbEcoles: 0 },
   useCatalogueMutations: () => ({
     majAmenagement: h.majAmenagement,
     ajouterAmenagement: h.ajouterAmenagement,
@@ -81,28 +82,47 @@ describe('Administration : catalogue et dispositifs', () => {
     h.ajouterAmenagement = { mutate: vi.fn(), isError: false };
     h.supprimerAmenagement = { mutate: vi.fn(), isError: false, isPending: false };
     h.supprimerChapitre = { mutate: vi.fn(), isError: false, isPending: false };
+    h.usage = undefined;
   });
 
   const rendre = () => render(<MemoryRouter><Administration /></MemoryRouter>);
 
-  it('supprimer un aménagement : confirmation puis mutation ; annulation = rien', () => {
+  const usageUtilise = { vide: false, nbEleves: 1, nbClassesAU: 0, nbEcoles: 1, ecoles: [{ ecoleId: 'e1', ecole: 'Pitteurs', referents: [], classes: [{ annee: '2026-2027', classe: '5LA', au: [], eleves: [{ nom: 'Emilie D.', libelles: ['x'] }] }] }] };
+
+  it('jamais coché : confirmation rassurante puis suppression ; annulation = rien', async () => {
     rendre();
     fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
-    const boutons = screen.getAllByRole('button', { name: 'Supprimer' });
-    vi.stubGlobal('confirm', vi.fn(() => false));
-    fireEvent.click(boutons[0]);
+    const bouton = () => screen.getAllByRole('button', { name: 'Supprimer' })[0];
+    const confirmer = vi.fn(() => false);
+    vi.stubGlobal('confirm', confirmer);
+    fireEvent.click(bouton());
+    await waitFor(() => expect(confirmer).toHaveBeenCalled());
+    expect(confirmer.mock.calls[0][0]).toContain("jamais été coché");
     expect(h.supprimerAmenagement.mutate).not.toHaveBeenCalled();
     vi.stubGlobal('confirm', vi.fn(() => true));
-    fireEvent.click(boutons[0]);
-    expect(h.supprimerAmenagement.mutate).toHaveBeenCalledWith({ id: 'a1' });
+    fireEvent.click(bouton());
+    await waitFor(() => expect(h.supprimerAmenagement.mutate).toHaveBeenCalledWith({ id: 'a1' }));
   });
 
-  it('supprimer un chapitre : confirmation puis mutation', () => {
+  it('déjà coché : pas de confirmation, la fenêtre explique le refus et montre qui contacter', async () => {
+    h.usage = usageUtilise;
+    const confirmer = vi.fn(() => true);
+    vi.stubGlobal('confirm', confirmer);
     rendre();
     fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Supprimer' })[0]);
+    const fenetre = await screen.findByRole('dialog');
+    expect(within(fenetre).getByText(/Suppression impossible pour l'instant/)).toBeTruthy();
+    expect(within(fenetre).getByText(/Emilie D\./)).toBeTruthy();
+    expect(confirmer).not.toHaveBeenCalled();
+    expect(h.supprimerAmenagement.mutate).not.toHaveBeenCalled();
+  });
+
+  it('supprimer un chapitre jamais coché : confirmation puis mutation', async () => {
     vi.stubGlobal('confirm', vi.fn(() => true));
+    rendre();
     fireEvent.click(screen.getAllByRole('button', { name: 'Supprimer ce chapitre' })[0]);
-    expect(h.supprimerChapitre.mutate).toHaveBeenCalledWith({ id: 'c1' });
+    await waitFor(() => expect(h.supprimerChapitre.mutate).toHaveBeenCalledWith({ id: 'c1' }));
   });
 
   it('refus de la base : le message (avec décompte) est affiché tel quel', () => {
