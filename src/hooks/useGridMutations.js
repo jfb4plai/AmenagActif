@@ -46,8 +46,8 @@ export function useGridMutations(ecoleId, anneeId) {
   });
 
   const upsertEleve = useMutation({
-    mutationFn: async ({ id, classeId, prenom, initialeNom, commentaire, statut }) => {
-      const row = { prenom, initiale_nom: initialeNom ?? '', commentaire: commentaire ?? '', statut };
+    mutationFn: async ({ id, classeId, prenom, nomFamille, initialeNom, commentaire, statut }) => {
+      const row = { prenom, nom_famille: nomFamille ?? '', initiale_nom: initialeNom ?? '', commentaire: commentaire ?? '', statut };
       if (id) {
         const { error } = await supabase.from('ar_eleves').update(row).eq('id', id);
         if (error) throw error;

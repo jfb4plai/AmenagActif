@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export default function EleveEditor({ eleve, onSave, onDelete, onClose, avertissements = [], extra = null }) {
   const [prenom, setPrenom] = useState(eleve?.prenom ?? '');
+  const [nomFamille, setNomFamille] = useState(eleve?.nom_famille ?? '');
   const [initiale, setInitiale] = useState(eleve?.initiale_nom ?? '');
   const [commentaire, setCommentaire] = useState(eleve?.commentaire ?? '');
   const [statut, setStatut] = useState(eleve?.statut ?? '');
@@ -14,7 +15,7 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose, avertiss
     setEtat('enregistrement');
     setErreur('');
     try {
-      await onSave({ prenom, initialeNom: initiale, commentaire, statut });
+      await onSave({ prenom, nomFamille, initialeNom: initiale, commentaire, statut });
       setEtat('enregistre');
       setTimeout(onClose, 600);
     } catch (e) {
@@ -48,8 +49,13 @@ export default function EleveEditor({ eleve, onSave, onDelete, onClose, avertiss
         <input className="plai-input w-full" value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Emilie" disabled={enCours} />
       </div>
       <div>
-        <label className="block text-sm font-medium">Initiale du nom</label>
-        <input className="plai-input w-full" maxLength={2} value={initiale} onChange={(e) => setInitiale(e.target.value)} placeholder="D" disabled={enCours} />
+        <label className="block text-sm font-medium">Nom de famille complet</label>
+        <input className="plai-input w-full" value={nomFamille} onChange={(e) => setNomFamille(e.target.value)} placeholder="Dupont" disabled={enCours} />
+        <p className="text-xs text-[color:var(--text3)]">Visible en saisie seulement. Ce qui figure sur les fiches est décidé par l'école.</p>
+      </div>
+      <div>
+        <label className="block text-sm font-medium">Initiales du nom (0 à 3 lettres)</label>
+        <input className="plai-input w-full" maxLength={3} value={initiale} onChange={(e) => setInitiale(e.target.value)} placeholder="D" disabled={enCours} />
         <p className="text-xs text-[color:var(--text3)]">Affichée « Emilie D. » sur la fiche. Pas de nom complet.</p>
       </div>
       <div>

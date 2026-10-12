@@ -18,7 +18,7 @@ export const AVANTAGES = [
   { titre: 'Fiche toujours à jour', texte: 'l’enseignant voit la version actuelle à chaque ouverture de son lien.' },
   { titre: 'Enseignants sans compte', texte: 'un lien en lecture seule, révocable, qui expire le 31 août.' },
   { titre: 'Un vocabulaire commun', texte: 'plus de 130 aménagements classés en chapitres, avec recherche par mot-clé.' },
-  { titre: 'RGPD', texte: 'prénom et initiale seulement, liens expirés supprimés, accès limité à son école.' },
+  { titre: 'RGPD', texte: 'les fiches et les liens enseignants n’affichent que prénom et initiales ; le nom complet, facultatif, reste dans la saisie de l’école. Liens expirés supprimés, accès limité à son école.' },
   { titre: 'Ouvert aux autres apps PLAI', texte: 'le profil de classe peut leur être transmis.' },
   { titre: 'Une rentrée sans ressaisie', texte: 'les classes et les élèves de l’an dernier se reprennent en trois étapes, avec leurs aménagements à relire.' },
   { titre: 'Un élève change de classe', texte: 'sa fiche le suit, ses aménagements sont marqués « à confirmer » pour la nouvelle classe, rien à ressaisir.' },

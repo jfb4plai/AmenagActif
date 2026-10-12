@@ -191,8 +191,8 @@ export default function SaisieEcole() {
             )}
             <p className="text-xs text-[color:var(--text3)]">Cliquez sur un nom pour voir ou modifier ses informations, dont son commentaire.</p>
             <AjoutEleve
-              onCreate={async ({ prenom, initiale, commentaire, statut }) => {
-                await mut.upsertEleve.mutateAsync({ classeId, prenom, initialeNom: initiale, commentaire, statut });
+              onCreate={async ({ prenom, nomFamille, initiale, commentaire, statut }) => {
+                await mut.upsertEleve.mutateAsync({ classeId, prenom, nomFamille, initialeNom: initiale, commentaire, statut });
               }}
             />
           </div>

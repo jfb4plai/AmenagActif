@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 export default function AjoutEleve({ onCreate }) {
   const [ouvert, setOuvert] = useState(false);
-  const [f, setF] = useState({ prenom: '', initiale: '', commentaire: '', statut: '' });
+  const [f, setF] = useState({ prenom: '', nomFamille: '', initiale: '', commentaire: '', statut: '' });
   const [etat, setEtat] = useState('idle'); // idle | creation | erreur
   const [erreur, setErreur] = useState('');
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
@@ -17,7 +17,7 @@ export default function AjoutEleve({ onCreate }) {
       await onCreate(f);
       setOuvert(false);
       setEtat('idle');
-      setF({ prenom: '', initiale: '', commentaire: '', statut: '' });
+      setF({ prenom: '', nomFamille: '', initiale: '', commentaire: '', statut: '' });
     } catch (err) {
       setEtat('erreur');
       setErreur(err.message || "Échec de la création, réessayez.");
@@ -31,8 +31,13 @@ export default function AjoutEleve({ onCreate }) {
       <label className="text-sm">Prénom
         <input className="plai-input block" required value={f.prenom} onChange={set('prenom')} placeholder="Emilie" disabled={enCours} />
       </label>
-      <label className="text-sm">Initiale
-        <input className="plai-input block" maxLength={2} value={f.initiale} onChange={set('initiale')} placeholder="D" disabled={enCours} />
+      <label className="text-sm">Nom de famille complet
+        <input className="plai-input block" value={f.nomFamille} onChange={set('nomFamille')} placeholder="Dupont" disabled={enCours} />
+        <span className="block text-xs text-[color:var(--text3)] font-normal">Visible en saisie seulement. Ce qui figure sur les fiches est décidé par l'école.</span>
+      </label>
+      <label className="text-sm">Initiales (0 à 3 lettres)
+        <input className="plai-input block" maxLength={3} value={f.initiale} onChange={set('initiale')} placeholder="Du" disabled={enCours} />
+        <span className="block text-xs text-[color:var(--text3)] font-normal">Affichées sur les fiches. Peut rester vide.</span>
       </label>
       <div className="text-sm">
         <span className="block font-medium">Statut administratif</span>
