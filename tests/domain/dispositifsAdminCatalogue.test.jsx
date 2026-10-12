@@ -100,7 +100,7 @@ describe('Administration : catalogue et dispositifs', () => {
     rendre();
     fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
     vi.stubGlobal('confirm', vi.fn(() => true));
-    fireEvent.click(screen.getByRole('button', { name: 'Supprimer ce chapitre' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Supprimer ce chapitre' })[0]);
     expect(h.supprimerChapitre.mutate).toHaveBeenCalledWith({ id: 'c1' });
   });
 

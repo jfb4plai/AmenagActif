@@ -211,7 +211,8 @@ function SectionCatalogue() {
           const estOuvert = ouvert === ch.id;
           return (
             <div key={ch.id}>
-              <button className="w-full text-left px-3 py-2 flex items-center gap-2 font-medium"
+              <div className="flex items-center gap-2 pr-3">
+              <button className="flex-1 text-left px-3 py-2 flex items-center gap-2 font-medium"
                 onClick={() => setOuvert(estOuvert ? null : ch.id)}>
                 <span>{estOuvert ? '▼' : '▶'}</span>
                 <span>{ch.titre}</span>
@@ -221,6 +222,16 @@ function SectionCatalogue() {
                     : `(${items.filter((i) => i.type === 'AU').length} AU · ${items.filter((i) => i.type === 'AR').length} AR)`}
                 </span>
               </button>
+              <button type="button" className="underline text-red-600 text-sm shrink-0"
+                onClick={() => {
+                  if (confirm(`Supprimer définitivement le chapitre « ${ch.titre} » et ses ${items.length} aménagement(s) ?
+
+Possible seulement si aucun n'a jamais été coché ; sinon, désactivez ses aménagements.`)) supprimerChapitre.mutate({ id: ch.id });
+                }}
+                disabled={supprimerChapitre.isPending}>
+                Supprimer ce chapitre
+              </button>
+              </div>
               {estOuvert && (
                 <div className="px-3 pb-3 space-y-3">
                   {items.map((a) => (
@@ -293,17 +304,6 @@ Possible seulement s'il n'a jamais été coché pour un élève ou une classe ; 
                     </div>
                   ))}
                   <AjoutAmenagement chapitreId={ch.id} estDispositif={ch.est_dispositif === true} onAdd={ajouterAmenagement.mutate} />
-                  <div className="pt-1">
-                    <button type="button" className="underline text-red-600 text-base"
-                      onClick={() => {
-                        if (confirm(`Supprimer définitivement le chapitre « ${ch.titre} » et ses ${items.length} aménagement(s) ?
-
-Possible seulement si aucun n'a jamais été coché ; sinon, désactivez ses aménagements.`)) supprimerChapitre.mutate({ id: ch.id });
-                      }}
-                      disabled={supprimerChapitre.isPending}>
-                      Supprimer ce chapitre
-                    </button>
-                  </div>
                 </div>
               )}
             </div>
