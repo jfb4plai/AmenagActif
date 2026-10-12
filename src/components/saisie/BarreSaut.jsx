@@ -1,6 +1,6 @@
 export default function BarreSaut({ chapitres }) {
   return (
-    <nav aria-label="Aller au chapitre" className="flex flex-wrap gap-1 sticky top-0 bg-[color:var(--bg)] py-2 z-30">
+    <nav aria-label="Aller au chapitre" className="flex flex-wrap items-center gap-1">
       <span className="text-sm text-[color:var(--text3)] mr-2">Sauter à :</span>
       {chapitres.map((c) => (
         <a key={c.id} href={`#chap-${c.ordre}`}

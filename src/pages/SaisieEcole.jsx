@@ -52,6 +52,15 @@ export default function SaisieEcole() {
 
   const chapitres = cat?.chapitres ?? [];
   const auCat = (cat?.amenagements ?? []).filter((a) => a.type === 'AU');
+  // Compteur de la recherche : même règle que les listes (sans accents ni majuscules, sous-chaîne).
+  const motRecherche = recherche.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const trouves = motRecherche
+    ? (cat?.amenagements ?? []).filter((a) => String(a.libelle ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().includes(motRecherche))
+    : [];
+  const nbTrouvesAU = trouves.filter((a) => a.type === 'AU').length;
+  const resultats = trouves.length === 0
+    ? 'Aucun résultat'
+    : `${trouves.length} résultat${trouves.length > 1 ? 's' : ''} (${nbTrouvesAU} AU, ${trouves.length - nbTrouvesAU} AR)`;
   const dispositifs = chapitres.filter((c) => c.est_dispositif);
   const modesClasse = (grid?.modesDispositifs ?? []).filter((m) => m.classe_id === classeId);
   const enModeAU = (ch) => chapitreEnModeAU(ch, modesClasse);
@@ -199,11 +208,18 @@ export default function SaisieEcole() {
 
           <RecapDispositifs dispositifs={dispositifs} modes={modesClasse} />
 
-          <div className="mb-2">
-            <input type="search" className="plai-input w-full max-w-sm" placeholder="Rechercher un AU ou un AR par mot-clé (ex : bruit, temps, oral)…"
-              value={recherche} onChange={(e) => setRecherche(e.target.value)} />
+          {/* Bloc flottant : reste visible sous la barre de navigation (52 px) pendant tout le défilement de la saisie. */}
+          <div className="sticky top-[52px] z-30 bg-[color:var(--bg)] py-2 border-b border-[color:var(--border)] space-y-1">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <input type="search" aria-label="Rechercher un aménagement" className="plai-input w-full max-w-sm" placeholder="Rechercher un AU ou un AR (ex : bruit, temps, oral)…"
+                value={recherche} onChange={(e) => setRecherche(e.target.value)} />
+              <p className="text-sm font-medium" aria-live="polite">
+                {recherche.trim() ? resultats : ''}
+              </p>
+            </div>
+            <BarreSaut chapitres={chapitres} />
             <p className="text-xs text-[color:var(--text3)]">
-              Filtre les aménagements universels ci-dessous et les aménagements raisonnables dans tous les chapitres, sans devoir les déplier un par un. Videz le champ pour revenir à la vue normale.
+              Filtre les AU et les AR de tous les chapitres, sans les déplier. Videz le champ pour revenir à la vue normale.
             </p>
           </div>
 
@@ -225,10 +241,7 @@ export default function SaisieEcole() {
               peutRetirer={peutEditerStructure} filtre={recherche} entete={enteteDe(ch)} />
           ))}
 
-          <div>
-            <h2 className="font-semibold mb-1">Aménagements raisonnables — {classe.nom}</h2>
-            <BarreSaut chapitres={chapitres} />
-          </div>
+          <h2 className="font-semibold">Aménagements raisonnables — {classe.nom}</h2>
           <div className="overflow-x-auto border border-[color:var(--border)] rounded">
             <table className="border-collapse text-sm">
               <EnTeteEleves eleves={eleves}
