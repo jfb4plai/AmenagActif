@@ -175,6 +175,8 @@ textarea.plai-input { resize: vertical; }
   }
   .fiche table { page-break-inside: auto; }
   .fiche tr { page-break-inside: avoid; }
+  /* un titre de chapitre ne reste jamais seul en bas de page */
+  .fiche tr.titre-chapitre { page-break-after: avoid; break-after: avoid; }
   .fiche + .fiche { page-break-before: always; }
   /* aperçu fiche groupée : lever le cadre défilant pour imprimer toute la fiche */
   .apercu-fiche { max-height: none !important; overflow: visible !important; border: 0 !important; }

@@ -81,14 +81,14 @@ export function computeFicheClasse(input) {
     .filter((x) => x.amenagements.length > 0);
 
   const parAmenagementMap = new Map();
-  const ajouterEleveAAmenagement = (libelle, chapOrdreVal, ordreVal, nom, eleveId, statut) => {
-    if (!parAmenagementMap.has(libelle)) parAmenagementMap.set(libelle, { chapOrdreVal, ordreVal, eleves: [] });
+  const ajouterEleveAAmenagement = (libelle, chapOrdreVal, ordreVal, nom, eleveId, statut, chapitreTitre) => {
+    if (!parAmenagementMap.has(libelle)) parAmenagementMap.set(libelle, { chapOrdreVal, ordreVal, chapitreTitre, eleves: [] });
     parAmenagementMap.get(libelle).eleves.push({ nom, eleveId, statut });
   };
   for (const [eleveId, amgts] of arParEleveId.entries()) {
     const e = eleves.find((x) => x.id === eleveId);
     if (!e) continue;
-    for (const a of amgts) ajouterEleveAAmenagement(a.libelle, chapOrdre(a), a.ordre, nomEleve(e), e.id, e.statut);
+    for (const a of amgts) ajouterEleveAAmenagement(a.libelle, chapOrdre(a), a.ordre, nomEleve(e), e.id, e.statut, chapTitre(a));
   }
   // Les aménagements libres n'ont pas d'ordre de catalogue : ils se placent
   // après tous les AR, dans le même ordre que dans parEleve (Infinity trie en dernier).
@@ -96,11 +96,11 @@ export function computeFicheClasse(input) {
   for (const l of libres) {
     const e = eleves.find((x) => x.id === l.eleve_id);
     if (!e) continue;
-    ajouterEleveAAmenagement(l.texte, Infinity, Infinity, nomEleve(e), e.id, e.statut);
+    ajouterEleveAAmenagement(l.texte, Infinity, Infinity, nomEleve(e), e.id, e.statut, 'Aménagements complémentaires');
   }
   const parAmenagement = [...parAmenagementMap.entries()]
     .sort(([, a], [, b]) => a.chapOrdreVal - b.chapOrdreVal || a.ordreVal - b.ordreVal)
-    .map(([libelle, { eleves: es }]) => ({ libelle, eleves: es }));
+    .map(([libelle, { chapitreTitre, eleves: es }]) => ({ libelle, chapitreTitre, eleves: es }));
 
   // PIA = référent(s) PLAI de la classe (texte libre, un ou plusieurs noms séparés par une
   // virgule, saisi une fois pour la classe — pas dérivé des élèves individuels).

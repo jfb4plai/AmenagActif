@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 /** @param {{ vm: import('../../domain/types.js').FicheClasseVM, showStatutEleve?: boolean, lienEleve?: boolean }} props
  * lienEleve : false sur la fiche publique (FichePublique.jsx) — les enseignants qui la consultent
  * n'ont pas de compte et ne peuvent pas ouvrir /eleve/:id/fiche (page authentifiée). */
@@ -74,22 +76,30 @@ export default function FicheClasseView({ vm, showStatutEleve = false, lienEleve
       <table className="w-full border border-black mb-4 text-sm">
         <tbody>
           {vm.parAmenagement.length === 0 && <tr><td className="border border-black p-2 text-gray-500">Aucun.</td></tr>}
-          {vm.parAmenagement.map((row) => (
-            <tr key={row.libelle}>
-              <td className="border border-black p-2 align-top w-2/3">{row.libelle}</td>
-              <td className="border border-black p-2 align-top w-1/3">
-                {/* Élèves à la suite, séparés par un point médian (gain de place) ; liens conservés sur la fiche école. */}
-                {row.eleves.map((e, i) => (
-                  <span key={i}>
-                    {i > 0 && ' · '}
-                    {lienEleve ? <a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a> : <span>{e.nom}</span>}
-                    {showStatutEleve && (
-                      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 ml-1">{e.statut}</span>
-                    )}
-                  </span>
-                ))}
-              </td>
-            </tr>
+          {vm.parAmenagement.map((row, idx) => (
+            <Fragment key={row.libelle}>
+              {/* Séparateur : titre du chapitre à chaque changement de chapitre (libres : « Aménagements complémentaires »). */}
+              {row.chapitreTitre && row.chapitreTitre !== vm.parAmenagement[idx - 1]?.chapitreTitre && (
+                <tr className="titre-chapitre">
+                  <td colSpan={2} className="border border-black p-2 bg-gray-200 font-bold">{row.chapitreTitre}</td>
+                </tr>
+              )}
+              <tr>
+                <td className="border border-black p-2 align-top w-2/3">{row.libelle}</td>
+                <td className="border border-black p-2 align-top w-1/3">
+                  {/* Élèves à la suite, séparés par un point médian (gain de place) ; liens conservés sur la fiche école. */}
+                  {row.eleves.map((e, i) => (
+                    <span key={i}>
+                      {i > 0 && ' · '}
+                      {lienEleve ? <a className="text-teal underline" href={`/eleve/${e.eleveId}/fiche`}>{e.nom}</a> : <span>{e.nom}</span>}
+                      {showStatutEleve && (
+                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 ml-1">{e.statut}</span>
+                      )}
+                    </span>
+                  ))}
+                </td>
+              </tr>
+            </Fragment>
           ))}
         </tbody>
       </table>

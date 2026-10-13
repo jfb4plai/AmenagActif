@@ -55,7 +55,7 @@
  * @property {{ libelle: string, chapitreTitre: string, surligne: boolean }[]} pourTous
  * @property {{ titre: string, items: string[], classe: string }[]} dispositifsClasse
  * @property {{ eleve: string, eleveId: string, amenagements: string[] }[]} parEleve
- * @property {{ libelle: string, eleves: { nom: string, eleveId: string, statut: string }[] }[]} parAmenagement
+ * @property {{ libelle: string, chapitreTitre: string, eleves: { nom: string, eleveId: string, statut: string }[] }[]} parAmenagement
  * @property {{ eleve: string, statut: string, texte: string }[]} commentaires
  * @property {{ classe: string, texte: string, modifieLe: string|null }[]} commentairesClasses
  * @property {{ nom: string, classe: string|null }[]} elevesListe
