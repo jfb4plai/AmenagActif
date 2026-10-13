@@ -78,14 +78,14 @@ export default async function handler(req, res) {
           if (e2b && e2b.code !== '23505') throw e2b;
         }
 
-        // Lien intermédiaire de 7 jours : le lien Supabase (24 h max) n'est généré qu'au clic, voir api/activer.js.
-        const lien = `${APP_URL}/activer?t=${encodeURIComponent(await signInvitationToken({ email }))}`;
+        // Lien intermédiaire de 7 jours, à usage unique : le lien Supabase (24 h max) n'est généré qu'au clic, voir api/activer.js.
+        const lien = `${APP_URL}/activer?t=${encodeURIComponent(await signInvitationToken({ email, uid: data.user.id }))}`;
         const roleLabel = LABEL_ROLE[role] ?? role;
         try {
           await envoyerEmail({
             to: email,
             subject: 'Invitation à AménagActif',
-            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${echapperHtml(lien)}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien est valable ${JOURS_INVITATION} jours.</strong> Passé ce délai, vous pourrez en redemander un directement avec votre adresse e-mail. Ce lien est personnel, ne le transférez pas.</p>`,
+            html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${echapperHtml(lien)}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien est valable ${JOURS_INVITATION} jours et ne sert qu'une fois</strong>, pour créer votre mot de passe. Ensuite, connectez-vous toujours sur <a href="${APP_URL}/connexion">${APP_URL.replace('https://', '')}</a> avec votre adresse e-mail et ce mot de passe. Ce lien est personnel, ne le transférez pas.</p>`,
           });
         } catch (e3) {
           console.error("Envoi de l'invitation échoué :", e3?.name, e3?.status ?? '');

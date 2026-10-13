@@ -59,6 +59,12 @@ export default function Login() {
           Mot de passe oublié ?
         </button>
       </form>
+      <p className="text-sm text-[color:var(--text3)] mt-6">
+        Première connexion ou message d'erreur ?{' '}
+        <a href="/modes-emploi/se-connecter.html" target="_blank" rel="noopener noreferrer" className="underline text-teal">
+          Lire le guide « Se connecter »
+        </a>
+      </p>
     </div>
   );
 }

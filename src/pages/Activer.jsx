@@ -11,6 +11,7 @@ export default function Activer() {
   const t = params.get('t');
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState(null);
+  const [dejaActive, setDejaActive] = useState(false);
 
   async function activer() {
     setErreur(null);
@@ -22,6 +23,7 @@ export default function Activer() {
         body: JSON.stringify({ t }),
       });
       const j = await r.json().catch(() => ({}));
+      if (j.code === 'deja_active') { setDejaActive(true); setEnvoi(false); return; }
       if (!r.ok || !j.url) { setErreur(j.error || 'Activation impossible, réessayez.'); setEnvoi(false); return; }
       window.location.assign(j.url);
     } catch {
@@ -35,6 +37,20 @@ export default function Activer() {
       <div className="plai-section max-w-md mx-auto space-y-3">
         <p className="plai-error">Lien incomplet. Rouvrez le lien depuis votre courriel d'invitation.</p>
         <Link to="/connexion" className="text-sm underline text-teal">Retour à la connexion</Link>
+      </div>
+    );
+  }
+
+  if (dejaActive) {
+    return (
+      <div className="plai-section max-w-md mx-auto space-y-4">
+        <h1 className="text-xl font-semibold">Votre compte est déjà activé</h1>
+        <p>Ce lien d'invitation a déjà servi à créer votre mot de passe. Il ne fonctionne qu'une fois.</p>
+        <p>Connectez-vous désormais avec votre adresse e-mail et votre mot de passe.</p>
+        <Link to="/connexion" className="plai-btn inline-block">Aller à la page de connexion</Link>
+        <p className="text-sm text-[color:var(--text3)]">
+          Mot de passe oublié ? Sur la page de connexion, entrez votre adresse e-mail puis cliquez « Mot de passe oublié ? ».
+        </p>
       </div>
     );
   }

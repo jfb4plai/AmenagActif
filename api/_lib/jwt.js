@@ -63,9 +63,12 @@ export async function verifyProfilToken(token) {
 export const AUDIENCE_INVITATION = 'invitation';
 export const JOURS_INVITATION = 7; // le lien Supabase natif est plafonné à 24 h : ce jeton intermédiaire en génère un neuf au clic
 
-/** Jeton d'invitation : audience distincte (inutilisable comme jeton de fiche ou de profil). */
-export async function signInvitationToken({ email, joursValide = JOURS_INVITATION }) {
-  return new SignJWT({ email })
+/**
+ * Jeton d'invitation : audience distincte (inutilisable comme jeton de fiche ou de profil).
+ * uid (optionnel) : permet à api/activer.js de refuser le jeton une fois le compte utilisé (usage unique).
+ */
+export async function signInvitationToken({ email, uid, joursValide = JOURS_INVITATION }) {
+  return new SignJWT(uid ? { email, uid } : { email })
     .setProtectedHeader({ alg: 'HS256' })
     .setAudience(AUDIENCE_INVITATION)
     .setIssuedAt()
@@ -73,9 +76,20 @@ export async function signInvitationToken({ email, joursValide = JOURS_INVITATIO
     .sign(secret());
 }
 
-/** @returns {Promise<{ email: string }>} Lève si signature, aud ou exp invalide. */
+/** @returns {Promise<{ email: string, uid: string|null, iat: number }>} Lève si signature, aud ou exp invalide. */
 export async function verifyInvitationToken(token) {
   const { payload } = await jwtVerify(token, secret(), { audience: AUDIENCE_INVITATION, algorithms: ['HS256'] });
   if (typeof payload.email !== 'string' || !payload.email) throw new errors.JWTClaimValidationFailed('email manquant', payload, 'email', 'missing');
-  return { email: payload.email };
+  return { email: payload.email, uid: typeof payload.uid === 'string' ? payload.uid : null, iat: payload.iat };
+}
+
+/**
+ * Usage unique : le jeton est périmé si le compte s'est connecté après son émission
+ * (le clic sur le lien Supabase de définition du mot de passe compte comme une connexion).
+ * @param {number} iat secondes epoch ; @param {string|null|undefined} lastSignInAt ISO
+ */
+export function invitationDejaUtilisee(iat, lastSignInAt) {
+  if (!lastSignInAt) return false;
+  const t = Date.parse(lastSignInAt);
+  return Number.isFinite(t) && Math.floor(t / 1000) >= iat;
 }

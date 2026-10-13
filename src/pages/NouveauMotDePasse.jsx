@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase.js';
 import ChampMotDePasse from '../components/ChampMotDePasse.jsx';
+import { messageErreurMotDePasse } from '../domain/erreurMotDePasse.js';
 
 /**
  * Cible des liens d'invitation et de « mot de passe oublié ».
@@ -14,6 +15,7 @@ export default function NouveauMotDePasse() {
   const [mdp, setMdp] = useState('');
   const [mdp2, setMdp2] = useState('');
   const [erreur, setErreur] = useState(null);
+  const [erreurVersConnexion, setErreurVersConnexion] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [emailSecours, setEmailSecours] = useState('');
   const [secoursInfo, setSecoursInfo] = useState(null);
@@ -37,6 +39,7 @@ export default function NouveauMotDePasse() {
   async function soumettre(e) {
     e.preventDefault();
     setErreur(null);
+    setErreurVersConnexion(false);
     if (mdp.length < 8) { setErreur('8 caractères minimum.'); return; }
     if (mdp !== mdp2) { setErreur('Les deux mots de passe diffèrent.'); return; }
     setEnvoi(true);
@@ -44,8 +47,10 @@ export default function NouveauMotDePasse() {
       const { error } = await supabase.auth.updateUser({ password: mdp });
       if (error) throw error;
       setStatut('fait');
-    } catch {
-      setErreur("Lien expiré ou invalide. Redemandez un lien depuis la page de connexion.");
+    } catch (err) {
+      const { message, versConnexion } = messageErreurMotDePasse(err);
+      setErreur(message);
+      setErreurVersConnexion(versConnexion);
     } finally {
       setEnvoi(false);
     }
@@ -116,7 +121,10 @@ export default function NouveauMotDePasse() {
           <ChampMotDePasse id="mdp2" required autoComplete="new-password" value={mdp2} onChange={(e) => setMdp2(e.target.value)} />
         </div>
         {erreur && <p className="plai-error">{erreur}</p>}
-        <button type="submit" className="plai-btn" disabled={envoi}>{envoi ? 'Enregistrement…' : 'Enregistrer'}</button>
+        {erreurVersConnexion && (
+          <Link to="/connexion" className="text-sm underline text-teal inline-block">Aller à la page de connexion</Link>
+        )}
+        <button type="submit" className="plai-btn block" disabled={envoi}>{envoi ? 'Enregistrement…' : 'Enregistrer'}</button>
       </form>
     </div>
   );
