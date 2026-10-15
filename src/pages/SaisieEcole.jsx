@@ -20,6 +20,7 @@ import { chapitreEnModeAU, bloqueBasculeDispositif } from '../domain/dispositifs
 import { aConfirmerParClasse } from '../domain/reprise.js';
 import { avertissementEleve } from '../domain/changementClasse.js';
 import ChangerClasse from '../components/saisie/ChangerClasse.jsx';
+import RenommerClasse from '../components/saisie/RenommerClasse.jsx';
 
 export default function SaisieEcole() {
   const { role } = useRole();
@@ -138,6 +139,13 @@ export default function SaisieEcole() {
             </div>
           </div>
           {mut.deleteClasse.isError && <p className="plai-error text-sm">Échec de la suppression, réessayez.</p>}
+          {peutEditerStructure && (
+            <div className="text-sm">
+              <RenommerClasse key={classe.id} classe={classe}
+                autresNoms={grid.classes.filter((c) => c.id !== classeId).map((c) => c.nom)}
+                onRenommer={(nom) => mut.renommerClasse.mutateAsync({ classeId, nom })} />
+            </div>
+          )}
 
           <div className="plai-card p-3 text-sm space-y-1">
             <label className="font-medium block" htmlFor="referent-plai-classe">Référent(s) PLAI de la classe</label>
