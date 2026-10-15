@@ -84,6 +84,7 @@ export default async function handler(req, res) {
         try {
           await envoyerEmail({
             to: email,
+            bcc: moi.email, // copie conforme du message réellement envoyé (lien d'activation compris)
             subject: 'Invitation à AménagActif',
             html: `<p>Bonjour,</p><p>Vous avez été invité·e à rejoindre <strong>AménagActif</strong> par le Pôle Territorial de la Ville de Liège (PLAI), avec le rôle <strong>${roleLabel}</strong>.</p><p><a href="${echapperHtml(lien)}">Cliquez ici pour définir votre mot de passe et activer votre compte</a>.</p><p><strong>Ce lien est valable ${JOURS_INVITATION} jours et ne sert qu'une fois</strong>, pour créer votre mot de passe. Ensuite, connectez-vous toujours sur <a href="${APP_URL}/connexion">${APP_URL.replace('https://', '')}</a> avec votre adresse e-mail et ce mot de passe. Ce lien est personnel, ne le transférez pas.</p>`,
           });
@@ -91,15 +92,6 @@ export default async function handler(req, res) {
           console.error("Envoi de l'invitation échoué :", e3?.name, e3?.status ?? '');
           res.status(502).json({ error: "Compte créé, mais l'envoi de l'email d'invitation a échoué. Réessayez l'invitation." });
           return;
-        }
-        try {
-          await envoyerEmail({
-            to: moi.email,
-            subject: `AménagActif — invitation envoyée à ${String(email).replace(/[\r\n]/g, ' ')}`,
-            html: `<p>Confirmation : vous venez d'inviter <strong>${echapperHtml(email)}</strong> avec le rôle <strong>${roleLabel}</strong>${scoped ? ' (école rattachée)' : ''}, le ${new Date().toLocaleString('fr-BE')}.</p>`,
-          });
-        } catch (e4) {
-          console.error("Notification admin (invitation) échouée :", e4?.name, e4?.status ?? '');
         }
         res.status(200).json({ ok: true });
         return;
