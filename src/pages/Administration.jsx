@@ -6,6 +6,7 @@ import {
 } from '../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 import { traverseDispositif } from '../domain/dispositifs.js';
+import RenommerChapitre from '../components/RenommerChapitre.jsx';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles nécessitant une école à l'invitation
@@ -186,8 +187,9 @@ function MembreRow({ m, ecoles, besoinEcole, mut }) {
 /* ─────────────── Catalogue des aménagements ─────────────── */
 function SectionCatalogue() {
   const { data } = useCatalogueAdmin();
-  const { majAmenagement, ajouterAmenagement, ajouterChapitre, supprimerAmenagement, supprimerChapitre } = useCatalogueMutations();
+  const { majAmenagement, ajouterAmenagement, ajouterChapitre, supprimerAmenagement, supprimerChapitre, renommerChapitre } = useCatalogueMutations();
   const [ouvert, setOuvert] = useState(null);
+  const [renomme, setRenomme] = useState(null); // id du chapitre dont le titre est en cours de modification
   const [usage, setUsage] = useState(null); // { type: 'amenagement' | 'chapitre', id, titre, refus? }
   const [verification, setVerification] = useState(false);
   const [erreurVerif, setErreurVerif] = useState('');
@@ -244,6 +246,10 @@ Supprimer définitivement ${quoi} ?`)) mutation.mutate({ id: cible.id });
                 </span>
               </button>
               <button type="button" className="underline text-teal text-sm shrink-0"
+                onClick={() => setRenomme(renomme === ch.id ? null : ch.id)}>
+                Renommer
+              </button>
+              <button type="button" className="underline text-teal text-sm shrink-0"
                 onClick={() => setUsage({ type: 'chapitre', id: ch.id, titre: ch.titre })}>
                 Voir où c'est utilisé
               </button>
@@ -253,6 +259,12 @@ Supprimer définitivement ${quoi} ?`)) mutation.mutate({ id: cible.id });
                 Supprimer ce chapitre
               </button>
               </div>
+              {renomme === ch.id && (
+                <RenommerChapitre key={ch.id} chapitre={ch}
+                  autresTitres={chapitres.filter((c) => c.id !== ch.id).map((c) => c.titre)}
+                  onRenommer={(titre) => renommerChapitre.mutateAsync({ id: ch.id, titre })}
+                  onFermer={() => setRenomme(null)} />
+              )}
               {estOuvert && (
                 <div className="px-3 pb-3 space-y-3">
                   {items.map((a) => (

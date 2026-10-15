@@ -228,7 +228,17 @@ export function useCatalogueMutations() {
   const supprimerAmenagement = useMutation({ mutationFn: supprimer('ar_amenagements'), onSuccess: inval });
   const supprimerChapitre = useMutation({ mutationFn: supprimer('ar_chapitres'), onSuccess: inval });
 
-  return { majAmenagement, ajouterAmenagement, ajouterChapitre, majPartageProfil, supprimerAmenagement, supprimerChapitre };
+  // Titre seulement : jamais `code` (immuable), `ordre` ni `est_dispositif`. Une RLS qui refuse un UPDATE renvoie 0 ligne sans erreur : on le détecte.
+  const renommerChapitre = useMutation({
+    mutationFn: async ({ id, titre }) => {
+      const { data, error } = await supabase.from('ar_chapitres').update({ titre }).eq('id', id).select('id');
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error('Renommage impossible (droits insuffisants ou chapitre introuvable).');
+    },
+    onSuccess: inval,
+  });
+
+  return { majAmenagement, ajouterAmenagement, ajouterChapitre, majPartageProfil, supprimerAmenagement, supprimerChapitre, renommerChapitre };
 }
 
 const LIEU = 'ar_classes(nom, ecole_id, ar_annees(libelle), ar_ecoles(nom, implantation_nom))';
