@@ -7,9 +7,9 @@ Document de référence pour comprendre ce que voit et peut modifier chaque rôl
 | Rôle | Portée | Écriture | Lecture | Visible dans « Mon école » (équipe) |
 |---|---|---|---|---|
 | **Administrateur** (`admin`) | Toute l'application, toutes les écoles | Tout : membres, écoles, années, catalogue AU/AR, saisie de toute classe (y compris créer/supprimer une classe) | Tout | — (page Administration à la place) |
-| **Référent PLAI** (`referent_plai`) | Une ou plusieurs écoles | Saisie complète : classes (créer/modifier/supprimer), élèves, AU (ajouter/retirer), AR, commentaires | Fiches de ses écoles | Oui |
+| **Référent PLAI** (`referent_plai`) | Une ou plusieurs écoles | Saisie complète : classes (créer/renommer/modifier/supprimer), élèves, AU (ajouter/retirer), AR, commentaires | Fiches de ses écoles | Oui |
 | **Direction** (`direction`) | Une ou plusieurs écoles, éventuellement limitée à certains niveaux | Identique à Référent PLAI sur ses écoles | Fiches de ses écoles | Oui |
-| **Agent accompagnant** (`agent_plai`) | Une ou plusieurs écoles | Élèves (créer/modifier/supprimer), AR par élève, aménagements libres, nom du référent PLAI classe, AU (**ajouter seulement**). **Ne peut pas** créer ni supprimer une classe, ni retirer un AU déjà coché | Fiches de ses écoles | Oui (depuis le 2026-09-23) |
+| **Agent accompagnant** (`agent_plai`) | Une ou plusieurs écoles | Élèves (créer/modifier/supprimer), AR par élève, aménagements libres, nom du référent PLAI classe, AU (**ajouter seulement**). **Ne peut pas** créer, supprimer ni renommer une classe, ni retirer un AU déjà coché | Fiches de ses écoles | Oui (depuis le 2026-09-23) |
 
 Référent PLAI et Direction ont exactement les mêmes droits techniques ; la distinction est surtout d'usage (à qui s'adresser) et se reflète sur les fiches imprimées : le nom d'un Référent PLAI atterrit dans la colonne « Référent(s) PLAI », celui d'une Direction dans la colonne « PAR (Direction) ».
 
@@ -28,10 +28,10 @@ Après connexion, tout éditeur (admin/référent/direction/agent) arrive sur `/
 
 Deux gestes réservés à référent PLAI / direction / admin, appliqués **en base (RLS)**, pas seulement à l'écran — un appel API direct échouerait pareil :
 
-1. **Pas de création (ni suppression) de classe.** Dans le sélecteur de classe, le bouton « + Nouvelle classe » n'apparaît pas pour l'agent ; s'il n'y a aucune classe dans l'école, un message l'invite à demander au référent/direction/admin d'en créer une.
+1. **Pas de création, suppression ni renommage de classe.** Dans le sélecteur de classe, le bouton « + Nouvelle classe » n'apparaît pas pour l'agent ; s'il n'y a aucune classe dans l'école, un message l'invite à demander au référent/direction/admin d'en créer une.
 2. **Aménagements universels (AU) : peut ajouter, pas retirer.** Une case AU déjà cochée est grisée (désactivée) pour l'agent, avec un bandeau d'avertissement au-dessus du bloc AU expliquant la restriction. Il peut cocher un AU non encore actif.
 
-Techniquement, `ar_amenagements_classe` (table des AU cochés) autorise l'`INSERT` pour l'agent mais pas le `DELETE` ; `ar_classes` autorise l'`UPDATE` (ex. nom du référent PLAI classe) mais pas l'`INSERT`/`DELETE`.
+Techniquement, `ar_amenagements_classe` (table des AU cochés) autorise l'`INSERT` pour l'agent mais pas le `DELETE` ; `ar_classes` autorise l'`UPDATE` (ex. nom du référent PLAI classe) mais pas l'`INSERT`/`DELETE`. Le renommage (colonne `nom`) est verrouillé par le déclencheur `ar_classes_nom_controle` (migration `20261015`), qui exige `ar_can_editer_structure_ecole` ; le service_role et le SQL éditeur ne sont pas bloqués. L'interface affiche « Renommer la classe » seulement quand `peutEditerStructure` est vrai.
 
 ## Rattachement à une ou plusieurs écoles
 
