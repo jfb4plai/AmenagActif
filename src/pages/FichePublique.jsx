@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
-import { imprimerFiche } from '../lib/imprimerFiche.js';
+import { imprimerFiche, piedFicheClasse } from '../lib/imprimerFiche.js';
 
 export default function FichePublique() {
   const { token } = useParams();
@@ -32,7 +32,7 @@ export default function FichePublique() {
     <div className="min-h-screen bg-[color:var(--bg)] py-6">
       <div className="text-center mb-3 no-print space-y-2">
         <p className="text-sm text-[color:var(--text3)]">Fiche en lecture seule — diffusion restreinte aux enseignants concernés.</p>
-        <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
+        <button className="plai-btn" onClick={() => imprimerFiche(piedFicheClasse(data.vm))}>Imprimer / Enregistrer en PDF</button>
         <p className="text-sm">
           <a className="text-teal underline" href="/catalogue-amenagements" target="_blank" rel="noopener noreferrer">
             Voir la liste complète des aménagements possibles (AU/AR)

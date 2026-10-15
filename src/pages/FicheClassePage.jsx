@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useFicheClasse, useFicheGroupe } from '../hooks/useFicheClasse.js';
 import { useEcoles, useAnnees, useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
-import { imprimerFiche } from '../lib/imprimerFiche.js';
+import { imprimerFiche, piedFicheClasse } from '../lib/imprimerFiche.js';
 import { useRole } from '../lib/auth.jsx';
 import GenerateurLien from '../components/GenerateurLien.jsx';
 import { useAConfirmerClasses } from '../hooks/useAConfirmer.js';
@@ -106,7 +106,7 @@ function Picker() {
                 Aperçu confirmé pour <strong>{apercu.data.classeNom}</strong> : vérifiez le contenu ci-dessous{peutLier && ' avant de générer le lien à envoyer'}.
               </p>
               <div className="no-print">
-                <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
+                <button className="plai-btn" onClick={() => imprimerFiche(piedFicheClasse(apercu.data))}>Imprimer / Enregistrer en PDF</button>
               </div>
               {peutLier && (
                 <div className="no-print">
@@ -147,7 +147,7 @@ function FicheClasseContenu({ classeId }) {
   return (
     <div className="plai-section space-y-3">
       <div className="flex gap-3 no-print">
-        <button className="plai-btn" onClick={imprimerFiche}>Imprimer / Enregistrer en PDF</button>
+        <button className="plai-btn" onClick={() => imprimerFiche(piedFicheClasse(vm))}>Imprimer / Enregistrer en PDF</button>
         {role !== 'agent_plai' && (
           <button className="plai-btn" style={{ fontSize: 16 }} aria-expanded={lienOuvert} onClick={() => setLienOuvert((o) => !o)}>
             Copier le lien enseignant
