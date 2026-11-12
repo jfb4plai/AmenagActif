@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AmenagementLibreForm from './AmenagementLibreForm.jsx';
 import EnTeteDispositif from './EnTeteDispositif.jsx';
 
@@ -9,9 +9,11 @@ function normaliser(s) {
     .toLowerCase();
 }
 
-export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsAR, libres, filtre, onToggle, onAddLibre, onRemoveLibre, eleveSurvole, onHoverEleve, dispositif }) {
+export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsAR, libres, filtre, onToggle, onAddLibre, onRemoveLibre, eleveSurvole, onHoverEleve, dispositif, signalReplier = 0 }) {
   const [ouvert, setOuvert] = useState(false);
   const [libreOuvert, setLibreOuvert] = useState(false);
+  // Bouton « Tout replier » de la page : chaque clic incrémente signalReplier, ce chapitre se referme.
+  useEffect(() => { if (signalReplier > 0) setOuvert(false); }, [signalReplier]);
 
   const cols = eleves;
   const totalCols = cols.length;
@@ -59,7 +61,7 @@ export default function ChapitreAR({ chapitre, amenagements, eleves, selectionsA
       )}
 
       {affiche && amenagementsAffiches.map((a) => (
-        <tr key={a.id} className="border-b border-[color:var(--border)] hover:bg-white/60">
+        <tr key={a.id} className="border-b border-[color:var(--border)] hover:bg-[#b3e0d0] [&:hover>td:first-child]:shadow-[inset_6px_0_0_var(--teal)] [&:hover>td:first-child]:font-semibold">
           <td className="p-1 align-top">{a.libelle}</td>
           {cols.map((e) => (
             <td key={e.id} className={`cell-eleve text-center border-l border-[color:var(--border)] ${e.id === eleveSurvole ? 'bg-[color:var(--teal-bg)]' : estAConfirmer(e.id, a.id) ? 'bg-orange/10' : ''}`}

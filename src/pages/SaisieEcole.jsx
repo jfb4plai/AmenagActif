@@ -29,6 +29,7 @@ export default function SaisieEcole() {
   const [classeId, setClasseId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [recherche, setRecherche] = useState('');
+  const [signalReplier, setSignalReplier] = useState(0);
   const [eleveSurvole, setEleveSurvole] = useState(null);
   const [blocages, setBlocages] = useState({});
   const { data: cat } = useCatalogue();
@@ -227,6 +228,10 @@ export default function SaisieEcole() {
                 style={{ borderColor: 'var(--teal)', borderWidth: 2 }}
                 placeholder="Cliquez ici, puis tapez un mot (ex : bruit, temps, oral)…"
                 value={recherche} onChange={(e) => setRecherche(e.target.value)} />
+              <button type="button" className="plai-btn text-base" onClick={() => setSignalReplier((n) => n + 1)}
+                title="Referme tous les chapitres d'aménagements raisonnables qui sont dépliés">
+                Tout replier
+              </button>
               <p className="text-base font-semibold" aria-live="polite">
                 {recherche.trim() ? resultats : ''}
               </p>
@@ -270,7 +275,7 @@ export default function SaisieEcole() {
                     eleves={eleves}
                     selectionsAR={grid.selectionsAR}
                     libres={grid.libres}
-                    filtre={recherche}
+                    filtre={recherche} signalReplier={signalReplier}
                     onToggle={(v) => mut.toggleAR.mutate(v)}
                     onAddLibre={(v) => mut.addLibre.mutate(v)}
                     onRemoveLibre={(v) => mut.removeLibre.mutate(v)}
