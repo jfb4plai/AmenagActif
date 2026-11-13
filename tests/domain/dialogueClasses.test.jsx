@@ -69,4 +69,35 @@ describe('DialogueClasses', () => {
     fireEvent(document.querySelector('dialog'), new Event('cancel', { cancelable: true }));
     expect(onAnnuler).toHaveBeenCalledTimes(2);
   });
+
+  describe('classes du lien absentes de la liste affichée', () => {
+    const avecAbsente = { id: 'l1', classe_ids: ['c1', 'zz9'] };
+
+    it("conservées dans l'envoi et signalées avec le bon nombre", () => {
+      const onEnregistrer = vi.fn();
+      rendre({ lien: avecAbsente, onEnregistrer });
+      expect(screen.getByText("1 classe de ce sommaire n'apparaît pas dans la liste ci-dessus ; elle est conservée.")).toBeTruthy();
+      fireEvent.click(screen.getByRole('checkbox', { name: '5B' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+      expect(onEnregistrer).toHaveBeenCalledWith(['c1', 'c2', 'zz9']);
+    });
+
+    it('tout décocher en visible : Enregistrer reste actif, envoi = ids conservés seuls', () => {
+      const onEnregistrer = vi.fn();
+      rendre({ lien: { id: 'l1', classe_ids: ['c1', 'zz9', 'yy8'] }, onEnregistrer });
+      expect(screen.getByText(/2 classes de ce sommaire n'apparaissent pas/)).toBeTruthy();
+      fireEvent.click(screen.getByRole('checkbox', { name: '5A' }));
+      const bouton = screen.getByRole('button', { name: 'Enregistrer' });
+      expect(bouton.disabled).toBe(false);
+      expect(screen.queryByRole('alert')).toBeNull();
+      fireEvent.click(bouton);
+      expect(onEnregistrer).toHaveBeenCalledWith(['zz9', 'yy8']);
+    });
+
+    it("zéro visible et zéro conservé : Enregistrer désactivé avec l'alerte", () => {
+      rendre({ lien: { id: 'l1', classe_ids: [] } });
+      expect(screen.getByRole('button', { name: 'Enregistrer' }).disabled).toBe(true);
+      expect(screen.getByRole('alert')).toBeTruthy();
+    });
+  });
 });

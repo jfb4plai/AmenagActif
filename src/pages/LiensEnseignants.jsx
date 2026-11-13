@@ -57,6 +57,9 @@ function DialogueClassesConnecte({ lien, onFermer }) {
       ? <p role="alert" className="plai-error" style={{ fontSize: 16 }}>Impossible de charger les classes : {grille.error.message}</p>
       : <p role="status">Chargement des classes…</p>;
   }
+  if (grille.data.classes.length === 0) {
+    return <p role="alert" className="plai-error" style={{ fontSize: 16 }}>Impossible de charger les classes de cette implantation.</p>;
+  }
   return (
     <DialogueClasses
       lien={lien} classes={grille.data.classes}

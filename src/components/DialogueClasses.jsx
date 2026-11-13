@@ -37,7 +37,10 @@ export default function DialogueClasses({ lien, classes, enCours, erreur, onEnre
 
   const vide = coches.size === 0;
   // Ordre d'affichage conservé pour l'envoi
-  const ids = trierClasses(classes).filter((c) => coches.has(c.id)).map((c) => c.id);
+  // Ids du lien absents de la liste affichée : jamais retirés (le serveur remplace l'ensemble).
+  const visibles = new Set(classes.map((c) => c.id));
+  const conservees = (lien.classe_ids ?? []).filter((id) => !visibles.has(id));
+  const ids = [...trierClasses(classes).filter((c) => coches.has(c.id)).map((c) => c.id), ...conservees];
 
   return (
     <dialog
@@ -74,6 +77,11 @@ export default function DialogueClasses({ lien, classes, enCours, erreur, onEnre
           </fieldset>
         ))}
       </div>
+      {conservees.length > 0 && (
+        <p className="mb-3" style={{ fontSize: 16 }}>
+          {conservees.length} {conservees.length > 1 ? "classes de ce sommaire n'apparaissent pas dans la liste ci-dessus ; elles sont conservées." : "classe de ce sommaire n'apparaît pas dans la liste ci-dessus ; elle est conservée."}
+        </p>
+      )}
       {vide && <p role="alert" className="plai-error mb-3" style={{ fontSize: 16 }}>{MESSAGE_AU_MOINS_UNE}</p>}
       {erreur && <p role="alert" className="plai-error mb-3" style={{ fontSize: 16 }}>{erreur}</p>}
       <div className="flex gap-3 justify-end">

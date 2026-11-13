@@ -24,8 +24,9 @@ vi.mock('../../src/hooks/useLiens.js', () => ({
   useRevoquerLien: () => ({ mutateAsync: revoquerMutate, reset: vi.fn(), isPending: false, error: null }),
   useDefinirClasses: () => ({ mutateAsync: vi.fn().mockResolvedValue({ ok: true }), reset: vi.fn(), isPending: false, error: null }),
 }));
+const grille = { classes: [{ id: 'c1', nom: '1A', niveau: '1re' }, { id: 'c2', nom: '1B', niveau: '1re' }] };
 vi.mock('../../src/hooks/useEcoleGrid.js', () => ({
-  useEcoleGrid: () => ({ data: { classes: [{ id: 'c1', nom: '1A', niveau: '1re' }, { id: 'c2', nom: '1B', niveau: '1re' }] }, isLoading: false }),
+  useEcoleGrid: () => ({ data: { classes: grille.classes }, isLoading: false }),
 }));
 
 const { default: LiensEnseignants } = await import('../../src/pages/LiensEnseignants.jsx');
@@ -120,6 +121,18 @@ describe('page Liens enseignants', () => {
     render(<LiensEnseignants />);
     fireEvent.click(screen.getByRole('button', { name: /Modifier les classes/ }));
     expect(screen.getByRole('checkbox', { name: '1A' }).checked).toBe(true);
+  });
+
+  it("grille vide : pas de dialogue, message d'erreur", () => {
+    avecSommaires();
+    const avant = grille.classes;
+    grille.classes = [];
+    try {
+      render(<LiensEnseignants />);
+      fireEvent.click(screen.getByRole('button', { name: /Modifier les classes/ }));
+      expect(document.querySelector('dialog[aria-labelledby="dlgc-titre"]')).toBeNull();
+      expect(screen.getByRole('alert').textContent).toBe('Impossible de charger les classes de cette implantation.');
+    } finally { grille.classes = avant; }
   });
 
   it('le paragraphe « Un lien, un seul enseignant » mentionne le sommaire', () => {
