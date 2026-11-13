@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { useLiens, useRevoquerLien } from '../hooks/useLiens.js';
-import { filtrerLiens, grouperParEcole, titreEcole, dateFR, LIBELLE_STATUT, JOURS_INACTIF_DEFAUT } from '../domain/liens.js';
+import { useLiens, useRevoquerLien, useDefinirClasses } from '../hooks/useLiens.js';
+import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
+import DialogueClasses from '../components/DialogueClasses.jsx';
+import { filtrerLiens, grouperParEcole, titreEcole, dateFR, nomSommaire, LIBELLE_STATUT, JOURS_INACTIF_DEFAUT } from '../domain/liens.js';
 
 const FOCUS = 'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]';
 
@@ -38,7 +40,33 @@ function DialogueRevocation({ lien, enCours, erreur, onConfirmer, onAnnuler }) {
   );
 }
 
-function TableLiens({ liens, onRevoquer, titre }) {
+/** Charge les classes de l'implantation pour l'année du lien, puis ouvre le dialogue. */
+function DialogueClassesConnecte({ lien, onFermer }) {
+  const grille = useEcoleGrid(lien.ecole_id, lien.annee_id);
+  const definir = useDefinirClasses();
+  async function enregistrer(classeIds) {
+    try {
+      await definir.mutateAsync({ lienId: lien.id, classeIds });
+      onFermer();
+    } catch {
+      // l'erreur reste affichée dans la boîte de dialogue (definir.error)
+    }
+  }
+  if (grille.isLoading || !grille.data) {
+    return grille.error
+      ? <p role="alert" className="plai-error" style={{ fontSize: 16 }}>Impossible de charger les classes : {grille.error.message}</p>
+      : <p role="status">Chargement des classes…</p>;
+  }
+  return (
+    <DialogueClasses
+      lien={lien} classes={grille.data.classes}
+      enCours={definir.isPending} erreur={definir.error?.message}
+      onEnregistrer={enregistrer} onAnnuler={onFermer}
+    />
+  );
+}
+
+function TableLiens({ liens, onRevoquer, onModifierClasses, ecole, titre }) {
   // Infos d'usage (ouvertures) : masquées par défaut, affichées ligne par ligne sur demande.
   const [ouverts, setOuverts] = useState(() => new Set());
   const basculer = (id) => setOuverts((prev) => {
@@ -68,7 +96,9 @@ function TableLiens({ liens, onRevoquer, titre }) {
               <Fragment key={l.id}>
                 <tr className="border-b border-[color:var(--border)] align-top">
                   <th scope="row" className="py-2 pr-3 font-medium">
-                    {l.destinataire}
+                    {l.mode === 'sommaire'
+                      ? nomSommaire({ numero: l.numero, cree_le: l.cree_le, ecole, destinataire: l.destinataire, nbClasses: l.classes.length })
+                      : l.destinataire}
                     {l.cree_par && <span className="block font-normal text-[color:var(--text2)]">créé par {l.cree_par}</span>}
                   </th>
                   <td className="py-2 pr-3">{l.classes.join(', ') || 'Non disponible'}</td>
@@ -86,6 +116,11 @@ function TableLiens({ liens, onRevoquer, titre }) {
                       >
                         Détails<span className="sr-only"> du lien de {l.destinataire}</span>
                       </button>
+                      {l.mode === 'sommaire' && l.statut === 'actif' && (
+                        <button type="button" className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={() => onModifierClasses(l)}>
+                          Modifier les classes<span className="sr-only"> du lien de {l.destinataire}</span>
+                        </button>
+                      )}
                       {l.statut !== 'revoque' && (
                         <button type="button" className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={() => onRevoquer(l)}>
                           Révoquer<span className="sr-only"> le lien de {l.destinataire}</span>
@@ -124,6 +159,7 @@ export default function LiensEnseignants() {
   const [joursTxt, setJoursTxt] = useState(String(JOURS_INACTIF_DEFAUT));
   const jours = Number.parseInt(joursTxt, 10);
   const [aRevoquer, setARevoquer] = useState(null);
+  const [aModifier, setAModifier] = useState(null);
   const [relanceOuverte, setRelanceOuverte] = useState(false);
 
   const sections = useMemo(() => {
@@ -166,7 +202,7 @@ export default function LiensEnseignants() {
           <strong>Conseil pour la colonne « Destinataire » :</strong> évitez le nom complet de l'enseignant (données personnelles, RGPD). Préférez un repère sans équivoque mais sans nom complet : initiale du prénom, matière, classe et implantation (ex. « A., français 5PA, Pitteurs »).
         </p>
         <p>
-          <strong>Un lien, un seul enseignant :</strong> la classe reste l'unité de tri d'un lien (un lien par classe, y compris pour un enseignant qui en a plusieurs). Mais s'il y a plusieurs enseignants sur une même classe, ne partagez jamais le même lien entre eux : générez-en un distinct pour chacun.
+          <strong>Un lien, un seul enseignant :</strong> la classe reste l'unité de tri d'un lien (un lien par classe, ou un sommaire qui regroupe, pour un même enseignant, l'accès à la fiche de chacune de ses classes). Mais s'il y a plusieurs enseignants sur une même classe, ne partagez jamais le même lien entre eux : générez-en un distinct pour chacun.
         </p>
       </div>
 
@@ -224,10 +260,12 @@ export default function LiensEnseignants() {
           <div className="px-4 pb-4">
             {liens.length === 0
               ? <p className="plai-empty">Aucun lien ne correspond aux filtres.</p>
-              : <TableLiens liens={liens} titre={titreEcole(ecole)} onRevoquer={(l) => { revoquer.reset(); setARevoquer(l); }} />}
+              : <TableLiens liens={liens} ecole={ecole} titre={titreEcole(ecole)} onModifierClasses={setAModifier} onRevoquer={(l) => { revoquer.reset(); setARevoquer(l); }} />}
           </div>
         </details>
       ))}
+
+      {aModifier && <DialogueClassesConnecte lien={aModifier} onFermer={() => setAModifier(null)} />}
 
       {aRevoquer && (
         <DialogueRevocation

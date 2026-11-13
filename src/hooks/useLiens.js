@@ -25,3 +25,12 @@ export function useRevoquerLien() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['liens'] }),
   });
 }
+
+/** Remplace la liste des classes d'un sommaire (le serveur refuse fusion, lien révoqué/expiré, liste vide). */
+export function useDefinirClasses() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ lienId, classeIds }) => apiLiens({ action: 'definir_classes', lien_id: lienId, classe_ids: classeIds }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['liens'] }),
+  });
+}

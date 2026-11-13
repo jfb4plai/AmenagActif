@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, within, fireEvent, cleanup } from '@testing-library/react';
 
 afterEach(cleanup);
@@ -6,21 +6,34 @@ afterEach(cleanup);
 HTMLDialogElement.prototype.showModal = function showModal() { this.setAttribute('open', ''); };
 
 const revoquerMutate = vi.fn().mockResolvedValue({});
+const LIENS_BASE = [];
+const SOMMAIRES = [
+    { id: 'l3', ecole_id: 'e1', mode: 'sommaire', numero: 42, annee_id: 'a1', classe_ids: ['c1', 'c2'], destinataire: 'M. Leroy, sciences', classes: ['1A', '1B'], cree_le: '2026-09-01T00:00:00Z', cree_par: null, expire_le: '2027-08-31', revoque_le: null, derniere_ouverture: null, nb_ouvertures: 0, statut: 'actif' },
+    { id: 'l4', ecole_id: 'e1', mode: 'sommaire', numero: 43, annee_id: 'a1', classe_ids: ['c1'], destinataire: 'Mme Revoquee, histoire', classes: ['1A'], cree_le: '2026-09-01T00:00:00Z', cree_par: null, expire_le: '2027-08-31', revoque_le: '2026-09-20T00:00:00Z', derniere_ouverture: null, nb_ouvertures: 0, statut: 'revoque' },
+];
 const donnees = {
   ecoles: [{ id: 'e1', nom: 'Athénée A', implantation: '4012', implantation_nom: 'Site Centre' }, { id: 'e2', nom: 'Athénée B', implantation: null, implantation_nom: null }],
   liens: [
-    { id: 'l1', ecole_id: 'e1', destinataire: 'Mme Dupont, français, 3e TQ B', classes: ['3TQB'], cree_le: '2026-09-01T00:00:00Z', cree_par: 'ref@ecole.be', expire_le: '2027-08-31', revoque_le: null, derniere_ouverture: '2026-09-10T00:00:00Z', nb_ouvertures: 3, statut: 'actif' },
-    { id: 'l2', ecole_id: 'e1', destinataire: 'M. Martin, maths', classes: ['2A'], cree_le: '2026-09-01T00:00:00Z', cree_par: null, expire_le: '2027-08-31', revoque_le: '2026-09-20T00:00:00Z', derniere_ouverture: null, nb_ouvertures: 0, statut: 'revoque' },
+    { id: 'l1', ecole_id: 'e1', mode: 'fusion', destinataire: 'Mme Dupont, français, 3e TQ B', classes: ['3TQB'], cree_le: '2026-09-01T00:00:00Z', cree_par: 'ref@ecole.be', expire_le: '2027-08-31', revoque_le: null, derniere_ouverture: '2026-09-10T00:00:00Z', nb_ouvertures: 3, statut: 'actif' },
+    { id: 'l2', ecole_id: 'e1', mode: 'fusion', destinataire: 'M. Martin, maths', classes: ['2A'], cree_le: '2026-09-01T00:00:00Z', cree_par: null, expire_le: '2027-08-31', revoque_le: '2026-09-20T00:00:00Z', derniere_ouverture: null, nb_ouvertures: 0, statut: 'revoque' },
   ],
 };
+LIENS_BASE.push(...donnees.liens);
 vi.mock('../../src/hooks/useLiens.js', () => ({
   useLiens: () => ({ data: donnees, isLoading: false, error: null }),
   useRevoquerLien: () => ({ mutateAsync: revoquerMutate, reset: vi.fn(), isPending: false, error: null }),
+  useDefinirClasses: () => ({ mutateAsync: vi.fn().mockResolvedValue({ ok: true }), reset: vi.fn(), isPending: false, error: null }),
+}));
+vi.mock('../../src/hooks/useEcoleGrid.js', () => ({
+  useEcoleGrid: () => ({ data: { classes: [{ id: 'c1', nom: '1A', niveau: '1re' }, { id: 'c2', nom: '1B', niveau: '1re' }] }, isLoading: false }),
 }));
 
 const { default: LiensEnseignants } = await import('../../src/pages/LiensEnseignants.jsx');
 
 describe('page Liens enseignants', () => {
+  beforeEach(() => { donnees.liens = [...LIENS_BASE]; });
+  const avecSommaires = () => { donnees.liens = [...SOMMAIRES, ...LIENS_BASE]; };
+
   it('sections par implantation, tableau avec en-têtes de colonnes, statut en toutes lettres', () => {
     render(<LiensEnseignants />);
     expect(screen.getAllByText(/Site Centre \(FASE 4012\)/).length).toBeGreaterThan(0);
@@ -90,5 +103,27 @@ describe('page Liens enseignants', () => {
     expect(screen.queryByText(/Mme Dupont/)).toBeNull();
     fireEvent.click(bouton);
     expect(screen.getAllByText(/Mme Dupont/).length).toBeGreaterThan(0);
+  });
+
+  it('une ligne sommaire affiche le nom composé et « Modifier les classes » ; fusion et révoqué non', () => {
+    avecSommaires();
+    render(<LiensEnseignants />);
+    expect(screen.getAllByText(/Super lien SL-0042 \(créé le .*\) · Site Centre \(FASE 4012\) · M\. Leroy, sciences · 2 classes/).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /Modifier les classes/ })).toHaveLength(1);
+    fireEvent.change(screen.getByLabelText('Statut'), { target: { value: 'tous' } });
+    expect(screen.getAllByRole('button', { name: /Modifier les classes/ })).toHaveLength(1);
+    expect(screen.getAllByText(/Super lien SL-0043/).length).toBeGreaterThan(0);
+  });
+
+  it('« Modifier les classes » ouvre le dialogue avec les classes du lien cochées', () => {
+    avecSommaires();
+    render(<LiensEnseignants />);
+    fireEvent.click(screen.getByRole('button', { name: /Modifier les classes/ }));
+    expect(screen.getByRole('checkbox', { name: '1A' }).checked).toBe(true);
+  });
+
+  it('le paragraphe « Un lien, un seul enseignant » mentionne le sommaire', () => {
+    render(<LiensEnseignants />);
+    expect(screen.getByText(/un sommaire qui regroupe, pour un même enseignant, l'accès à la fiche de chacune de ses classes/)).toBeTruthy();
   });
 });
