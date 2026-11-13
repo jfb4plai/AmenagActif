@@ -10,6 +10,36 @@ import ChoixModeLien from '../components/ChoixModeLien.jsx';
 import { useAConfirmerClasses } from '../hooks/useAConfirmer.js';
 import { messageAvantEnvoi } from '../domain/changementClasse.js';
 
+// Guide qui décrit le sommaire, selon le rôle (l'agent accompagnant ne crée pas de lien : pas de guide, un renvoi vers ses référents).
+const GUIDE_SOMMAIRE = { direction: '/modes-emploi/directions.html#sommaire' };
+const GUIDE_SOMMAIRE_DEFAUT = '/modes-emploi/referents-plai.html#sommaire';
+
+/** Annonce permanente du sommaire (nouveauté) : sans elle, le choix n'apparaît qu'après avoir coché deux classes. */
+function NoteSommaire({ role }) {
+  const peutCreer = role !== 'agent_plai';
+  return (
+    <aside role="note" aria-label="Nouveauté : le sommaire de classes" className="plai-card p-3 space-y-1 max-w-3xl no-print">
+      <p className="font-medium" style={{ fontSize: 16 }}>Nouveau : le sommaire, pour un enseignant qui a plusieurs classes</p>
+      {peutCreer ? (
+        <>
+          <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
+            Un seul lien ouvre la liste de ses classes ; chacune garde sa propre fiche. Pour le créer, cochez au moins deux classes ci-dessous, puis choisissez « Un sommaire : une fiche par classe ».
+          </p>
+          <p style={{ fontSize: 16 }}>
+            <a className="text-teal underline" href={GUIDE_SOMMAIRE[role] ?? GUIDE_SOMMAIRE_DEFAUT} target="_blank" rel="noopener noreferrer">
+              Mode d'emploi du sommaire
+            </a>
+          </p>
+        </>
+      ) : (
+        <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
+          Les référents PLAI, les directions et les administrateurs peuvent créer un sommaire : un seul lien qui ouvre la liste des classes d'un enseignant, chacune gardant sa propre fiche. Pour en savoir plus, adressez-vous à eux.
+        </p>
+      )}
+    </aside>
+  );
+}
+
 function Picker() {
   const { data: ecoles = [] } = useEcoles();
   const { data: annees = [] } = useAnnees();
@@ -75,6 +105,7 @@ function Picker() {
     <div className="plai-section space-y-3">
       <h1 className="text-xl font-semibold no-print">Fiches par classe</h1>
       <Link className="text-sm text-teal underline no-print" to="/fiches/ecole">Voir la fiche « vue école complète »</Link>
+      <NoteSommaire role={role} />
       <div className="flex gap-3 no-print">
         {ecoleUnique ? (
           <span className="plai-input inline-block bg-[color:var(--bg)]">{ecoleUnique.nom}</span>
