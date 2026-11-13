@@ -3,6 +3,8 @@
 -- Chaque cas affiche un NOTICE « OK » ou « ECHEC » (onglet Messages du SQL Editor), sauf (d) et (h) : SELECT à comparer.
 -- Prérequis : l'école A a au moins 12 classes pour l'année donnée, plus une classe d'une autre école
 -- et une classe d'une autre année (même école A). Créer ces lignes avant de lancer si besoin (tout est annulé à la fin).
+-- Attention : une séquence n'est pas annulée par le rollback. Jouer ce test consomme quelques numéros SL
+-- (colonne ar_liens.numero, identité) dans la base cible : des trous dans la numérotation sont attendus.
 begin;
 
 -- A ADAPTER : utilisateur existant dans auth.users, école A, année, classes de test.
@@ -115,6 +117,23 @@ do $$ begin
   exception when others then
     if sqlerrm like '%type sommaire%' then raise notice 'g OK : %', sqlerrm;
     else raise notice 'g ECHEC (mauvais message) : %', sqlerrm; end if;
+  end;
+end $$;
+
+-- (j) atomicité : une classe valide + une classe d'une autre école => erreur, et l'ensemble précédent
+--     (classes n = 3 et 4 après f2) reste intact (même nombre, mêmes ids).
+do $$
+declare lid uuid; nb integer; avant uuid[]; apres uuid[];
+begin
+  select id into lid from ar_liens where token_hash = 'hash-test-sommaire-2';
+  select array_agg(classe_id order by classe_id) into avant from ar_liens_classes where lien_id = lid;
+  begin
+    perform ar_lien_definir_classes(lid, array[(select id from _cl where n = 5), (select classe_autre_ecole from _t)]);
+    raise notice 'j ECHEC : classe d''une autre école acceptée';
+  exception when others then
+    select count(*), array_agg(classe_id order by classe_id) into nb, apres from ar_liens_classes where lien_id = lid;
+    if nb = 2 and apres = avant then raise notice 'j OK : erreur « % », ensemble précédent intact (% lignes)', sqlerrm, nb;
+    else raise notice 'j ECHEC : ensemble modifié (% lignes)', nb; end if;
   end;
 end $$;
 

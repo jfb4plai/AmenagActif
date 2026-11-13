@@ -53,6 +53,19 @@ function Picker() {
     setValide(null); // changer de mode invalide l'aperçu déjà confirmé
   }
 
+  // Changer d'école ou d'année vide la sélection : le sommaire ne compte jamais de classe absente de la liste.
+  function changerEcole(id) {
+    setEcoleId(id);
+    setSelection(new Set());
+    setValide(null);
+  }
+
+  function changerAnnee(id) {
+    setAnneeId(id);
+    setSelection(new Set());
+    setValide(null);
+  }
+
   function changerNomGroupe(v) {
     setNomGroupe(v);
     setValide(null);
@@ -66,12 +79,12 @@ function Picker() {
         {ecoleUnique ? (
           <span className="plai-input inline-block bg-[color:var(--bg)]">{ecoleUnique.nom}</span>
         ) : (
-          <select className="plai-input" value={ecoleId} onChange={(e) => setEcoleId(e.target.value)}>
+          <select className="plai-input" aria-label="École" value={ecoleId} onChange={(e) => changerEcole(e.target.value)}>
             <option value="">École…</option>
             {ecoles.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
           </select>
         )}
-        <select className="plai-input" value={anneeId} onChange={(e) => setAnneeId(e.target.value)}>
+        <select className="plai-input" aria-label="Année scolaire" value={anneeId} onChange={(e) => changerAnnee(e.target.value)}>
           <option value="">Année…</option>
           {annees.map((a) => <option key={a.id} value={a.id}>{a.libelle}</option>)}
         </select>
@@ -90,10 +103,14 @@ function Picker() {
 
       {peutGrouper && selection.size >= 2 && (
         <div className="plai-card p-3 space-y-2 max-w-md no-print">
-          <p className="font-medium text-sm">Fiche groupée — {selection.size} classes sélectionnées</p>
-          <p className="text-xs text-[color:var(--text3)]">
-            Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…) : une seule fiche,
-            AU et AR fusionnés, sans doublon.{peutLier && " L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule."}
+          <p className="font-medium" style={{ fontSize: 16 }}>
+            {sommaire ? 'Sommaire' : 'Fiche groupée'} — {selection.size} classes sélectionnées
+          </p>
+          <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
+            {sommaire
+              ? "Un seul lien pour l'enseignant : chaque classe garde sa propre fiche, il choisit celle qu'il veut ouvrir."
+              : 'Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…) : une seule fiche, AU et AR fusionnés, sans doublon.'}
+            {peutLier && " L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule."}
           </p>
           {peutLier && <ChoixModeLien mode={mode} onChange={changerMode} nbClasses={selection.size} />}
           {!sommaire && (
