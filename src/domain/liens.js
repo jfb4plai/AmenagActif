@@ -42,3 +42,26 @@ export function dateFR(iso) {
   const d = new Date(iso.length === 10 ? `${iso}T12:00:00` : iso);
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' });
 }
+
+/** Référence lisible d'un super lien : SL-0042 ; '' si numéro absent. */
+export function referenceLien(numero) {
+  if (numero == null) return '';
+  return `SL-${String(numero).padStart(4, '0')}`;
+}
+
+const collateurNiveau = new Intl.Collator('fr', { numeric: true });
+
+/** Nouveau tableau trié : niveau (ordre naturel), niveau absent en dernier, puis nom. */
+export function trierClasses(classes) {
+  return [...classes].sort((a, b) => {
+    if (!a.niveau !== !b.niveau) return a.niveau ? -1 : 1;
+    const parNiveau = a.niveau ? collateurNiveau.compare(a.niveau, b.niveau) : 0;
+    return parNiveau || collateurNiveau.compare(a.nom, b.nom);
+  });
+}
+
+/** Nom lisible d'un sommaire de classes. */
+export function nomSommaire({ numero, cree_le, ecole, destinataire, nbClasses }) {
+  const nb = `${nbClasses} classe${nbClasses > 1 ? 's' : ''}`;
+  return `Super lien ${referenceLien(numero)} (créé le ${dateFR(cree_le)}) · ${titreEcole(ecole)} · ${destinataire} · ${nb}`;
+}
