@@ -279,6 +279,8 @@ git commit -m "feat(liens): migration sommaire (mode, numero, plafond par mode, 
 
 **Files:** aucun fichier de code. Compte rendu à JF.
 
+**Précondition (bloquante) : la migration `supabase/migrations/20261113_amenagactif_liens_sommaire.sql` est appliquée AVANT tout déploiement du code.** Le code lit les colonnes `mode` et `numero` (`COLONNES_LIEN`) : sans elles, PostgREST répond 42703 et tous les liens opaques, la passerelle profil-classe, `GET /api/liens` et la création de lien répondent 500. Ordre : migration, puis `supabase/tests/liens_sommaire.sql`, puis merge/déploiement.
+
 - [ ] **Step 1:** `npx vite build` et `npx vitest run` : citer les sorties.
 - [ ] **Step 2: Accord de JF** pour appliquer la migration (si ce n'est pas déjà fait en Task 1) ; jouer `supabase/tests/liens_sommaire.sql` et citer le résultat de chaque cas.
 - [ ] **Step 3: Parcours réel local** avec `vercel dev` (config `amenagactif-vercel` de `.claude/launch.json`, `NODE_OPTIONS=--use-system-ca` ; `npm run dev` ne lance pas `/api/*`), sur une école d'essai créée puis désactivée, jamais une vraie implantation : créer un sommaire de 3 classes ; ouvrir l'adresse en navigation privée ; ouvrir chaque fiche et revenir au sommaire ; retirer une classe, recharger, constater qu'elle a disparu et que l'ancienne adresse de sa fiche donne « Ce lien n'est plus actif » ; essayer de tout décocher (refusé) ; révoquer et constater le refus ; contrôler la largeur 375 px.

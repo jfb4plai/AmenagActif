@@ -1,3 +1,4 @@
+-- Si ce fichier est rejoué, rejouer ensuite 20261113_amenagactif_liens_sommaire.sql (le plafond de 10 et les droits de lecture de mode/numero y sont redéfinis).
 -- AménagActif — liens enseignants opaques, révocables (remplace le JWT 120 jours pour les nouveaux liens).
 -- À exécuter à la main dans le SQL Editor Supabase, APRÈS 20260924b et 20260924c. Idempotent.
 --

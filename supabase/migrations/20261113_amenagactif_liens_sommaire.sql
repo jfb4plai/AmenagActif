@@ -1,6 +1,11 @@
 -- AménagActif — super lien « sommaire de classes » : un lien peut porter un nombre quelconque de classes.
 -- À exécuter à la main dans le SQL Editor Supabase, APRÈS 20260924d. Idempotent.
 --
+-- À appliquer AVANT le déploiement du code ; sinon tous les liens opaques répondent 500.
+-- (Le code lit les colonnes mode et numero : sans elles, PostgREST répond 42703, d'où une erreur 500 sur
+-- tous les liens opaques, la passerelle profil-classe, GET /api/liens et la création de lien.)
+-- Ordre : migration, puis supabase/tests/liens_sommaire.sql, puis merge/déploiement.
+--
 -- Choix documentés :
 --  * ar_liens.mode : 'fusion' (comportement actuel, 10 classes au plus) ou 'sommaire' (pas de plafond).
 --    Les liens existants prennent 'fusion' (valeur par défaut) : aucun changement pour eux.

@@ -108,7 +108,7 @@ Aucune table ni colonne propre à un Pôle ; le Pôle se déduit de l'école (`e
 3. `npx vite build` et `npx vitest run` : sorties citées.
 4. Parcours réel sur une école d'essai (jamais une vraie implantation) : créer un sommaire de 3 classes ; ouvrir l'adresse en navigation privée (sans connexion) ; ouvrir chaque fiche et revenir au sommaire ; retirer une classe, recharger, constater qu'elle a disparu et que l'ancienne adresse de sa fiche renvoie « lien plus actif » ; révoquer, constater le refus.
 5. Largeur 375 px : aucun défilement horizontal sur le sommaire et le dialogue.
-6. Ordre de mise en ligne : **migration d'abord** (additive, défaut `fusion`, aucun effet sur l'existant), puis le code. Migration appliquée seulement avec l'accord explicite de JF.
+6. Ordre de mise en ligne : **migration d'abord** (additive, défaut `fusion`, aucun effet sur l'existant), puis le code. Migration appliquée seulement avec l'accord explicite de JF. L'ordre inverse casse l'existant : le code lit les colonnes `mode` et `numero`, absentes sans la migration, et tous les liens opaques (ainsi que la passerelle profil-classe, la liste et la création de liens) répondraient alors 500.
 
 ## Laissé au réalisateur
 
