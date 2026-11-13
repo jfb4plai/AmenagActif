@@ -6,6 +6,7 @@ import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche, piedFicheClasse } from '../lib/imprimerFiche.js';
 import { useRole } from '../lib/auth.jsx';
 import GenerateurLien from '../components/GenerateurLien.jsx';
+import ChoixModeLien from '../components/ChoixModeLien.jsx';
 import { useAConfirmerClasses } from '../hooks/useAConfirmer.js';
 import { messageAvantEnvoi } from '../domain/changementClasse.js';
 
@@ -21,7 +22,10 @@ function Picker() {
   const [valide, setValide] = useState(null); // { classeIds, nomGroupe } une fois "Valider" cliqué
   const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction' || role === 'agent_plai';
   const peutLier = role !== 'agent_plai'; // liens enseignants : référents et directions uniquement (cf. api/_lib/ficheData.js)
-  const apercu = useFicheGroupe(valide?.classeIds, valide?.nomGroupe);
+  const [mode, setMode] = useState('fusion'); // 'fusion' | 'sommaire' (sommaire : rôles pouvant lier, 2 classes ou plus)
+  const sommaire = peutLier && selection.size >= 2 && mode === 'sommaire';
+  // En mode sommaire, l'aperçu fusionné n'est pas chargé (ids indéfinis : requête désactivée).
+  const apercu = useFicheGroupe(sommaire ? undefined : valide?.classeIds, valide?.nomGroupe);
   const aConfirmer = useAConfirmerClasses(valide?.classeIds);
 
   useEffect(() => {
@@ -42,6 +46,11 @@ function Picker() {
       return n;
     });
     setValide(null); // toute modification de la sélection invalide l'aperçu déjà confirmé
+  }
+
+  function changerMode(m) {
+    setMode(m);
+    setValide(null); // changer de mode invalide l'aperçu déjà confirmé
   }
 
   function changerNomGroupe(v) {
@@ -86,17 +95,39 @@ function Picker() {
             Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…) : une seule fiche,
             AU et AR fusionnés, sans doublon.{peutLier && " L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule."}
           </p>
+          {peutLier && <ChoixModeLien mode={mode} onChange={changerMode} nbClasses={selection.size} />}
+          {!sommaire && (
           <label className="text-sm block">Nom du groupe (optionnel)
             <input className="plai-input w-full" placeholder="Atelier cuisine 3e" value={nomGroupe} onChange={(e) => changerNomGroupe(e.target.value)} />
             <span className="block text-xs text-[color:var(--text3)] font-normal">Affiché en titre de la fiche. Vide : les noms des classes sont concatenés (« 3LA + 3LB »).</span>
           </label>
+          )}
+          {!sommaire && (
           <button className="plai-btn" onClick={() => setValide({ classeIds: [...selection], nomGroupe: nomGroupe.trim() })}>
             Valider la sélection — voir la fiche
           </button>
+          )}
         </div>
       )}
 
-      {valide && (
+      {sommaire && (
+        <div className="space-y-3 max-w-xl no-print">
+          <div className="plai-card p-3 space-y-1" style={{ fontSize: 16 }}>
+            <p className="font-medium">Classes du sommaire ({selection.size})</p>
+            <ul className="list-disc pl-5">
+              {(grid?.classes ?? []).filter((c) => selection.has(c.id)).map((c) => <li key={c.id}>{c.nom}</li>)}
+            </ul>
+          </div>
+          <GenerateurLien
+            mode="sommaire"
+            classeIds={[...selection]}
+            libelle={`Aménagements à mettre en place — Vos classes (${ecoleUnique?.nom ?? ecoles.find((e) => e.id === ecoleId)?.nom ?? ''})`}
+            avertissement="Ce lien ouvre toutes les classes listées. Ne le transmettez qu'à l'enseignant concerné."
+          />
+        </div>
+      )}
+
+      {valide && !sommaire && (
         <div className="space-y-2 max-w-3xl">
           {apercu.isLoading && <p className="text-sm">Chargement de l'aperçu…</p>}
           {apercu.error && <p className="plai-error text-sm">{apercu.error.message}</p>}
