@@ -265,6 +265,146 @@ describe('profil-classe depuis un lien opaque', () => {
   });
 });
 
+describe('sommaire', () => {
+  const get = async (token, classe) => {
+    const r = reponse();
+    await ficheHandler({ method: 'GET', headers: {}, query: classe === undefined ? { token } : { token, classe } }, r);
+    return r;
+  };
+  const postFiche = async (body) => {
+    const r = reponse();
+    await ficheHandler({ method: 'POST', headers: auth, body: { destinataire: 'Mme Dupont, français', ...body } }, r);
+    return r;
+  };
+  async function creerSommaire(classeIds = [C1, C2], extra = {}) {
+    const r = await postFiche({ mode: 'sommaire', classeIds, ...extra });
+    expect(r.statusCode).toBe(200);
+    return r.body;
+  }
+  const idsMasse = (n) => Array.from({ length: n }, (_, i) => `22222222-2222-4222-8222-${String(i).padStart(12, '0')}`);
+  const inactif = (r) => {
+    expect(r.statusCode).toBe(410);
+    expect(r.body).toEqual({ error: MESSAGE_LIEN_INACTIF });
+    expect(r.headers['Cache-Control']).toBe('private, no-store');
+  };
+
+  beforeEach(() => {
+    tables.ar_classes.push(...idsMasse(25).map((id, i) => ({ id, nom: `C${i}`, ecole_id: 'ec1', annee_id: 'an1' })));
+    mocks.db = fakeDb(tables, { autoIncrement: { ar_liens: 'numero' }, users: { [U.ref1]: 'ref1@ecole.be' } });
+    mocks.db.auth.getUser = async () => ({ data: { user: { id: courant } }, error: null });
+  });
+
+  it('POST sommaire renvoie un numéro ; 22 classes acceptées ; fusion de 11 refusée ; mode inconnu → 400', async () => {
+    const a = await creerSommaire([C1, C2], { nomGroupe: 'ignoré' });
+    expect(a.numero).toBe(1);
+    expect(ligneLien(a.token).mode).toBe('sommaire');
+    expect(ligneLien(a.token).nom_groupe).toBeNull();
+    const b = await creerSommaire(idsMasse(22));
+    expect(b.numero).toBe(2);
+    expect(tables.ar_liens_classes.filter((c) => c.lien_id === ligneLien(b.token).id)).toHaveLength(22);
+
+    const trop = await postFiche({ mode: 'sommaire', classeIds: idsMasse(101) });
+    expect(trop.statusCode).toBe(400);
+    const fusion = await postFiche({ classeIds: idsMasse(11) });
+    expect(fusion.statusCode).toBe(400);
+    const fusionExplicite = await postFiche({ mode: 'fusion', classeIds: idsMasse(11) });
+    expect(fusionExplicite.statusCode).toBe(400);
+    const inconnu = await postFiche({ mode: 'xyz', classeIds: [C1] });
+    expect(inconnu.statusCode).toBe(400);
+    expect(inconnu.body.error).toBe('Mode inconnu.');
+    expect(tables.ar_liens).toHaveLength(2);
+    const f = await creerVia([C1]);
+    expect(f.numero).toBeUndefined();
+  });
+
+  it('GET sommaire : liste triée, numéro, école, pas de vm, no-store, loadClasseData jamais appelé, ouverture comptée', async () => {
+    tables.ar_classes.find((c) => c.id === C1).niveau = '3e';
+    tables.ar_classes.find((c) => c.id === C2).niveau = '2e';
+    const { token } = await creerSommaire([C1, C2]);
+    const r = await get(token);
+    expect(r.statusCode).toBe(200);
+    expect(r.headers['Cache-Control']).toBe('private, no-store');
+    expect(r.body.vm).toBeUndefined();
+    expect(r.body.sommaire.numero).toBe(1);
+    expect(r.body.sommaire.ecole).toMatchObject({ nom: 'Athénée A', implantation: 'Site 1' });
+    expect(r.body.sommaire.classes).toEqual([{ id: C2, nom: '3LB', niveau: '2e' }, { id: C1, nom: '3LA', niveau: '3e' }]);
+    expect(mocks.loadClasseData).not.toHaveBeenCalled();
+    expect(mocks.loadClassesData).not.toHaveBeenCalled();
+    expect(mocks.db.journal.rpc).toEqual([{ fn: 'ar_lien_compter_ouverture', args: { p_id: ligneLien(token).id } }]);
+  });
+
+  it('GET sommaire + classe du sommaire : vm et depuisSommaire, loadClasseData appelé avec C1', async () => {
+    const { token } = await creerSommaire([C1, C2]);
+    const r = await get(token, C1);
+    expect(r.statusCode).toBe(200);
+    expect(r.body.vm).toBeTruthy();
+    expect(r.body.depuisSommaire).toBe(true);
+    expect(r.body.sommaire).toBeUndefined();
+    expect(r.headers['Cache-Control']).toBe('private, no-store');
+    expect(mocks.loadClasseData).toHaveBeenCalledWith(C1);
+  });
+
+  it('classe hors sommaire, UUID inconnu et mauvais format donnent un corps identique à celui d\'un secret inconnu', async () => {
+    const { token } = await creerSommaire([C1, C2]);
+    const reference = await get('A'.repeat(43));
+    inactif(reference);
+    for (const classe of [C3, '99999999-9999-4999-8999-999999999999', 'pas-un-uuid', '', 'x'.repeat(500)]) {
+      const r = await get(token, classe);
+      inactif(r);
+      expect(r.body).toEqual(reference.body);
+    }
+    expect(mocks.loadClasseData).not.toHaveBeenCalled();
+  });
+
+  it('paramètre classe avec un lien fusion ou classe unique → 410 uniforme, loadClasseData non appelé', async () => {
+    const unique = await creerVia([C1]);
+    const groupe = await creerVia([C1, C2], { nomGroupe: 'Atelier' });
+    for (const { token } of [unique, groupe]) {
+      for (const classe of [C1, C2, C3, 'pas-un-uuid']) inactif(await get(token, classe));
+    }
+    expect(mocks.loadClasseData).not.toHaveBeenCalled();
+    expect(mocks.loadClassesData).not.toHaveBeenCalled();
+  });
+
+  it('sommaire révoqué, expiré : 410 sur le sommaire et sur la fiche', async () => {
+    const rev = await creerSommaire([C1, C2]);
+    ligneLien(rev.token).revoque_le = '2026-09-24T10:00:00Z';
+    inactif(await get(rev.token));
+    inactif(await get(rev.token, C1));
+    const exp = await creerSommaire([C1, C2]);
+    ligneLien(exp.token).expire_le = '2020-08-31';
+    inactif(await get(exp.token));
+    inactif(await get(exp.token, C1));
+    expect(mocks.loadClasseData).not.toHaveBeenCalled();
+  });
+
+  it('sommaire dont ar_liens_classes est vide : 200 avec classes []', async () => {
+    const { token } = await creerSommaire([C1, C2]);
+    tables.ar_liens_classes.splice(0, tables.ar_liens_classes.length);
+    const r = await get(token);
+    expect(r.statusCode).toBe(200);
+    expect(r.body.sommaire.classes).toEqual([]);
+    inactif(await get(token, C1));
+  });
+
+  it('profil-classe : le secret d\'un sommaire donne un jeton pour une de ses classes (expiration plafonnée à celle du lien) et est refusé (403) pour une classe hors sommaire', async () => {
+    const { token } = await creerSommaire([C1, C2]);
+    const dans5 = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+    ligneLien(token).expire_le = dans5;
+    const ok = reponse();
+    await profilHandler({ method: 'POST', headers: {}, body: { lien: token, classeId: C2 } }, ok);
+    expect(ok.statusCode).toBe(200);
+    expect(ok.body.expire_le).toBe(dans5);
+    const v = await verifyProfilToken(ok.body.token);
+    expect(v.lid).toBe(ligneLien(token).id);
+    expect(v.exp).toBeLessThanOrEqual(Math.floor(Date.parse(`${dans5}T23:59:59Z`) / 1000));
+    const ko = reponse();
+    await profilHandler({ method: 'POST', headers: {}, body: { lien: token, classeId: C3 } }, ko);
+    expect(ko.statusCode).toBe(403);
+    expect(ko.body.token).toBeUndefined();
+  });
+});
+
 describe('api/liens : liste et révocation', () => {
   const liste = async (query = {}) => {
     const r = reponse();

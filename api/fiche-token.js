@@ -1,7 +1,7 @@
 import { verifyFicheToken } from './_lib/jwt.js';
 import { authentifier } from './_lib/authUtilisateur.js';
-import { genererSecret, formeSecretValide, estFormeJwt, MAX_CLASSES_PAR_LIEN, MAX_DESTINATAIRE, MAX_NOM_GROUPE, MESSAGE_LIEN_INACTIF } from './_lib/liens.js';
-import { creerLien, trouverLienParSecret, lienActif, compterOuverture, ErreurLien } from './_lib/liensData.js';
+import { genererSecret, formeSecretValide, estFormeJwt, modeValide, MAX_CLASSES_PAR_LIEN, MAX_IDS_PAR_REQUETE, MAX_DESTINATAIRE, MAX_NOM_GROUPE, MESSAGE_LIEN_INACTIF } from './_lib/liens.js';
+import { creerLien, chargerSommaire, trouverLienParSecret, lienActif, compterOuverture, ErreurLien } from './_lib/liensData.js';
 import { loadClasseData, loadClassesData, verifierAccesClasses } from './_lib/ficheData.js';
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { computeFicheClasse } from '../src/domain/projections/ficheClasse.js';
@@ -16,10 +16,15 @@ export default async function handler(req, res) {
       const auth = await authentifier(db, req, 'fiche-token');
       if (!auth.user) { res.status(auth.statut).json({ error: auth.erreur }); return; }
 
-      const { classeId, classeIds, nomGroupe, destinataire: destinataireBrut } = req.body || {};
+      const { classeId, classeIds, nomGroupe, destinataire: destinataireBrut, mode: modeBrut } = req.body || {};
+      const mode = modeBrut === undefined || modeBrut === null ? 'fusion' : modeValide(modeBrut);
+      if (!mode) { res.status(400).json({ error: 'Mode inconnu.' }); return; }
       if (classeIds !== undefined && !Array.isArray(classeIds)) { res.status(400).json({ error: 'classeIds doit être une liste.' }); return; }
       const idsGroupe = Array.isArray(classeIds) ? classeIds.filter(Boolean) : [];
-      if (idsGroupe.length > MAX_CLASSES_PAR_LIEN) { res.status(400).json({ error: `Au plus ${MAX_CLASSES_PAR_LIEN} classes par fiche groupée.` }); return; }
+      // Plafond par mode, appliqué ici (la couche SQL ne limite pas à MAX_IDS_PAR_REQUETE).
+      if (mode === 'sommaire') {
+        if (idsGroupe.length > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Au plus ${MAX_IDS_PAR_REQUETE} classes par sommaire.` }); return; }
+      } else if (idsGroupe.length > MAX_CLASSES_PAR_LIEN) { res.status(400).json({ error: `Au plus ${MAX_CLASSES_PAR_LIEN} classes par fiche groupée.` }); return; }
       const cibles = idsGroupe.length > 0 ? idsGroupe : (classeId ? [classeId] : []);
       if (cibles.length === 0) { res.status(400).json({ error: 'classeId ou classeIds requis' }); return; }
       if (!cibles.every((id) => typeof id === 'string' && UUID_RE.test(id))) { res.status(400).json({ error: 'Identifiant de classe invalide.' }); return; }
@@ -37,17 +42,20 @@ export default async function handler(req, res) {
 
       // Lien opaque : seul le hash est stocké ; le secret n'est renvoyé qu'ici, une seule fois.
       const secret = genererSecret();
-      const { expire_le } = await creerLien(db, { userId: auth.user.id, classeIds: cibles, destinataire, nomGroupe: idsGroupe.length > 0 ? nomGroupe : null, secret });
+      const { expire_le, numero } = await creerLien(db, { userId: auth.user.id, classeIds: cibles, destinataire, nomGroupe: mode === 'fusion' && idsGroupe.length > 0 ? nomGroupe : null, secret, mode });
       const origin = req.headers.origin || `https://${req.headers.host || ''}`;
       res.setHeader('Cache-Control', 'private, no-store');
-      res.status(200).json({ token: secret, url: `${origin}/fiche/${secret}`, expire_le });
+      res.status(200).json({ token: secret, url: `${origin}/fiche/${secret}`, expire_le, ...(mode === 'sommaire' ? { numero } : {}) });
       return;
     }
 
     const token = req.query.token;
     if (!token || typeof token !== 'string') { res.status(400).json({ error: 'token requis' }); return; }
 
+    // `classe` n'a de sens que pour un sommaire ; présent (même vide ou répété) il est contrôlé strictement.
+    const classeDemandee = req.query.classe;
     let opaque = false;
+    let depuisSommaire = false;
     let cible; // { classeId } | { classeIds, nomGroupe }
     if (estFormeJwt(token)) {
       // Chemin de repli : anciens liens JWT (120 jours, sans révocation), valides jusqu'à leur échéance.
@@ -55,10 +63,26 @@ export default async function handler(req, res) {
     } else {
       // Lien opaque. Forme inconnue, inexistant, révoqué, expiré : MÊME réponse (pas d'oracle).
       const lien = formeSecretValide(token) ? await trouverLienParSecret(supabaseAdmin(), token) : null;
-      if (!lienActif(lien)) { res.status(410).json({ error: MESSAGE_LIEN_INACTIF }); return; }
+      // Tout refus : même corps, même en-tête (pas d'oracle sur l'existence du lien ni de la classe).
+      const refuser = () => { res.setHeader('Cache-Control', 'private, no-store'); res.status(410).json({ error: MESSAGE_LIEN_INACTIF }); };
+      if (!lienActif(lien)) { refuser(); return; }
+      if (lien.mode === 'sommaire') {
+        if (classeDemandee === undefined) {
+          await compterOuverture(supabaseAdmin(), lien.id);
+          const sommaire = await chargerSommaire(supabaseAdmin(), lien);
+          res.setHeader('Cache-Control', 'private, no-store');
+          res.status(200).json({ sommaire });
+          return;
+        }
+        if (typeof classeDemandee !== 'string' || !UUID_RE.test(classeDemandee) || !lien.classeIds.includes(classeDemandee)) { refuser(); return; }
+        depuisSommaire = true;
+        cible = { classeId: classeDemandee };
+      } else if (classeDemandee !== undefined) {
+        refuser(); return;
+      }
       opaque = true;
-      await compterOuverture(supabaseAdmin(), lien.id);
-      cible = lien.classeIds.length > 1 ? { classeIds: lien.classeIds, nomGroupe: lien.nom_groupe } : { classeId: lien.classeIds[0] };
+      if (!depuisSommaire) await compterOuverture(supabaseAdmin(), lien.id);
+      if (!depuisSommaire) cible = lien.classeIds.length > 1 ? { classeIds: lien.classeIds, nomGroupe: lien.nom_groupe } : { classeId: lien.classeIds[0] };
     }
 
     let vm;
@@ -74,7 +98,7 @@ export default async function handler(req, res) {
 
     // Lien opaque : pas de cache navigateur (la révocation doit être immédiate).
     res.setHeader('Cache-Control', opaque ? 'private, no-store' : 'private, max-age=60');
-    res.status(200).json({ vm });
+    res.status(200).json(depuisSommaire ? { vm, depuisSommaire: true } : { vm });
   } catch (e) {
     if (e instanceof ErreurLien) { res.status(e.statut).json({ error: e.message }); return; }
     // Jeton illisible/expiré (erreurs jose) : 401. Toute autre erreur (base, configuration) : 500.
