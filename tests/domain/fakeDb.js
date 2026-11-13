@@ -2,8 +2,10 @@
 // Respecte la liste de colonnes du select : une colonne non demandée (ex. token_hash) n'est jamais renvoyée.
 const EMBEDS = { ar_classes: 'classe_id', ar_annees: 'annee_id' };
 
-export function fakeDb(tables, { users = {}, sessionUser = null, rpc = () => ({ data: true, error: null }) } = {}) {
+// autoIncrement : { table: 'colonne' } numérote 1, 2, 3… à l'insertion (identity SQL), compteur par table.
+export function fakeDb(tables, { users = {}, sessionUser = null, rpc = () => ({ data: true, error: null }), autoIncrement = {} } = {}) {
   let seq = 0;
+  const compteurs = {};
   const journal = { inserts: [], updates: [], rpc: [] };
 
   function projeter(row, cols, tablesRef) {
@@ -26,7 +28,12 @@ export function fakeDb(tables, { users = {}, sessionUser = null, rpc = () => ({ 
     const executer = () => {
       const rows = (tables[nom] = tables[nom] ?? []);
       if (b.op === 'insert') {
-        const nouveaux = (Array.isArray(b.payload) ? b.payload : [b.payload]).map((r) => ({ id: `00000000-0000-4000-8000-${String(++seq).padStart(12, '0')}`, ...r }));
+        const nouveaux = (Array.isArray(b.payload) ? b.payload : [b.payload]).map((r) => {
+          const ligne = { id: `00000000-0000-4000-8000-${String(++seq).padStart(12, '0')}`, ...r };
+          const colAuto = autoIncrement[nom];
+          if (colAuto) ligne[colAuto] = compteurs[nom] = (compteurs[nom] ?? 0) + 1;
+          return ligne;
+        });
         rows.push(...nouveaux);
         journal.inserts.push({ table: nom, rows: nouveaux });
         const data = nouveaux.map((r) => projeter(r, b.cols, tables));

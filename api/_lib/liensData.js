@@ -1,6 +1,7 @@
 // Accès base des liens enseignants. Toujours appelé avec le client service role : les contrôles
 // d'autorisation sont faits par les appelants (api/*.js) avant d'arriver ici.
-import { hasherSecret, finAnneeScolaire, statutLien, aujourdhui, MAX_CLASSES_PAR_LIEN } from './liens.js';
+import { hasherSecret, finAnneeScolaire, statutLien, aujourdhui, MAX_CLASSES_PAR_LIEN, MAX_IDS_PAR_REQUETE } from './liens.js';
+import { trierClasses } from '../../src/domain/liens.js';
 
 /** Erreur métier : message affichable tel quel au client (aucune donnée personnelle). */
 export class ErreurLien extends Error {
@@ -13,11 +14,13 @@ export class ErreurLien extends Error {
 
 /**
  * Crée un lien pour des classes de la MÊME école et de la MÊME année. Ne stocke que le hash.
- * @returns {Promise<{ id: string, expire_le: string }>}
+ * mode 'fusion' : 1 à 10 classes ; mode 'sommaire' : 1 à MAX_IDS_PAR_REQUETE classes, sans nom de groupe.
+ * @returns {Promise<{ id: string, expire_le: string, numero: number }>}
  */
-export async function creerLien(db, { userId, classeIds, destinataire, nomGroupe, secret, now = new Date() }) {
+export async function creerLien(db, { userId, classeIds, destinataire, nomGroupe, secret, mode = 'fusion', now = new Date() }) {
   const ids = [...new Set(classeIds)];
-  if (ids.length === 0 || ids.length > MAX_CLASSES_PAR_LIEN) throw new ErreurLien(400, `Un lien regroupe de 1 à ${MAX_CLASSES_PAR_LIEN} classes.`);
+  const plafond = mode === 'sommaire' ? MAX_IDS_PAR_REQUETE : MAX_CLASSES_PAR_LIEN;
+  if (ids.length === 0 || ids.length > plafond) throw new ErreurLien(400, `Un lien regroupe de 1 à ${plafond} classes.`);
 
   const { data: classes, error } = await db.from('ar_classes').select('id, ecole_id, annee_id, ar_annees(libelle)').in('id', ids);
   if (error) throw error;
@@ -35,10 +38,11 @@ export async function creerLien(db, { userId, classeIds, destinataire, nomGroupe
     ecole_id: classes[0].ecole_id,
     annee_id: classes[0].annee_id,
     destinataire,
-    nom_groupe: nomGroupe || null,
+    mode,
+    nom_groupe: mode === 'sommaire' ? null : (nomGroupe || null),
     cree_par: userId,
     expire_le,
-  }).select('id').single();
+  }).select('id, numero').single();
   if (eIns) throw eIns;
 
   const { error: eCl } = await db.from('ar_liens_classes').insert(ids.map((classe_id) => ({ lien_id: lien.id, classe_id })));
@@ -46,10 +50,10 @@ export async function creerLien(db, { userId, classeIds, destinataire, nomGroupe
     await db.from('ar_liens').delete().eq('id', lien.id); // pas de lien orphelin sans classes
     throw eCl;
   }
-  return { id: lien.id, expire_le };
+  return { id: lien.id, expire_le, numero: lien.numero };
 }
 
-const COLONNES_LIEN = 'id, ecole_id, nom_groupe, expire_le, revoque_le';
+const COLONNES_LIEN = 'id, ecole_id, mode, numero, annee_id, nom_groupe, expire_le, revoque_le';
 
 async function classesDuLien(db, lienId) {
   const { data, error } = await db.from('ar_liens_classes').select('classe_id').eq('lien_id', lienId);
@@ -112,4 +116,34 @@ export async function revoquerLien(db, lienId, userId) {
     .eq('id', lienId).is('revoque_le', null).select('id');
   if (error) throw error;
   return data && data.length > 0 ? 'revoque' : 'deja';
+}
+
+/**
+ * Remplace les classes d'un lien (fonction SQL atomique). Les erreurs métier (P0001) deviennent des
+ * ErreurLien 400 au message français ; toute autre erreur est relancée.
+ */
+export async function definirClasses(db, lienId, classeIds) {
+  const { error } = await db.rpc('ar_lien_definir_classes', { p_lien: lienId, p_classes: classeIds });
+  if (error) {
+    if (error.code === 'P0001') throw new ErreurLien(400, error.message);
+    throw error;
+  }
+}
+
+/** Contenu d'un sommaire : école, numéro et classes (triées) du lien. Liste vide possible. */
+export async function chargerSommaire(db, lien) {
+  const { data: ecole, error: eEc } = await db.from('ar_ecoles').select('nom, implantation, implantation_nom').eq('id', lien.ecole_id).maybeSingle();
+  if (eEc) throw eEc;
+  const ids = lien.classeIds ?? await classesDuLien(db, lien.id);
+  let classes = [];
+  if (ids.length > 0) {
+    const { data, error } = await db.from('ar_classes').select('id, nom, niveau').in('id', ids);
+    if (error) throw error;
+    classes = trierClasses(data ?? []);
+  }
+  return {
+    numero: lien.numero,
+    ecole: { nom: ecole?.nom ?? '', implantation: ecole?.implantation ?? null, implantation_nom: ecole?.implantation_nom ?? null },
+    classes,
+  };
 }

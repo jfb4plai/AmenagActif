@@ -2,6 +2,7 @@
 import { randomBytes, createHash } from 'node:crypto';
 
 export const MAX_CLASSES_PAR_LIEN = 10;
+export const MAX_IDS_PAR_REQUETE = 100; // plafond d'un sommaire et de toute requête .in()
 export const MAX_DESTINATAIRE = 80;
 export const MAX_NOM_GROUPE = 60;
 export const ROLES_GESTION_LIENS = ['admin', 'referent_plai', 'direction']; // PAS agent_plai
@@ -74,14 +75,24 @@ export function plafonnerExpirationProfil(nowMs, jours, expireLe) {
   return Math.min(naturelle, limite);
 }
 
+/** Mode d'un lien : undefined → 'fusion' (compatibilité), valeur inconnue → null. */
+export function modeValide(v) {
+  if (v === undefined) return 'fusion';
+  return v === 'fusion' || v === 'sommaire' ? v : null;
+}
+
 /** Projection publique d'un lien : liste blanche de champs, token_hash n'en fait JAMAIS partie. */
-export function versLienPublic(row, { classes = [], creePar = null, now = new Date() } = {}) {
+export function versLienPublic(row, { classes = [], classeIds = [], creePar = null, now = new Date() } = {}) {
   return {
     id: row.id,
     ecole_id: row.ecole_id,
+    annee_id: row.annee_id ?? null,
+    mode: row.mode ?? 'fusion',
+    numero: row.numero ?? null,
     destinataire: row.destinataire,
     nom_groupe: row.nom_groupe ?? null,
     classes,
+    classe_ids: classeIds,
     cree_le: row.cree_le,
     cree_par: creePar,
     expire_le: row.expire_le,
