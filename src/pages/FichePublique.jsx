@@ -1,15 +1,19 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import SommairePublic from '../components/SommairePublic.jsx';
+
+const FOCUS = 'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]';
 import { useQuery } from '@tanstack/react-query';
 import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche, piedFicheClasse } from '../lib/imprimerFiche.js';
 
 export default function FichePublique() {
-  const { token } = useParams();
+  const { token, classeId } = useParams();
   const { data, isLoading, error } = useQuery({
-    queryKey: ['fiche-publique', token],
+    queryKey: ['fiche-publique', token, classeId ?? null],
     retry: false,
     queryFn: async () => {
-      const res = await fetch(`/api/fiche-token?token=${encodeURIComponent(token)}`);
+      const suffixe = classeId ? `&classe=${encodeURIComponent(classeId)}` : '';
+      const res = await fetch(`/api/fiche-token?token=${encodeURIComponent(token)}${suffixe}`);
       if (!res.ok) throw new Error(res.status >= 500 ? 'panne' : 'lien inactif');
       return res.json();
     },
@@ -19,6 +23,7 @@ export default function FichePublique() {
   if (error?.message === 'panne') {
     return <div className="plai-section text-base" role="alert"><p className="plai-error" style={{ fontSize: 16 }}>Le service est momentanément indisponible. Réessayez dans quelques minutes.</p></div>;
   }
+  if (!error && data?.sommaire) return <SommairePublic sommaire={data.sommaire} token={token} />;
   if (error || !data?.vm) {
     return (
       <div className="plai-section text-base" role="alert">
@@ -31,6 +36,11 @@ export default function FichePublique() {
   return (
     <div className="min-h-screen bg-[color:var(--bg)] py-6">
       <div className="text-center mb-3 no-print space-y-2">
+        {data.depuisSommaire && (
+          <p style={{ fontSize: 16 }}>
+            <Link to={`/fiche/${encodeURIComponent(token)}`} className={`text-teal underline no-print ${FOCUS}`}>Retour à mes classes</Link>
+          </p>
+        )}
         <p className="text-sm text-[color:var(--text3)]">Fiche en lecture seule — diffusion restreinte aux enseignants concernés.</p>
         <button className="plai-btn" onClick={() => imprimerFiche(piedFicheClasse(data.vm))}>Imprimer / Enregistrer en PDF</button>
         <p className="text-sm">
