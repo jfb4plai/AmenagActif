@@ -119,6 +119,7 @@ function Picker() {
             </ul>
           </div>
           <GenerateurLien
+            key={`sommaire:${[...selection].sort().join(',')}`}
             mode="sommaire"
             classeIds={[...selection]}
             libelle={`Aménagements à mettre en place — Vos classes (${ecoleUnique?.nom ?? ecoles.find((e) => e.id === ecoleId)?.nom ?? ''})`}

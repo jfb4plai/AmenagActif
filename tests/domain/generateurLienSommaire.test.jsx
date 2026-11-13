@@ -72,3 +72,18 @@ describe('GenerateurLien sans mode', () => {
     expect(screen.queryByText(/SL-/)).toBeNull();
   });
 });
+
+describe('GenerateurLien remonté sous une nouvelle clé (changement de sélection)', () => {
+  it('oublie le lien généré et le destinataire', async () => {
+    simulerFetch({ url: 'https://x.test/f/abc', expire_le: '2027-06-30', numero: 42 });
+    const rendu = (ids) => (
+      <GenerateurLien key={`sommaire:${[...ids].sort().join(",")}`} classeIds={ids} mode="sommaire" libelle="x" />
+    );
+    const { rerender } = render(rendu(['c1', 'c2']));
+    await soumettre();
+    await waitFor(() => expect(screen.getByText(/SL-0042/)).toBeTruthy());
+    rerender(rendu(['c1', 'c2', 'c3']));
+    expect(screen.queryByText(/SL-0042/)).toBeNull();
+    expect(screen.getByLabelText(/Destinataire du lien/).value).toBe('');
+  });
+});
