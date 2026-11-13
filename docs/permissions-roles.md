@@ -33,6 +33,10 @@ Deux gestes réservés à référent PLAI / direction / admin, appliqués **en b
 
 Techniquement, `ar_amenagements_classe` (table des AU cochés) autorise l'`INSERT` pour l'agent mais pas le `DELETE` ; `ar_classes` autorise l'`UPDATE` (ex. nom du référent PLAI classe) mais pas l'`INSERT`/`DELETE`. Le renommage (colonne `nom`) est verrouillé par le déclencheur `ar_classes_nom_controle` (migration `20261015`), qui exige `ar_can_editer_structure_ecole` ; le service_role et le SQL éditeur ne sont pas bloqués. L'interface affiche « Renommer la classe » seulement quand `peutEditerStructure` est vrai.
 
+## Liens enseignants et sommaires
+
+Les liens enseignants, sommaires de classes (« super liens » SL-xxxx) compris, relèvent des mêmes rôles : admin, référent PLAI et direction (`ROLES_GESTION_LIENS` dans `api/_lib/liens.js`). L'agent accompagnant ne crée, ne modifie et ne révoque aucun lien ni sommaire.
+
 ## Rattachement à une ou plusieurs écoles
 
 - **Référent PLAI / Direction / Agent accompagnant** : tous les trois peuvent être rattachés à **plusieurs écoles** (table `ar_profils_acces_ecoles`, relation many-to-many). Dans Administration, ça se gère par des « chips » (une par école) avec un sélecteur « + ajouter une école… ».
