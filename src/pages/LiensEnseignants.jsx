@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { useLiens, useRevoquerLien, useDefinirClasses } from '../hooks/useLiens.js';
+import { useLiens, useRevoquerLien, useDefinirClasses, useClassesDuLien } from '../hooks/useLiens.js';
 import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
 import DialogueClasses from '../components/DialogueClasses.jsx';
 import { filtrerLiens, grouperParEcole, titreEcole, dateFR, nomSommaire, LIBELLE_STATUT, JOURS_INACTIF_DEFAUT } from '../domain/liens.js';
@@ -40,29 +40,55 @@ function DialogueRevocation({ lien, enCours, erreur, onConfirmer, onAnnuler }) {
   );
 }
 
-/** Charge les classes de l'implantation pour l'année du lien, puis ouvre le dialogue. */
+/** Message affiché à la place du dialogue (chargement, erreur) : rendu visible et refermable. */
+function MessageClasses({ erreur, children, onFermer }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const b = ref.current;
+    if (!b) return;
+    if (typeof b.scrollIntoView === 'function') b.scrollIntoView({ block: 'center' });
+    b.focus();
+  }, []);
+  return (
+    <div className="plai-card p-4 flex flex-wrap items-center gap-3">
+      {erreur
+        ? <p role="alert" className="plai-error" style={{ fontSize: 16 }}>{children}</p>
+        : <p role="status" style={{ fontSize: 16 }}>{children}</p>}
+      <button ref={ref} type="button" className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={onFermer}>
+        Fermer
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Charge les classes de l'implantation pour l'année du lien et la liste de référence des classes du lien
+ * (lue en base, jamais lien.classe_ids qui peut être incomplet), puis ouvre le dialogue.
+ */
 function DialogueClassesConnecte({ lien, onFermer }) {
   const grille = useEcoleGrid(lien.ecole_id, lien.annee_id);
+  const actuelles = useClassesDuLien(lien.id);
   const definir = useDefinirClasses();
+  const classeIdsAvant = actuelles.data?.classe_ids;
   async function enregistrer(classeIds) {
     try {
-      await definir.mutateAsync({ lienId: lien.id, classeIds });
+      await definir.mutateAsync({ lienId: lien.id, classeIds, classeIdsAvant });
       onFermer();
     } catch {
       // l'erreur reste affichée dans la boîte de dialogue (definir.error)
     }
   }
-  if (grille.isLoading || !grille.data) {
-    return grille.error
-      ? <p role="alert" className="plai-error" style={{ fontSize: 16 }}>Impossible de charger les classes : {grille.error.message}</p>
-      : <p role="status">Chargement des classes…</p>;
+  if (grille.error) return <MessageClasses erreur onFermer={onFermer}>Impossible de charger les classes : {grille.error.message}</MessageClasses>;
+  if (actuelles.error) return <MessageClasses erreur onFermer={onFermer}>Impossible de charger les classes de ce sommaire : {actuelles.error.message}</MessageClasses>;
+  if (grille.isLoading || !grille.data || actuelles.isLoading || !Array.isArray(classeIdsAvant)) {
+    return <MessageClasses onFermer={onFermer}>Chargement des classes…</MessageClasses>;
   }
   if (grille.data.classes.length === 0) {
-    return <p role="alert" className="plai-error" style={{ fontSize: 16 }}>Impossible de charger les classes de cette implantation.</p>;
+    return <MessageClasses erreur onFermer={onFermer}>Impossible de charger les classes de cette implantation.</MessageClasses>;
   }
   return (
     <DialogueClasses
-      lien={lien} classes={grille.data.classes}
+      lien={lien} classes={grille.data.classes} classeIdsInitiales={classeIdsAvant}
       enCours={definir.isPending} erreur={definir.error?.message}
       onEnregistrer={enregistrer} onAnnuler={onFermer}
     />
@@ -268,7 +294,7 @@ export default function LiensEnseignants() {
         </details>
       ))}
 
-      {aModifier && <DialogueClassesConnecte lien={aModifier} onFermer={() => setAModifier(null)} />}
+      {aModifier && <DialogueClassesConnecte key={aModifier.id} lien={aModifier} onFermer={() => setAModifier(null)} />}
 
       {aRevoquer && (
         <DialogueRevocation

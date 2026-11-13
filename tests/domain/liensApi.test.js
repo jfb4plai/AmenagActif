@@ -670,6 +670,71 @@ describe('gestion des sommaires', () => {
     expect(classesDe(lienId)).toEqual([C2, C5].sort());
   });
 
+  describe('concurrence optimiste (classe_ids_avant)', () => {
+    const MESSAGE_409 = 'Ce sommaire a été modifié entre-temps. Fermez la fenêtre et rouvrez-la.';
+
+    it('classe_ids_avant différent des lignes actuelles : 409, aucun appel rpc, rien modifié', async () => {
+      for (const avant of [[C1], [C1, C2, C5], [C1, C5]]) {
+        const r = await definir({ lien_id: lienId, classe_ids: [C5], classe_ids_avant: avant });
+        expect(r.statusCode).toBe(409);
+        expect(r.body).toEqual({ error: MESSAGE_409 });
+      }
+      lignesIntactes();
+      expect(mocks.db.journal.rpc).toHaveLength(0);
+    });
+
+    it('classe_ids_avant égal (comme ensemble, ordre et doublons indifférents) : 200', async () => {
+      const r = await definir({ lien_id: lienId, classe_ids: [C2, C5], classe_ids_avant: [C2, C1, C2] });
+      expect(r.statusCode).toBe(200);
+      expect(classesDe(lienId)).toEqual([C2, C5].sort());
+    });
+
+    it('classe_ids_avant absent : comportement inchangé (compatibilité)', async () => {
+      const r = await definir({ lien_id: lienId, classe_ids: [C5] });
+      expect(r.statusCode).toBe(200);
+      expect(classesDe(lienId)).toEqual([C5]);
+    });
+
+    it('classe_ids_avant non tableau ou non UUID : 400, rien modifié', async () => {
+      expect((await definir({ lien_id: lienId, classe_ids: [C5], classe_ids_avant: 'x' })).statusCode).toBe(400);
+      expect((await definir({ lien_id: lienId, classe_ids: [C5], classe_ids_avant: ['pas-un-uuid'] })).statusCode).toBe(400);
+      lignesIntactes();
+      expect(mocks.db.journal.rpc).toHaveLength(0);
+    });
+  });
+
+  describe('lecture des classes d\'un lien (GET ?lien_id=)', () => {
+    it('renvoie toutes les classes du lien, sans purge ni autre donnée', async () => {
+      for (const qui of ['ref1', 'admin']) {
+        connecte(qui);
+        const r = await liste({ lien_id: lienId });
+        expect(r.statusCode).toBe(200);
+        expect(Object.keys(r.body).sort()).toEqual(['classe_ids', 'lien_id']);
+        expect(r.body.lien_id).toBe(lienId);
+        expect([...r.body.classe_ids].sort()).toEqual([C1, C2].sort());
+      }
+      expect(mocks.db.journal.updates).toHaveLength(0);
+    });
+
+    it('n\'est pas tronquée par la liste globale : 60 classes lues intégralement', async () => {
+      const ids = Array.from({ length: 60 }, (_, i) => `33333333-3333-4333-8333-${String(i).padStart(12, '0')}`);
+      tables.ar_liens_classes = tables.ar_liens_classes.filter((c) => c.lien_id !== lienId);
+      for (const classe_id of ids) tables.ar_liens_classes.push({ lien_id: lienId, classe_id });
+      const r = await liste({ lien_id: lienId });
+      expect(r.body.classe_ids).toHaveLength(60);
+    });
+
+    it('agent PLAI, référent d\'une autre école : 403 ; lien inconnu : 404 ; id invalide : 400', async () => {
+      connecte('agent');
+      expect((await liste({ lien_id: lienId })).statusCode).toBe(403);
+      connecte('ref2');
+      expect((await liste({ lien_id: lienId })).statusCode).toBe(403);
+      connecte('admin');
+      expect((await liste({ lien_id: INCONNU })).statusCode).toBe(404);
+      expect((await liste({ lien_id: 'pas-un-uuid' })).statusCode).toBe(400);
+    });
+  });
+
   it('erreur métier P0001 de la base : 400 avec son message ; autre erreur : 500 générique', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     mocks.db.rpc = () => Promise.resolve({ data: null, error: { code: 'P0001', message: 'Classe hors école.' } });

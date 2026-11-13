@@ -19,10 +19,15 @@ const donnees = {
   ],
 };
 LIENS_BASE.push(...donnees.liens);
+const definirMutate = vi.fn().mockResolvedValue({ ok: true });
+// Lecture de référence des classes d'un lien (GET /api/liens?lien_id=) : état configurable par test.
+const classesDuLien = { etat: null };
+const ETAT_CLASSES_DEFAUT = { data: { lien_id: 'l3', classe_ids: ['c1', 'c2'] }, isLoading: false, error: null };
 vi.mock('../../src/hooks/useLiens.js', () => ({
   useLiens: () => ({ data: donnees, isLoading: false, error: null }),
   useRevoquerLien: () => ({ mutateAsync: revoquerMutate, reset: vi.fn(), isPending: false, error: null }),
-  useDefinirClasses: () => ({ mutateAsync: vi.fn().mockResolvedValue({ ok: true }), reset: vi.fn(), isPending: false, error: null }),
+  useDefinirClasses: () => ({ mutateAsync: definirMutate, reset: vi.fn(), isPending: false, error: null }),
+  useClassesDuLien: () => classesDuLien.etat,
 }));
 const grille = { classes: [{ id: 'c1', nom: '1A', niveau: '1re' }, { id: 'c2', nom: '1B', niveau: '1re' }] };
 vi.mock('../../src/hooks/useEcoleGrid.js', () => ({
@@ -32,7 +37,7 @@ vi.mock('../../src/hooks/useEcoleGrid.js', () => ({
 const { default: LiensEnseignants } = await import('../../src/pages/LiensEnseignants.jsx');
 
 describe('page Liens enseignants', () => {
-  beforeEach(() => { donnees.liens = [...LIENS_BASE]; });
+  beforeEach(() => { donnees.liens = [...LIENS_BASE]; classesDuLien.etat = ETAT_CLASSES_DEFAUT; definirMutate.mockClear(); });
   const avecSommaires = () => { donnees.liens = [...SOMMAIRES, ...LIENS_BASE]; };
 
   it('sections par implantation, tableau avec en-têtes de colonnes, statut en toutes lettres', () => {
@@ -133,6 +138,81 @@ describe('page Liens enseignants', () => {
       expect(document.querySelector('dialog[aria-labelledby="dlgc-titre"]')).toBeNull();
       expect(screen.getByRole('alert').textContent).toBe('Impossible de charger les classes de cette implantation.');
     } finally { grille.classes = avant; }
+  });
+
+  describe('« Modifier les classes » : liste de référence lue à l\'ouverture', () => {
+    const CINQ = ['c1', 'c2', 'c3', 'c4', 'c5'];
+    const grilleCinq = CINQ.map((id, i) => ({ id, nom: `1${'ABCDE'[i]}`, niveau: '1re' }));
+    const avecGrille = (classes, fn) => {
+      const avant = grille.classes;
+      grille.classes = classes;
+      try { fn(); } finally { grille.classes = avant; }
+    };
+    const ouvrir = () => fireEvent.click(screen.getByRole('button', { name: /Modifier les classes/ }));
+    const dialogue = () => document.querySelector('dialog[aria-labelledby="dlgc-titre"]');
+
+    it('lien.classe_ids incomplet (2 sur 5) : cases cochées et envoi depuis la liste de référence (5)', () => {
+      avecSommaires();
+      classesDuLien.etat = { data: { lien_id: 'l3', classe_ids: CINQ }, isLoading: false, error: null };
+      avecGrille(grilleCinq, () => {
+        render(<LiensEnseignants />);
+        ouvrir();
+        for (const nom of ['1A', '1B', '1C', '1D', '1E']) expect(screen.getByRole('checkbox', { name: nom }).checked).toBe(true);
+        fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+        expect(definirMutate).toHaveBeenCalledTimes(1);
+        expect(definirMutate).toHaveBeenCalledWith({ lienId: 'l3', classeIds: CINQ, classeIdsAvant: CINQ });
+      });
+    });
+
+    it('classes de référence absentes de la grille : conservées dans l\'envoi', () => {
+      avecSommaires();
+      classesDuLien.etat = { data: { lien_id: 'l3', classe_ids: ['c1', 'c2', 'hors1', 'hors2', 'hors3'] }, isLoading: false, error: null };
+      render(<LiensEnseignants />);
+      ouvrir();
+      expect(screen.getByText(/3 classes de ce sommaire n'apparaissent pas/)).toBeTruthy();
+      fireEvent.click(screen.getByRole('checkbox', { name: '1B' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+      expect(definirMutate).toHaveBeenCalledWith({
+        lienId: 'l3', classeIds: ['c1', 'hors1', 'hors2', 'hors3'], classeIdsAvant: ['c1', 'c2', 'hors1', 'hors2', 'hors3'],
+      });
+    });
+
+    it('chargement de la liste de référence : message de chargement, pas de dialogue, bouton « Fermer »', () => {
+      avecSommaires();
+      classesDuLien.etat = { data: undefined, isLoading: true, error: null };
+      render(<LiensEnseignants />);
+      ouvrir();
+      expect(dialogue()).toBeNull();
+      expect(screen.getByRole('status').textContent).toBe('Chargement des classes…');
+      fireEvent.click(screen.getByRole('button', { name: 'Fermer' }));
+      expect(screen.queryByRole('status')).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Fermer' })).toBeNull();
+    });
+
+    it('erreur de la liste de référence : message d\'erreur, pas de dialogue, bouton « Fermer » qui reçoit le focus', () => {
+      avecSommaires();
+      classesDuLien.etat = { data: undefined, isLoading: false, error: new Error('Accès refusé.') };
+      render(<LiensEnseignants />);
+      ouvrir();
+      expect(dialogue()).toBeNull();
+      expect(screen.getByRole('alert').textContent).toBe('Impossible de charger les classes de ce sommaire : Accès refusé.');
+      const fermer = screen.getByRole('button', { name: 'Fermer' });
+      expect(fermer.style.fontSize).toBe('16px');
+      expect(document.activeElement).toBe(fermer);
+      fireEvent.click(fermer);
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
+
+    it('grille vide : le message d\'erreur se ferme avec « Fermer »', () => {
+      avecSommaires();
+      avecGrille([], () => {
+        render(<LiensEnseignants />);
+        ouvrir();
+        expect(screen.getByRole('alert')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Fermer' }));
+        expect(screen.queryByRole('alert')).toBeNull();
+      });
+    });
   });
 
   it('le paragraphe « Un lien, un seul enseignant » mentionne le sommaire', () => {

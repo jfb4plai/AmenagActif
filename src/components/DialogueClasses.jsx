@@ -5,10 +5,14 @@ const FOCUS = 'focus-visible:outline focus-visible:outline-[3px] focus-visible:o
 const SANS_NIVEAU = 'Sans niveau';
 export const MESSAGE_AU_MOINS_UNE = 'Un sommaire doit garder au moins une classe. Pour le supprimer, révoquez-le.';
 
-/** Modification des classes d'un sommaire. <dialog> natif : focus piégé, Échap annule. */
-export default function DialogueClasses({ lien, classes, enCours, erreur, onEnregistrer, onAnnuler }) {
+/**
+ * Modification des classes d'un sommaire. <dialog> natif : focus piégé, Échap annule.
+ * classeIdsInitiales : liste de référence lue en base à l'ouverture ; à défaut, lien.classe_ids (peut être incomplet).
+ */
+export default function DialogueClasses({ lien, classes, classeIdsInitiales, enCours, erreur, onEnregistrer, onAnnuler }) {
   const ref = useRef(null);
-  const [coches, setCoches] = useState(() => new Set(lien.classe_ids ?? []));
+  const [initiales] = useState(() => classeIdsInitiales ?? lien.classe_ids ?? []);
+  const [coches, setCoches] = useState(() => new Set(initiales));
   useEffect(() => {
     const d = ref.current;
     if (d && typeof d.showModal === 'function' && !d.open) d.showModal();
@@ -39,7 +43,7 @@ export default function DialogueClasses({ lien, classes, enCours, erreur, onEnre
   // Ordre d'affichage conservé pour l'envoi
   // Ids du lien absents de la liste affichée : jamais retirés (le serveur remplace l'ensemble).
   const visibles = new Set(classes.map((c) => c.id));
-  const conservees = (lien.classe_ids ?? []).filter((id) => !visibles.has(id));
+  const conservees = initiales.filter((id) => !visibles.has(id));
   const ids = [...trierClasses(classes).filter((c) => coches.has(c.id)).map((c) => c.id), ...conservees];
 
   return (

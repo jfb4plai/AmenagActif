@@ -70,6 +70,15 @@ describe('DialogueClasses', () => {
     expect(onAnnuler).toHaveBeenCalledTimes(2);
   });
 
+  it('classeIdsInitiales (liste de référence) prime sur lien.classe_ids incomplet', () => {
+    const onEnregistrer = vi.fn();
+    rendre({ lien: { id: 'l1', classe_ids: ['c1'] }, classeIdsInitiales: ['c1', 'c2', 'c3', 'zz9'], onEnregistrer });
+    expect(screen.getAllByRole('checkbox').every((c) => c.checked)).toBe(true);
+    expect(screen.getByText("1 classe de ce sommaire n'apparaît pas dans la liste ci-dessus ; elle est conservée.")).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+    expect(onEnregistrer).toHaveBeenCalledWith(['c1', 'c2', 'c3', 'zz9']);
+  });
+
   describe('classes du lien absentes de la liste affichée', () => {
     const avecAbsente = { id: 'l1', classe_ids: ['c1', 'zz9'] };
 

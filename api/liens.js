@@ -13,7 +13,10 @@ const COLONNES_PUBLIQUES = 'id, ecole_id, annee_id, mode, numero, destinataire, 
  *      liens des écoles gérables, sans token_hash. La purge est globale (toutes écoles) mais n'est lancée qu'après
  *      les contrôles d'accès.
  * POST { action: 'revoke', lien_id } : révocation idempotente, la ligne n'est pas supprimée (elle l'est à l'expiration).
- * POST { action: 'definir_classes', lien_id, classe_ids } : remplace les classes d'un sommaire actif (fonction SQL atomique).
+ * GET  ?lien_id=<uuid> : { lien_id, classe_ids } = toutes les classes de ce lien (source de référence du dialogue
+ *      « Modifier les classes » ; la liste globale ci-dessus peut être tronquée à 1000 lignes par PostgREST).
+ * POST { action: 'definir_classes', lien_id, classe_ids, classe_ids_avant? } : remplace les classes d'un sommaire actif
+ *      (fonction SQL atomique). Si classe_ids_avant est fourni et diffère des lignes actuelles : 409, rien modifié.
  * Les erreurs renvoyées au client sont génériques ; le journal serveur ne contient aucune donnée personnelle.
  */
 export default async function handler(req, res) {
@@ -28,6 +31,8 @@ export default async function handler(req, res) {
     const { data: liaisons, error: eLia } = await db.from('ar_profils_acces_ecoles').select('ecole_id').eq('user_id', auth.user.id);
     if (eLia) throw eLia;
     const ecolesLiees = (liaisons ?? []).map((l) => l.ecole_id);
+
+    if (req.method === 'GET' && req.query?.lien_id !== undefined) { await classesDuLien(db, req, res, profil, ecolesLiees); return; }
 
     if (req.method === 'GET') {
       const gerables = ecolesGerables(profil, ecolesLiees); // null = toutes (admin), [] = aucune
@@ -95,11 +100,32 @@ export default async function handler(req, res) {
   }
 }
 
+const listeUuidValide = (v) => Array.isArray(v) && v.every((c) => typeof c === 'string' && UUID_RE.test(c));
+
+/** Ids de classes d'un lien, lus sans troncature (un lien compte au plus 100 lignes). */
+async function lireClassesDuLien(db, lienId) {
+  const { data, error } = await db.from('ar_liens_classes').select('classe_id').eq('lien_id', lienId);
+  if (error) throw error;
+  return (data ?? []).map((r) => r.classe_id);
+}
+
+/** GET ?lien_id= : mêmes contrôles d'accès que la modification (école gérable, jamais agent_plai). */
+async function classesDuLien(db, req, res, profil, ecolesLiees) {
+  const lienId = req.query.lien_id;
+  if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
+  const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id').eq('id', lienId).maybeSingle();
+  if (error) throw error;
+  if (!lien) { res.status(404).json({ error: 'Lien introuvable.' }); return; }
+  if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
+  res.status(200).json({ lien_id: lienId, classe_ids: await lireClassesDuLien(db, lienId) });
+}
+
 /** Remplace les classes d'un sommaire. Les contrôles JS précèdent la fonction SQL (le plafond n'y est pas appliqué). */
 async function definirClassesAction(db, req, res, profil, ecolesLiees) {
-  const { lien_id: lienId, classe_ids: brut } = req.body || {};
+  const { lien_id: lienId, classe_ids: brut, classe_ids_avant: avant } = req.body || {};
   if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
-  if (!Array.isArray(brut) || brut.some((c) => typeof c !== 'string' || !UUID_RE.test(c))) { res.status(400).json({ error: 'classe_ids invalide.' }); return; }
+  if (!listeUuidValide(brut)) { res.status(400).json({ error: 'classe_ids invalide.' }); return; }
+  if (avant !== undefined && !listeUuidValide(avant)) { res.status(400).json({ error: 'classe_ids_avant invalide.' }); return; }
   const ids = [...new Set(brut)];
   if (ids.length === 0 || ids.length > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Un sommaire regroupe de 1 à ${MAX_IDS_PAR_REQUETE} classes.` }); return; }
 
@@ -109,6 +135,16 @@ async function definirClassesAction(db, req, res, profil, ecolesLiees) {
   if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
   if (lien.mode !== 'sommaire') { res.status(400).json({ error: 'Seul un sommaire peut être modifié.' }); return; }
   if (statutLien(lien) !== 'actif') { res.status(400).json({ error: "Ce lien n'est plus actif." }); return; }
+
+  if (avant !== undefined) {
+    // Concurrence optimiste : la liste lue à l'ouverture du dialogue doit encore être celle de la base.
+    const actuelles = new Set(await lireClassesDuLien(db, lienId));
+    const attendues = new Set(avant);
+    if (actuelles.size !== attendues.size || [...attendues].some((c) => !actuelles.has(c))) {
+      res.status(409).json({ error: 'Ce sommaire a été modifié entre-temps. Fermez la fenêtre et rouvrez-la.' });
+      return;
+    }
+  }
 
   const { data: classes, error: eCl } = await db.from('ar_classes').select('id, ecole_id, annee_id').in('id', ids);
   if (eCl) throw eCl;
