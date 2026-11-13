@@ -555,3 +555,130 @@ describe('api/liens : purge des liens expirés (après le 31 août)', () => {
     expect(ids()).toContain('expire-actif');
   });
 });
+
+describe('gestion des sommaires', () => {
+  const C5 = '11111111-1111-4111-8111-555555555555';
+  const INCONNU = '99999999-9999-4999-8999-999999999996';
+  let lienId;
+
+  const liste = async (query = {}) => {
+    const r = reponse();
+    await liensHandler({ method: 'GET', headers: auth, query }, r);
+    return r;
+  };
+  const definir = async (body) => {
+    const r = reponse();
+    await liensHandler({ method: 'POST', headers: auth, body: { action: 'definir_classes', ...body } }, r);
+    return r;
+  };
+  const classesDe = (id) => tables.ar_liens_classes.filter((c) => c.lien_id === id).map((c) => c.classe_id).sort();
+  const lignesIntactes = () => expect(classesDe(lienId)).toEqual([C1, C2].sort());
+
+  beforeEach(async () => {
+    tables.ar_classes.push({ id: C5, nom: '3LC', ecole_id: 'ec1', annee_id: 'an1' });
+    mocks.db = fakeDb(tables, {
+      autoIncrement: { ar_liens: 'numero' },
+      users: { [U.ref1]: 'ref1@ecole.be', [U.admin]: 'admin@plai.be' },
+      // Double de ar_lien_definir_classes : remplace les lignes du lien dans ar_liens_classes.
+      rpc: (fn, args) => {
+        if (fn !== 'ar_lien_definir_classes') return { data: null, error: null };
+        tables.ar_liens_classes = tables.ar_liens_classes.filter((c) => c.lien_id !== args.p_lien);
+        for (const classe_id of args.p_classes) tables.ar_liens_classes.push({ lien_id: args.p_lien, classe_id });
+        return { data: null, error: null };
+      },
+    });
+    mocks.db.auth.getUser = async () => ({ data: { user: { id: courant } }, error: null });
+    connecte('ref1');
+    const r = reponse();
+    await ficheHandler({ method: 'POST', headers: auth, body: { mode: 'sommaire', classeIds: [C1, C2], destinataire: 'Mme Dupont' } }, r);
+    expect(r.statusCode).toBe(200);
+    lienId = ligneLien(r.body.token).id;
+  });
+
+  it('la liste expose mode, numero, annee_id, classe_ids et jamais token_hash', async () => {
+    connecte('admin');
+    const r = await liste();
+    expect(r.statusCode).toBe(200);
+    expect(JSON.stringify(r.body)).not.toContain('token_hash');
+    const l = r.body.liens.find((x) => x.id === lienId);
+    expect(l).toMatchObject({ mode: 'sommaire', numero: 1, annee_id: 'an1' });
+    expect([...l.classe_ids].sort()).toEqual([C1, C2].sort());
+  });
+
+  it('definir_classes remplace l\'ensemble des classes (admin et référent de l\'école)', async () => {
+    connecte('ref1');
+    const r1 = await definir({ lien_id: lienId, classe_ids: [C2, C5] });
+    expect(r1.statusCode).toBe(200);
+    expect(r1.body).toEqual({ ok: true, nb: 2 });
+    expect(classesDe(lienId)).toEqual([C2, C5].sort());
+    connecte('admin');
+    const r2 = await definir({ lien_id: lienId, classe_ids: [C1] });
+    expect(r2.statusCode).toBe(200);
+    expect(r2.body).toEqual({ ok: true, nb: 1 });
+    expect(classesDe(lienId)).toEqual([C1]);
+  });
+
+  it('agent PLAI et référent d\'une autre école : 403, rien modifié', async () => {
+    connecte('agent');
+    expect((await definir({ lien_id: lienId, classe_ids: [C5] })).statusCode).toBe(403);
+    connecte('ref2');
+    expect((await definir({ lien_id: lienId, classe_ids: [C5] })).statusCode).toBe(403);
+    lignesIntactes();
+    expect(mocks.db.journal.rpc).toHaveLength(0);
+  });
+
+  it('lien fusion : 400 ; lien révoqué : 400', async () => {
+    const f = await creerVia([C1]);
+    const idFusion = ligneLien(f.token).id;
+    const r = await definir({ lien_id: idFusion, classe_ids: [C2] });
+    expect(r.statusCode).toBe(400);
+    expect(r.body.error).toBe('Seul un sommaire peut être modifié.');
+    tables.ar_liens.find((l) => l.id === lienId).revoque_le = '2026-09-24T10:00:00Z';
+    const r2 = await definir({ lien_id: lienId, classe_ids: [C5] });
+    expect(r2.statusCode).toBe(400);
+    expect(r2.body.error).toBe("Ce lien n'est plus actif.");
+    lignesIntactes();
+    expect(mocks.db.journal.rpc).toHaveLength(0);
+  });
+
+  it('classe d\'une autre école, d\'une autre année ou inexistante : 400, rien modifié', async () => {
+    for (const hors of [C3, C4, INCONNU]) {
+      expect((await definir({ lien_id: lienId, classe_ids: [C1, hors] })).statusCode).toBe(400);
+    }
+    lignesIntactes();
+    expect(mocks.db.journal.rpc).toHaveLength(0);
+  });
+
+  it('liste vide, plus de 100 classes, identifiants non UUID : 400 ; lien inconnu : 404', async () => {
+    expect((await definir({ lien_id: lienId, classe_ids: [] })).statusCode).toBe(400);
+    expect((await definir({ lien_id: lienId })).statusCode).toBe(400);
+    const trop = Array.from({ length: 101 }, (_, i) => `22222222-2222-4222-8222-${String(i).padStart(12, '0')}`);
+    expect((await definir({ lien_id: lienId, classe_ids: trop })).statusCode).toBe(400);
+    expect((await definir({ lien_id: 'pas-un-uuid', classe_ids: [C1] })).statusCode).toBe(400);
+    expect((await definir({ lien_id: lienId, classe_ids: ['pas-un-uuid'] })).statusCode).toBe(400);
+    expect((await definir({ lien_id: lienId, classe_ids: [C1, 42] })).statusCode).toBe(400);
+    expect((await definir({ lien_id: INCONNU, classe_ids: [C1] })).statusCode).toBe(404);
+    lignesIntactes();
+    expect(mocks.db.journal.rpc).toHaveLength(0);
+  });
+
+  it('doublons dans classe_ids : dédoublonnés, une seule ligne par classe', async () => {
+    const r = await definir({ lien_id: lienId, classe_ids: [C5, C5, C2, C5] });
+    expect(r.statusCode).toBe(200);
+    expect(r.body.nb).toBe(2);
+    expect(mocks.db.journal.rpc[0].args.p_classes).toEqual([C5, C2]);
+    expect(classesDe(lienId)).toEqual([C2, C5].sort());
+  });
+
+  it('erreur métier P0001 de la base : 400 avec son message ; autre erreur : 500 générique', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    mocks.db.rpc = () => Promise.resolve({ data: null, error: { code: 'P0001', message: 'Classe hors école.' } });
+    const r = await definir({ lien_id: lienId, classe_ids: [C5] });
+    expect(r.statusCode).toBe(400);
+    expect(r.body.error).toBe('Classe hors école.');
+    mocks.db.rpc = () => Promise.resolve({ data: null, error: { code: 'XX000', message: 'détail interne' } });
+    const r2 = await definir({ lien_id: lienId, classe_ids: [C5] });
+    expect(r2.statusCode).toBe(500);
+    expect(r2.body).toEqual({ error: 'Erreur serveur.' });
+  });
+});

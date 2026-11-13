@@ -1,11 +1,11 @@
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { authentifier } from './_lib/authUtilisateur.js';
-import { peutGererEcole, ecolesGerables, versLienPublic } from './_lib/liens.js';
-import { revoquerLien, purgerLiensExpires } from './_lib/liensData.js';
+import { peutGererEcole, ecolesGerables, versLienPublic, statutLien, MAX_IDS_PAR_REQUETE } from './_lib/liens.js';
+import { revoquerLien, purgerLiensExpires, definirClasses, ErreurLien } from './_lib/liensData.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LIMITE_LIENS = 1000;
-const COLONNES_PUBLIQUES = 'id, ecole_id, destinataire, nom_groupe, cree_par, cree_le, expire_le, revoque_le, derniere_ouverture, nb_ouvertures'; // jamais token_hash
+const COLONNES_PUBLIQUES = 'id, ecole_id, annee_id, mode, numero, destinataire, nom_groupe, cree_par, cree_le, expire_le, revoque_le, derniere_ouverture, nb_ouvertures'; // jamais token_hash
 
 /**
  * Gestion des liens enseignants (utilisateur connecté : admin, référent PLAI, direction ; jamais agent_plai).
@@ -13,6 +13,7 @@ const COLONNES_PUBLIQUES = 'id, ecole_id, destinataire, nom_groupe, cree_par, cr
  *      liens des écoles gérables, sans token_hash. La purge est globale (toutes écoles) mais n'est lancée qu'après
  *      les contrôles d'accès.
  * POST { action: 'revoke', lien_id } : révocation idempotente, la ligne n'est pas supprimée (elle l'est à l'expiration).
+ * POST { action: 'definir_classes', lien_id, classe_ids } : remplace les classes d'un sommaire actif (fonction SQL atomique).
  * Les erreurs renvoyées au client sont génériques ; le journal serveur ne contient aucune donnée personnelle.
  */
 export default async function handler(req, res) {
@@ -45,16 +46,20 @@ export default async function handler(req, res) {
       const ids = (rows ?? []).map((r) => r.id);
       const ecoleIds = gerables === null && !demandee ? null : (demandee ? [demandee] : gerables);
       const [{ data: liensClasses, error: eC }, { data: ecoles, error: eE }] = await Promise.all([
-        ids.length ? db.from('ar_liens_classes').select('lien_id, ar_classes(nom)').in('lien_id', ids) : { data: [], error: null },
+        ids.length ? db.from('ar_liens_classes').select('lien_id, classe_id, ar_classes(nom)').in('lien_id', ids) : { data: [], error: null },
         ecoleIds === null ? db.from('ar_ecoles').select('id, nom, implantation, implantation_nom').order('nom') : db.from('ar_ecoles').select('id, nom, implantation, implantation_nom').in('id', ecoleIds).order('nom'),
       ]);
       if (eC) throw eC;
       if (eE) throw eE;
       const classesParLien = new Map();
+      const idsParLien = new Map();
       for (const lc of liensClasses ?? []) {
         const l = classesParLien.get(lc.lien_id) ?? [];
         if (lc.ar_classes?.nom) l.push(lc.ar_classes.nom);
         classesParLien.set(lc.lien_id, l);
+        const i = idsParLien.get(lc.lien_id) ?? [];
+        if (lc.classe_id) i.push(lc.classe_id);
+        idsParLien.set(lc.lien_id, i);
       }
       // Seul l'e-mail du compte créateur est exposé (pas d'autre donnée du compte).
       const createurs = new Map();
@@ -63,13 +68,14 @@ export default async function handler(req, res) {
         createurs.set(uid, data?.user?.email ?? null);
       }
       const now = new Date();
-      const liens = (rows ?? []).map((r) => versLienPublic(r, { classes: (classesParLien.get(r.id) ?? []).sort(), creePar: createurs.get(r.cree_par) ?? null, now }));
+      const liens = (rows ?? []).map((r) => versLienPublic(r, { classes: (classesParLien.get(r.id) ?? []).sort(), classeIds: idsParLien.get(r.id) ?? [], creePar: createurs.get(r.cree_par) ?? null, now }));
       res.status(200).json({ ecoles: ecoles ?? [], liens });
       return;
     }
 
     if (req.method === 'POST') {
       const { action, lien_id: lienId } = req.body || {};
+      if (action === 'definir_classes') { await definirClassesAction(db, req, res, profil, ecolesLiees); return; }
       if (action !== 'revoke') { res.status(400).json({ error: 'Action inconnue.' }); return; }
       if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
       const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id').eq('id', lienId).maybeSingle();
@@ -83,7 +89,33 @@ export default async function handler(req, res) {
 
     res.status(405).json({ error: 'Méthode non supportée.' });
   } catch (e) {
+    if (e instanceof ErreurLien) { res.status(e.statut).json({ error: e.message }); return; }
     console.error('liens :', e?.code ?? e?.name ?? 'erreur');
     res.status(500).json({ error: 'Erreur serveur.' });
   }
+}
+
+/** Remplace les classes d'un sommaire. Les contrôles JS précèdent la fonction SQL (le plafond n'y est pas appliqué). */
+async function definirClassesAction(db, req, res, profil, ecolesLiees) {
+  const { lien_id: lienId, classe_ids: brut } = req.body || {};
+  if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
+  if (!Array.isArray(brut) || brut.some((c) => typeof c !== 'string' || !UUID_RE.test(c))) { res.status(400).json({ error: 'classe_ids invalide.' }); return; }
+  const ids = [...new Set(brut)];
+  if (ids.length === 0 || ids.length > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Un sommaire regroupe de 1 à ${MAX_IDS_PAR_REQUETE} classes.` }); return; }
+
+  const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id, annee_id, mode, expire_le, revoque_le').eq('id', lienId).maybeSingle();
+  if (error) throw error;
+  if (!lien) { res.status(404).json({ error: 'Lien introuvable.' }); return; }
+  if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
+  if (lien.mode !== 'sommaire') { res.status(400).json({ error: 'Seul un sommaire peut être modifié.' }); return; }
+  if (statutLien(lien) !== 'actif') { res.status(400).json({ error: "Ce lien n'est plus actif." }); return; }
+
+  const { data: classes, error: eCl } = await db.from('ar_classes').select('id, ecole_id, annee_id').in('id', ids);
+  if (eCl) throw eCl;
+  if (!classes || classes.length !== ids.length || classes.some((c) => c.ecole_id !== lien.ecole_id || c.annee_id !== lien.annee_id)) {
+    res.status(400).json({ error: "Toutes les classes doivent appartenir à l'école et à l'année scolaire du lien." });
+    return;
+  }
+  await definirClasses(db, lienId, ids);
+  res.status(200).json({ ok: true, nb: ids.length });
 }
