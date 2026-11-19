@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useEcoles } from '../../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../../hooks/useMembres.js';
+import { LIBELLE_ROLE } from '../../domain/droits.js';
+import { filtrerMembres, grouperMembres, compteurMembres } from '../../domain/membres.js';
 
-const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles nécessitant une école à l'invitation
 const ROLE_SCOPE_MULTI = ['referent_plai', 'direction', 'agent_plai', 'admin']; // rôles pouvant être rattachés à PLUSIEURS écoles ensuite (admin : rattachement facultatif, identification "Mon école" seulement — aucun droit supplémentaire)
 
@@ -14,18 +15,24 @@ export default function MembresTab() {
   const [f, setF] = useState({ email: '', nom: '', role: 'referent_plai', ecoleId: '' });
   const besoinEcole = (r) => ROLE_SCOPE.includes(r);
 
-  const admins = membres.filter((m) => m.role === 'admin');
-  const dansEcole = (m, ecoleId) => m.ecoleId === ecoleId || (m.ecoleIds ?? []).includes(ecoleId);
-  // Un admin rattaché (facultatif) à une école apparaît aussi dans son groupe — identification
-  // "personne de terrain" seulement, aucun droit supplémentaire (déjà global via ar_is_admin()).
-  const parEcole = ecoles.map((ecole) => ({ ecole, membres: membres.filter((m) => dansEcole(m, ecole.id)) }));
-  // Un admin sans école n'est pas une anomalie (c'est le cas normal) : on ne le signale pas ici.
-  const sansEcole = membres.filter((m) => m.role !== 'admin' && !m.ecoleId && (m.ecoleIds ?? []).length === 0);
+  const [filtre, setFiltre] = useState({ texte: '', role: '' });
+
+  // Le regroupement (admins, par école, sans école) se fait sur la liste FILTRÉE ;
+  // l'alerte « sans école » se calcule sur la liste NON filtrée : un filtre ne doit pas la masquer.
+  const filtres = filtrerMembres(membres, filtre);
+  const { admins, parEcole, sansEcole } = grouperMembres(filtres, ecoles);
+  const nbSansEcole = grouperMembres(membres, ecoles).sansEcole.length;
+  const filtreActif = Boolean(filtre.texte.trim() || filtre.role);
 
   return (
     <section className="space-y-3">
       <h2 className="font-semibold">Membres &amp; accès</h2>
-      <p className="text-sm text-[color:var(--text3)]">
+      <p className="text-base text-[color:var(--text3)]">
+        Chaque compte a un rôle qui détermine les écoles et les actions auxquelles il accède.
+      </p>
+      <details className="plai-card p-3">
+        <summary className="cursor-pointer font-medium">Comprendre les rôles</summary>
+      <p className="text-base text-[color:var(--text3)] mt-2">
         <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, sur une ou plusieurs écoles (classes, élèves, AR/AU, fiches).
         <strong>Agent accompagnant</strong> : sur une ou plusieurs écoles comme référent/direction, peut créer/modifier/supprimer des élèves et leurs AR, créer une classe, ajouter (pas retirer) un AU, et créer des liens enseignants (il ne révoque et ne modifie que les siens) — mais ne peut ni supprimer ni renommer une classe, ni changer un élève de classe, ni faire la reprise d'année.
         Le <strong>nom</strong> figure sur les fiches (colonnes « Référent(s) PLAI » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
@@ -33,6 +40,7 @@ export default function MembresTab() {
         Ci-dessous, la liste est groupée par implantation — un référent, une direction ou un agent multi-écoles apparaît dans chacune des siennes.
         Un <strong>administrateur</strong> peut aussi être rattaché à une ou plusieurs écoles (chips ci-dessous) — uniquement pour apparaître dans « Mon école » comme personne de terrain, aucun droit supplémentaire (il a déjà accès à tout).
       </p>
+      </details>
 
       <form
         className="plai-card p-3 flex flex-wrap gap-3 items-end"
@@ -74,6 +82,30 @@ export default function MembresTab() {
       {inviter.isError && <p className="plai-error">{inviter.error.message}</p>}
       {inviter.isSuccess && <p className="plai-success">Invitation envoyée.</p>}
 
+      {nbSansEcole > 0 && (
+        <p role="status" className="text-base font-semibold text-amber-700">
+          {nbSansEcole === 1 ? '1 compte sans école assignée (à corriger)' : `${nbSansEcole} comptes sans école assignée (à corriger)`}
+        </p>
+      )}
+      <div className="plai-card p-3 flex flex-wrap gap-3 items-start">
+        <div>
+          <label htmlFor="membres-recherche" className="block text-base">Rechercher un compte</label>
+          <input id="membres-recherche" className="plai-input block" type="search" placeholder="Adresse ou nom, ex. dubois"
+            aria-describedby="membres-recherche-aide" value={filtre.texte} onChange={(e) => setFiltre({ ...filtre, texte: e.target.value })} />
+          <p id="membres-recherche-aide" className="text-base text-[color:var(--text3)] max-w-xs">Tapez une partie de l'adresse ou du nom. Les groupes sans résultat disparaissent.</p>
+        </div>
+        <div>
+          <label htmlFor="membres-filtre-role" className="block text-base">Filtrer par rôle</label>
+          <select id="membres-filtre-role" className="plai-input block" aria-describedby="membres-filtre-role-aide"
+            value={filtre.role} onChange={(e) => setFiltre({ ...filtre, role: e.target.value })}>
+            <option value="">Tous les rôles</option>
+            {Object.entries(LIBELLE_ROLE).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+          <p id="membres-filtre-role-aide" className="text-base text-[color:var(--text3)] max-w-xs">Ne garde que les comptes ayant ce rôle.</p>
+        </div>
+        <p className="text-base self-center" aria-live="polite">{compteurMembres(filtres.length, membres.length)}</p>
+      </div>
+
       {isLoading ? (
         <p>Chargement…</p>
       ) : error ? (
@@ -88,7 +120,7 @@ export default function MembresTab() {
               </ul>
             </div>
           )}
-          {parEcole.map(({ ecole, membres: membresEcole }) => (
+          {parEcole.filter(({ membres: g }) => !filtreActif || g.length > 0).map(({ ecole, membres: membresEcole }) => (
             <div key={ecole.id} className="space-y-1">
               <h3 className="text-sm font-semibold text-[color:var(--text3)]">{ecole.nom}</h3>
               {membresEcole.length === 0 ? (
@@ -125,10 +157,10 @@ function MembreRow({ m, ecoles, besoinEcole, mut }) {
         onBlur={(e) => { if ((e.target.value || '') !== (m.nom || '')) changerRole.mutate({ userId: m.userId, role: m.role, nom: e.target.value }); }} />
       <select className="plai-input !w-auto !py-1 text-sm" value={m.role}
         onChange={(e) => changerRole.mutate({ userId: m.userId, role: e.target.value })}>
-        <option value="admin">{LABEL_ROLE.admin}</option>
-        <option value="referent_plai">{LABEL_ROLE.referent_plai}</option>
-        <option value="direction">{LABEL_ROLE.direction}</option>
-        <option value="agent_plai">{LABEL_ROLE.agent_plai}</option>
+        <option value="admin">{LIBELLE_ROLE.admin}</option>
+        <option value="referent_plai">{LIBELLE_ROLE.referent_plai}</option>
+        <option value="direction">{LIBELLE_ROLE.direction}</option>
+        <option value="agent_plai">{LIBELLE_ROLE.agent_plai}</option>
       </select>
       {ROLE_SCOPE_MULTI.includes(m.role) ? (
         <div className="flex flex-wrap gap-2 items-center">
