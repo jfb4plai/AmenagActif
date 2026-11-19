@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useEcoles } from '../../hooks/useAdmin.js';
 import { useMembres, useMembresMutations } from '../../hooks/useMembres.js';
 import { LIBELLE_ROLE } from '../../domain/droits.js';
+import NiveauxDirection from './NiveauxDirection.jsx';
 import { filtrerMembres, grouperMembres, compteurMembres } from '../../domain/membres.js';
 
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles nécessitant une école à l'invitation
@@ -36,7 +37,7 @@ export default function MembresTab() {
         <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, sur une ou plusieurs écoles (classes, élèves, AR/AU, fiches).
         <strong>Agent accompagnant</strong> : sur une ou plusieurs écoles comme référent/direction, peut créer/modifier/supprimer des élèves et leurs AR, créer une classe, ajouter (pas retirer) un AU, et créer des liens enseignants (il ne révoque et ne modifie que les siens) — mais ne peut ni supprimer ni renommer une classe, ni changer un élève de classe, ni faire la reprise d'année.
         Le <strong>nom</strong> figure sur les fiches (colonnes « Référent(s) PLAI » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
-        Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : le champ <strong>Niveaux</strong> limite l'apparition de chacun aux classes concernées — vide, il apparaît sur toutes.
+        Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : les cases <strong>Niveaux</strong> limitent l'apparition de chacun aux classes concernées — sans case cochée, il apparaît sur toutes.
         Ci-dessous, la liste est groupée par implantation — un référent, une direction ou un agent multi-écoles apparaît dans chacune des siennes.
         Un <strong>administrateur</strong> peut aussi être rattaché à une ou plusieurs écoles (chips ci-dessous) — uniquement pour apparaître dans « Mon école » comme personne de terrain, aucun droit supplémentaire (il a déjà accès à tout).
       </p>
@@ -150,6 +151,9 @@ export default function MembresTab() {
 function MembreRow({ m, ecoles, besoinEcole, mut }) {
   const { changerRole, retirer, assignerEcole, retirerEcole } = mut;
   const nomEcole = (id) => ecoles.find((e) => e.id === id)?.nom ?? '—';
+  // État de la dernière mutation, seulement si elle concerne ce membre.
+  const concerne = changerRole.variables?.userId === m.userId;
+  const etatNiveaux = !concerne ? 'idle' : changerRole.isPending ? 'enCours' : changerRole.isError ? 'erreur' : changerRole.isSuccess ? 'ok' : 'idle';
   return (
     <li className="px-3 py-2 flex flex-wrap items-center gap-3">
       <span className="min-w-[12rem]">{m.email}</span>
@@ -184,13 +188,8 @@ function MembreRow({ m, ecoles, besoinEcole, mut }) {
         </select>
       ) : null}
       {m.role === 'direction' && (
-        <input className="plai-input !py-1 text-sm w-48" defaultValue={(m.niveaux ?? []).join(',')}
-          placeholder="Niveaux (ex: 3e,4e,5e,6e), vide=tous"
-          onBlur={(e) => {
-            const niveaux = e.target.value.split(',').map((n) => n.trim()).filter(Boolean);
-            const actuel = (m.niveaux ?? []).join(',');
-            if (e.target.value.trim() !== actuel) changerRole.mutate({ userId: m.userId, role: m.role, niveaux });
-          }} />
+        <NiveauxDirection membre={m} enregistrement={etatNiveaux}
+          onChange={(niveaux) => changerRole.mutate({ userId: m.userId, role: m.role, niveaux })} />
       )}
       <button className="text-sm underline" onClick={() => { if (confirm(`Retirer l'accès de ${m.email} ?`)) retirer.mutate(m.userId); }}>retirer</button>
     </li>

@@ -19,7 +19,9 @@ vi.mock('../../src/hooks/useMembres.js', () => ({
 }));
 vi.mock('../../src/hooks/useAdmin.js', () => ({
   useEcoles: () => ({ data: [{ id: 'e1', nom: 'Athénée A' }, { id: 'e2', nom: 'Athénée B' }] }),
+  useAnneeActive: () => ({ id: 'a1', libelle: '2026-2027', active: true }),
 }));
+vi.mock('../../src/hooks/useNiveauxEcoles.js', () => ({ useNiveauxEcoles: () => ({ data: [] }) }));
 
 const { default: MembresTab } = await import('../../src/pages/administration/MembresTab.jsx');
 
