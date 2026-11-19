@@ -1,6 +1,6 @@
 # AménagActif — Rôles, permissions et autorisations
 
-Document de référence pour comprendre ce que voit et peut modifier chaque rôle, et comment un administrateur gère les comptes. Mis à jour au 2026-09-24 (Administration.jsx, App.jsx, Nav.jsx, MonEcole.jsx, SaisieEcole.jsx, BandeauAU.jsx, migrations Supabase `2026090x`–`20260924`).
+Document de référence pour comprendre ce que voit et peut modifier chaque rôle, et comment un administrateur gère les comptes. Mis à jour au 2026-11-19 (src/pages/administration/*, src/domain/droits.js, App.jsx, Nav.jsx, MonEcole.jsx, SaisieEcole.jsx, BandeauAU.jsx, api/_lib/liens.js, migrations Supabase `2026090x`–`20261121`).
 
 ## Les 4 rôles
 
@@ -9,33 +9,33 @@ Document de référence pour comprendre ce que voit et peut modifier chaque rôl
 | **Administrateur** (`admin`) | Toute l'application, toutes les écoles | Tout : membres, écoles, années, catalogue AU/AR, saisie de toute classe (y compris créer/supprimer une classe) | Tout | — (page Administration à la place) |
 | **Référent PLAI** (`referent_plai`) | Une ou plusieurs écoles | Saisie complète : classes (créer/renommer/modifier/supprimer), élèves, AU (ajouter/retirer), AR, commentaires | Fiches de ses écoles | Oui |
 | **Direction** (`direction`) | Une ou plusieurs écoles, niveaux éventuellement cochés (ils limitent seulement les fiches où son nom apparaît dans « PAR », pas l'accès) | Identique à Référent PLAI sur ses écoles | Fiches de ses écoles | Oui |
-| **Agent accompagnant** (`agent_plai`) | Une ou plusieurs écoles | Élèves (créer/modifier/supprimer), AR par élève, aménagements libres, nom du référent PLAI classe, AU (**ajouter seulement**). **Ne peut pas** créer, supprimer ni renommer une classe, ni retirer un AU déjà coché | Fiches de ses écoles | Oui (depuis le 2026-09-23) |
+| **Agent accompagnant** (`agent_plai`) | Une ou plusieurs écoles | Élèves (créer/modifier/supprimer), AR par élève, aménagements libres, nom du référent PLAI classe, AU (**ajouter seulement**), création de classe, création de liens enseignants. **Ne peut pas** supprimer ni renommer une classe, changer un élève de classe, retirer un AU déjà coché, ni faire la reprise d'année | Fiches de ses écoles | Oui (depuis le 2026-09-23) |
 
 Référent PLAI et Direction ont exactement les mêmes droits techniques ; la distinction est surtout d'usage (à qui s'adresser) et se reflète sur les fiches imprimées : le nom d'un Référent PLAI atterrit dans la colonne « Référent(s) PLAI », celui d'une Direction dans la colonne « PAR (Direction) ».
 
-L'agent accompagnant est un éditeur à parité presque complète avec référent/direction sur ses écoles — deux exceptions volontaires (voir « Restrictions de l'agent accompagnant » ci-dessous), pour que la structure des classes et le socle des AU restent sous la responsabilité du référent/direction/admin.
+L'agent accompagnant est un éditeur à parité presque complète avec référent/direction sur ses écoles — quelques exceptions volontaires (voir « Restrictions de l'agent accompagnant » ci-dessous), pour que la structure des classes et le socle des AU restent sous la responsabilité du référent/direction/admin.
 
 ## Ce que chaque rôle voit dans la navigation
 
 - **Saisie** : tous les rôles (admin, referent_plai, direction, agent_plai)
 - **Fiches** : tous les rôles
 - **Mon école** : tous sauf admin (l'admin a « Administration » à la place)
-- **Administration** : admin uniquement. Six onglets, chacun avec sa propre adresse : **Membres & accès** (`/administration/membres`), **Droits** (`/administration/droits`, lecture seule : tableau des droits de chaque rôle, non modifiable), **Écoles** (`/administration/ecoles`), **Années** (`/administration/annees`), **Catalogue** (`/administration/catalogue`), **Transmission** (`/administration/transmission`). L'adresse `/administration` seule redirige vers Membres & accès.
+- **Administration** : admin uniquement. Sept onglets, chacun avec sa propre adresse : **Membres & accès** (`/administration/membres`), **Droits** (`/administration/droits`, lecture seule : tableau des droits de chaque rôle, non modifiable), **Écoles** (`/administration/ecoles`), **Années** (`/administration/annees`), **Catalogue** (`/administration/catalogue`), **Transmission** (`/administration/transmission`), **Messages** (`/administration/messages`, administrateur seul : envoie par e-mail un message, un par personne, aux comptes des rôles cochés ; un envoi d'essai aux administrateurs est possible). L'adresse `/administration` seule redirige vers Membres & accès.
 
 Après connexion, tout éditeur (admin/référent/direction/agent) arrive sur `/saisie`.
 
 ## Restrictions de l'agent accompagnant
 
-Deux gestes réservés à référent PLAI / direction / admin, appliqués **en base (RLS)**, pas seulement à l'écran — un appel API direct échouerait pareil :
+Gestes réservés à référent PLAI / direction / admin, appliqués **en base (RLS)**, pas seulement à l'écran — un appel API direct échouerait pareil :
 
-1. **Pas de création, suppression ni renommage de classe.** Dans le sélecteur de classe, le bouton « + Nouvelle classe » n'apparaît pas pour l'agent ; s'il n'y a aucune classe dans l'école, un message l'invite à demander au référent/direction/admin d'en créer une.
+1. **Pas de suppression ni de renommage de classe, pas de changement de classe d'un élève, pas de reprise d'année.** L'agent peut en revanche **créer** une classe (migration `20261119b`) : le bouton « + Nouvelle classe » du sélecteur lui est ouvert.
 2. **Aménagements universels (AU) : peut ajouter, pas retirer.** Une case AU déjà cochée est grisée (désactivée) pour l'agent, avec un bandeau d'avertissement au-dessus du bloc AU expliquant la restriction. Il peut cocher un AU non encore actif.
 
-Techniquement, `ar_amenagements_classe` (table des AU cochés) autorise l'`INSERT` pour l'agent mais pas le `DELETE` ; `ar_classes` autorise l'`UPDATE` (ex. nom du référent PLAI classe) mais pas l'`INSERT`/`DELETE`. Le renommage (colonne `nom`) est verrouillé par le déclencheur `ar_classes_nom_controle` (migration `20261015`), qui exige `ar_can_editer_structure_ecole` ; le service_role et le SQL éditeur ne sont pas bloqués. L'interface affiche « Renommer la classe » seulement quand `peutEditerStructure` est vrai.
+Techniquement, `ar_amenagements_classe` (table des AU cochés) autorise l'`INSERT` pour l'agent mais pas le `DELETE` ; `ar_classes` autorise l'`INSERT` (migration `20261119b`) et l'`UPDATE` (ex. nom du référent PLAI classe) mais pas le `DELETE`. Le renommage (colonne `nom`) est verrouillé par le déclencheur `ar_classes_nom_controle` (migration `20261015`), qui exige `ar_can_editer_structure_ecole` ; le service_role et le SQL éditeur ne sont pas bloqués. L'interface affiche « Renommer la classe » seulement quand `peutEditerStructure` est vrai.
 
 ## Liens enseignants et sommaires
 
-Les liens enseignants, sommaires de classes (« super liens » SL-xxxx) compris, relèvent des mêmes rôles : admin, référent PLAI et direction (`ROLES_GESTION_LIENS` dans `api/_lib/liens.js`). L'agent accompagnant ne crée, ne modifie et ne révoque aucun lien ni sommaire.
+Les liens enseignants, sommaires de classes (« super liens » SL-xxxx) compris, relèvent des quatre rôles éditeurs (`ROLES_GESTION_LIENS` dans `api/_lib/liens.js`). L'agent accompagnant peut en créer pour les classes de ses écoles ; il ne modifie et ne révoque que les liens qu'il a lui-même créés (`peutAgirSurLien`, `api/_lib/liens.js`).
 
 ## Rattachement à une ou plusieurs écoles
 
