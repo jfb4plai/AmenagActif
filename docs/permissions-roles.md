@@ -20,7 +20,7 @@ L'agent accompagnant est un éditeur à parité presque complète avec référen
 - **Saisie** : tous les rôles (admin, referent_plai, direction, agent_plai)
 - **Fiches** : tous les rôles
 - **Mon école** : tous sauf admin (l'admin a « Administration » à la place)
-- **Administration** : admin uniquement
+- **Administration** : admin uniquement. Six onglets, chacun avec sa propre adresse : **Membres & accès** (`/administration/membres`), **Droits** (`/administration/droits`, lecture seule : tableau des droits de chaque rôle, non modifiable), **Écoles** (`/administration/ecoles`), **Années** (`/administration/annees`), **Catalogue** (`/administration/catalogue`), **Transmission** (`/administration/transmission`). L'adresse `/administration` seule redirige vers Membres & accès.
 
 Après connexion, tout éditeur (admin/référent/direction/agent) arrive sur `/saisie`.
 
@@ -44,7 +44,7 @@ Les liens enseignants, sommaires de classes (« super liens » SL-xxxx) compris,
 
 ## Vue par école
 
-- **Administration → Membres & accès** : la liste est **groupée par implantation** (une section « Administrateurs », puis une section par école active, triées comme le sélecteur d'écoles). Un référent, une direction ou un agent multi-écoles apparaît dans chacune des siennes — c'est voulu, l'admin édite « par implantation ». Une section « Sans école assignée » apparaît si un profil scope n'a ni `ecole_id` ni entrée dans `ar_profils_acces_ecoles` (état anormal à corriger).
+- **Administration → Membres & accès** (`/administration/membres`) : un champ « Rechercher un compte » (adresse ou nom) et un filtre « Filtrer par rôle » réduisent la liste ; les groupes sans résultat disparaissent et un compteur indique le nombre de comptes affichés. La liste est **groupée par implantation** (une section « Administrateurs », puis une section par école active, triées comme le sélecteur d'écoles). Un référent, une direction ou un agent multi-écoles apparaît dans chacune des siennes — c'est voulu, l'admin édite « par implantation ». Une section « Sans école assignée » apparaît si un profil scope n'a ni `ecole_id` ni entrée dans `ar_profils_acces_ecoles` (état anormal à corriger).
 - **Mon école** (vue non-admin) : chaque référent/direction/agent accompagnant voit l'équipe complète de sa (ses) école(s), agents accompagnants inclus. Objectif : que les référents/directions puissent repérer un changement nécessaire (agent parti, mal orthographié…) et le signaler à l'administrateur, qui édite dans Administration.
 
 ## Vue par accompagnant
@@ -53,12 +53,12 @@ Pas de fiche individuelle par accompagnant. Dans Administration → Membres & ac
 
 ## Comment éditer un membre existant
 
-Tout se passe en ligne, dans **Administration → Membres & accès**, sans bouton « Enregistrer » séparé — chaque champ s'enregistre à sa propre sortie de focus ou sélection :
+Tout se passe en ligne, dans **Administration → Membres & accès** (`/administration/membres`), sans bouton « Enregistrer » séparé — chaque champ s'enregistre à sa propre sortie de focus ou sélection :
 
 1. **Nom** : champ texte, sauvegarde au `onBlur` (clic ailleurs).
 2. **Rôle** : liste déroulante, changement immédiat.
 3. **École(s)** : chips + « ajouter une école » / « retirer » par chip (tous les rôles rattachés à une école).
-4. **Niveaux** (Direction uniquement) : champ texte libre séparé par virgules, sauvegarde au `onBlur`.
+4. **Niveaux** (Direction uniquement) : cases à cocher, enregistrées à chaque clic. Les niveaux cochés limitent seulement les fiches sur lesquelles le nom de la direction apparaît dans la colonne « PAR » ; ce n'est pas un droit d'accès.
 5. **Retirer** : bouton avec confirmation — révoque complètement l'accès (le compte reste dans Supabase Auth mais n'a plus de profil `ar_profils_acces`, donc plus aucun accès à l'application).
 
 Il n'y a pas de suppression de compte au sens strict (Supabase Auth) depuis cette interface — seulement une révocation d'accès applicatif.

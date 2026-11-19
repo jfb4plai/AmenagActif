@@ -96,7 +96,7 @@ export default function Reprise() {
             <option value="">— choisir —</option>
             {annees.map((a) => <option key={a.id} value={a.id}>{a.libelle}</option>)}
           </select>
-          <p className="text-xs text-[color:var(--text3)]">La nouvelle année (créez-la d'abord dans Administration si elle manque).</p>
+          <p className="text-xs text-[color:var(--text3)]">La nouvelle année (créez-la d'abord dans <Link to="/administration/annees" className="underline">Administration</Link> si elle manque).</p>
         </div>
       </div>
 

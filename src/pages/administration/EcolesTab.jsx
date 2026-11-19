@@ -9,7 +9,7 @@ export default function EcolesTab() {
   return (
     <section className="space-y-3">
       <h2 className="font-semibold">Écoles / implantations</h2>
-      <p className="text-sm text-[color:var(--text3)]">Les 11 implantations secondaires accompagnées. Désactiver une école la retire des sélecteurs (saisie, fiches) sans supprimer ses données ; réactivable à tout moment ci-dessous.</p>
+      <p className="text-sm text-[color:var(--text3)]">Les implantations accompagnées. Désactiver une école la retire des sélecteurs (saisie, fiches) sans supprimer ses données ; réactivable à tout moment ci-dessous.</p>
       <form
         className="flex flex-wrap gap-2 items-end"
         onSubmit={(e) => { e.preventDefault(); if (f.nom.trim()) { ajouterEcole.mutate(f); setF({ nom: '', implantation: '', implantationNom: '' }); } }}

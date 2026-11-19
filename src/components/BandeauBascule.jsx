@@ -14,7 +14,7 @@ export default function BandeauBascule() {
       {active
         ? <>L'année active est <strong>{active.libelle}</strong>. Créez et activez l'année suivante dans </>
         : <>Aucune année scolaire active. Créez-en une dans </>}
-      <Link to="/administration" className="underline font-semibold">Administration</Link>.
+      <Link to="/administration/annees" className="underline font-semibold">Administration</Link>.
     </div>
   );
 }
