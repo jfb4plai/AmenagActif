@@ -8,7 +8,7 @@ Document de référence pour comprendre ce que voit et peut modifier chaque rôl
 |---|---|---|---|---|
 | **Administrateur** (`admin`) | Toute l'application, toutes les écoles | Tout : membres, écoles, années, catalogue AU/AR, saisie de toute classe (y compris créer/supprimer une classe) | Tout | — (page Administration à la place) |
 | **Référent PLAI** (`referent_plai`) | Une ou plusieurs écoles | Saisie complète : classes (créer/renommer/modifier/supprimer), élèves, AU (ajouter/retirer), AR, commentaires | Fiches de ses écoles | Oui |
-| **Direction** (`direction`) | Une ou plusieurs écoles, éventuellement limitée à certains niveaux | Identique à Référent PLAI sur ses écoles | Fiches de ses écoles | Oui |
+| **Direction** (`direction`) | Une ou plusieurs écoles, niveaux éventuellement cochés (ils limitent seulement les fiches où son nom apparaît dans « PAR », pas l'accès) | Identique à Référent PLAI sur ses écoles | Fiches de ses écoles | Oui |
 | **Agent accompagnant** (`agent_plai`) | Une ou plusieurs écoles | Élèves (créer/modifier/supprimer), AR par élève, aménagements libres, nom du référent PLAI classe, AU (**ajouter seulement**). **Ne peut pas** créer, supprimer ni renommer une classe, ni retirer un AU déjà coché | Fiches de ses écoles | Oui (depuis le 2026-09-23) |
 
 Référent PLAI et Direction ont exactement les mêmes droits techniques ; la distinction est surtout d'usage (à qui s'adresser) et se reflète sur les fiches imprimées : le nom d'un Référent PLAI atterrit dans la colonne « Référent(s) PLAI », celui d'une Direction dans la colonne « PAR (Direction) ».
@@ -40,7 +40,7 @@ Les liens enseignants, sommaires de classes (« super liens » SL-xxxx) compris,
 ## Rattachement à une ou plusieurs écoles
 
 - **Référent PLAI / Direction / Agent accompagnant** : tous les trois peuvent être rattachés à **plusieurs écoles** (table `ar_profils_acces_ecoles`, relation many-to-many). Dans Administration, ça se gère par des « chips » (une par école) avec un sélecteur « + ajouter une école… ».
-- **Direction** a un champ optionnel **Niveaux** (ex. `3e,4e,5e,6e`) qui limite son apparition aux classes de ces niveaux sur les fiches — vide, elle apparaît sur toutes les classes de l'école.
+- **Direction** a des cases à cocher **Niveaux** (une par niveau de classe de ses écoles) qui limitent l'apparition de son nom dans la colonne « PAR » des fiches de ces niveaux ; aucune case cochée : son nom apparaît sur toutes les classes de l'école. Ce n'est pas un droit d'accès.
 
 ## Vue par école
 
@@ -65,7 +65,7 @@ Il n'y a pas de suppression de compte au sens strict (Supabase Auth) depuis cett
 
 ## Créer un nouveau membre
 
-Formulaire en haut de la section « Membres & accès » : e-mail, nom (celui affiché sur les fiches), rôle, école de départ. Le bouton **Inviter** envoie un e-mail Supabase avec un lien pour définir le mot de passe — la personne n'existe dans `ar_profils_acces` qu'après avoir cliqué ce lien et créé son compte. Le domaine d'envoi étant récent, le mail peut finir en indésirables (Outlook surtout) : prévenir la personne par un autre canal.
+Formulaire en haut de l'onglet « Membres & accès » : e-mail, nom (celui affiché sur les fiches), rôle, école de départ. Le bouton **Inviter** envoie un e-mail Supabase avec un lien pour définir le mot de passe — la personne n'existe dans `ar_profils_acces` qu'après avoir cliqué ce lien et créé son compte. Le domaine d'envoi étant récent, le mail peut finir en indésirables (Outlook surtout) : prévenir la personne par un autre canal.
 
 ## Sécurité (RLS Supabase)
 
