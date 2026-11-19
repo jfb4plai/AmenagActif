@@ -28,6 +28,7 @@ vi.mock('../../src/hooks/useMembres.js', () => ({
   }),
 }));
 vi.mock('../../src/lib/auth.jsx', () => ({ useAuth: () => ({ session: null }) }));
+vi.mock('../../src/components/AnnoncesAdmin.jsx', () => ({ default: () => null })); // section Messages : hors sujet ici, son propre fichier de tests
 
 import Administration from '../../src/pages/Administration.jsx';
 import CatalogueAmenagements from '../../src/pages/CatalogueAmenagements.jsx';

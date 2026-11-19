@@ -7,6 +7,7 @@ import {
 import { useMembres, useMembresMutations } from '../hooks/useMembres.js';
 import { traverseDispositif } from '../domain/dispositifs.js';
 import RenommerChapitre from '../components/RenommerChapitre.jsx';
+import AnnoncesAdmin from '../components/AnnoncesAdmin.jsx';
 
 const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
 const ROLE_SCOPE = ['referent_plai', 'direction', 'agent_plai']; // rôles nécessitant une école à l'invitation
@@ -17,6 +18,7 @@ export default function Administration() {
     <div className="plai-section space-y-8 max-w-4xl px-4">
       <h1 className="text-xl font-semibold">Administration</h1>
       <SectionMembres />
+      <AnnoncesAdmin />
       <SectionAnnees />
       <SectionEcoles />
       <SectionCatalogue />
