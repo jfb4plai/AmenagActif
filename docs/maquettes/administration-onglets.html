@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette Administration AménagActif</title>
+<style>
+:root{--text-primary:#1f1f1c;--text-secondary:#5f5e5a;--border:#d3d1c7;--surface-1:#f4f2ec;--surface-2:#ffffff;--page:#faf9f7}
+@media (prefers-color-scheme:dark){:root{--text-primary:#f1efe8;--text-secondary:#b4b2a9;--border:#4a4945;--surface-1:#2c2c2a;--surface-2:#1f1f1d;--page:#161615}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text-primary);font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+h1,h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400}
+h1{font-size:26px;margin:0 0 8px}
+h2{font-size:20px;margin:0 0 4px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+a{color:#0f6e56}
+input[type=text],input[type=search],select{font:inherit;font-size:15px;min-height:38px;padding:4px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-primary)}
+button{font:inherit;font-size:15px;min-height:38px;padding:4px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-primary);cursor:pointer}
+button:hover{background:var(--surface-1)}
+:focus-visible{outline:3px solid #f97316;outline-offset:2px}
+.intro{background:#fff3e6;border:1px solid #f97316;color:#9a3412;border-radius:10px;padding:10px 14px;margin:0 0 12px;font-size:15px}
+@media (prefers-color-scheme:dark){.intro{background:#3a2412;color:#fdba74}}
+.mk{font-size:15px;line-height:1.5}
+.mk .tab{border:none;border-bottom:3px solid transparent;border-radius:0;background:transparent;padding:8px 12px;font-size:15px;color:var(--text-secondary)}
+.mk .tab:hover{background:var(--surface-1)}
+.mk .tab.on{border-bottom-color:#0f6e56;color:var(--text-primary);font-weight:700}
+.mk .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;margin-right:6px;font-weight:400}
+.mk .new{background:#fff3e6;color:#9a3412;border:1px solid #f97316}
+.mk .same{background:var(--surface-1);color:var(--text-secondary);border:1px solid var(--border)}
+.mk .card{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin:10px 0}
+.mk .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;border-top:1px solid var(--border)}
+.mk .chip{font-size:13px;background:#e1f5ee;color:#085041;padding:2px 10px;border-radius:10px}
+.mk .btn1{background:#0f6e56;color:#fff;border-color:#0f6e56}
+.mk .btn1:hover{background:#085041}
+.mk .help{font-size:14px;color:var(--text-secondary);margin:4px 0}
+.mk .warn{background:#faeeda;color:#633806;border:1px solid #ba7517;border-radius:8px;padding:6px 10px;font-size:14px;margin:6px 0}
+@media (prefers-color-scheme:dark){.mk .warn{background:#412402;color:#fac775}.mk .chip{background:#085041;color:#9fe1cb}.mk .new{background:#3a2412;color:#fdba74}}
+.mk table{width:100%;border-collapse:collapse;font-size:14px}
+.mk th,.mk td{border-top:1px solid var(--border);padding:6px 8px;text-align:left}
+.mk fieldset{border:1px solid var(--border);border-radius:8px;margin:6px 0 2px;padding:6px 10px}
+.mk legend{font-size:14px;color:var(--text-secondary);padding:0 4px}
+.mk label.cb{display:inline-flex;gap:6px;align-items:center;margin-right:14px}
+.mk summary{cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap mk">
+<h1>Maquette : page Administration d'AménagActif</h1>
+<p class="intro"><b>Maquette de travail (13/11/2026), non fonctionnelle.</b> Tous les noms, adresses, écoles et titres sont fictifs. Rien n'est enregistré. Les étiquettes <span class="tag new">Nouveau</span> et <span class="tag same">À l'identique</span> ne servent qu'à la relecture : elles n'existeront pas dans l'application.</p>
+<label style="display:inline-flex;gap:8px;align-items:center;margin:0 0 10px;font-size:14px;color:var(--text-secondary)"><input type="checkbox" id="ph"> Voir en largeur téléphone (375 px)</label>
+<div id="frame" style="border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:0 auto;max-width:100%;background:var(--surface-2)">
+<div style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);font-size:14px">
+<span style="font-weight:700;color:#0f6e56;margin-right:6px">PLAI</span>
+<span>Saisie</span><span>Reprise d'année</span><span>Catalogue</span><span>Fiches</span><span>Liens enseignants</span>
+<span style="font-weight:700;border-bottom:2px solid #0f6e56">Administration</span>
+</div>
+<div style="padding:14px">
+<h1 style="font-size:24px">Administration</h1>
+<nav id="tabs" aria-label="Sections de l'administration" style="display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:10px"></nav>
+<div id="panel"></div>
+</div>
+</div>
+</div>
+<script>
+var niv={dubois:{'2e':true,'3e':true,'4e':true,'5e':false,'6e':false},martin:{'3e':false,'4e':false,'5e':true,'6e':true}};
+var membres=[
+{k:'dubois',email:'h.dubois@ecole.be',nom:'Hélène Dubois',role:'Direction',ecole:'Athénée de démonstration'},
+{k:'martin',email:'p.martin@ecole.be',nom:'Paul Martin',role:'Direction',ecole:'Athénée de démonstration'},
+{k:'r1',email:'s.leroy@pole.be',nom:'Sophie Leroy',role:'Référent PLAI',ecole:'Athénée de démonstration'},
+{k:'a1',email:'m.collin@pole.be',nom:'Marc Collin',role:'Agent accompagnant',ecole:'Institut d\'exemple'},
+{k:'r2',email:'j.noel@pole.be',nom:'Julie Noël',role:'Référent PLAI',ecole:'Institut d\'exemple'}
+];
+var roles=['Direction','Référent PLAI','Agent accompagnant'];
+function tg(n,s){return '<p class="help">'+(n?'<span class="tag new">Nouveau</span>'+n+' ':'')+(s?'<span class="tag same">À l\'identique</span>'+s:'')+'</p>'}
+function nivBlock(k){
+ var o=niv[k],keys=Object.keys(o),n=keys.filter(function(x){return o[x]}).length;
+ var h='<fieldset><legend>Apparaît sur les fiches des classes de niveau</legend>';
+ keys.forEach(function(x){h+='<label class="cb"><input type="checkbox" data-k="'+k+'" data-n="'+x+'"'+(o[x]?' checked':'')+'>'+x+(x==='2e'?' <span style="font-size:13px;color:var(--text-secondary)">(absent des classes actuelles)</span>':'')+'</label>'});
+ h+='<p class="help" style="margin:4px 0 0">'+(n===0?'Aucun niveau coché : apparaît sur toutes les classes.':'Apparaît seulement sur les classes cochées.')+'</p>';
+ if(n>0)h+='<div class="warn" style="margin:4px 0 0">2 classes sans niveau : cette direction n\'y apparaît pas.</div>';
+ return h+'</fieldset>';
+}
+function liste(){
+ var q=(document.getElementById('q')||{value:''}).value.toLowerCase(),r=(document.getElementById('rf')||{value:''}).value;
+ var f=membres.filter(function(m){return (!q||(m.email+' '+m.nom).toLowerCase().indexOf(q)>-1)&&(!r||m.role===r)});
+ document.getElementById('cnt').textContent=f.length+' compte'+(f.length>1?'s':'')+' affiché'+(f.length>1?'s':'')+' sur 23';
+ var h='',ec=['Athénée de démonstration','Institut d\'exemple'];
+ ec.forEach(function(e){
+  var g=f.filter(function(m){return m.ecole===e});if(!g.length)return;
+  h+='<p style="font-weight:700;margin:12px 0 2px;color:var(--text-secondary)">'+e+'</p><div style="border:1px solid var(--border);border-radius:8px">';
+  g.forEach(function(m,i){
+   h+='<div class="row" style="'+(i===0?'border-top:none':'')+'"><span style="min-width:150px">'+m.email+'</span><input type="text" value="'+m.nom+'" style="width:160px" aria-label="Nom"><select aria-label="Rôle"><option>'+m.role+'</option></select><span class="chip">'+m.ecole+'</span><a href="#">retirer l\'accès</a>';
+   if(niv[m.k])h+='<div style="flex-basis:100%">'+nivBlock(m.k)+'</div>';
+   h+='</div>';
+  });
+  h+='</div>';
+ });
+ if(!f.length)h='<p class="help">Aucun compte ne correspond.</p>';
+ document.getElementById('liste').innerHTML=h;
+ document.querySelectorAll('#liste input[data-k]').forEach(function(c){c.onchange=function(){niv[c.dataset.k][c.dataset.n]=c.checked;liste()}});
+ document.querySelectorAll('#liste a[href="#"]').forEach(function(a){a.onclick=function(e){e.preventDefault()}});
+}
+function pMembres(){
+ var h=tg('recherche et filtre, cases à cocher des niveaux','invitation, rôles, rattachement aux écoles');
+ h+='<div class="warn">2 comptes sans école assignée (à corriger) · <a href="#">les afficher</a></div>';
+ h+='<div class="card"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end"><label style="font-size:14px">Adresse e-mail<br><input type="text" placeholder="prenom.nom@ecole.be"></label><label style="font-size:14px">Nom affiché sur la fiche<br><input type="text" placeholder="Hélène Dubois"></label><label style="font-size:14px">Rôle<br><select><option>Référent PLAI</option></select></label><button class="btn1">Inviter</button></div></div>';
+ h+='<details class="card"><summary>Comprendre les rôles</summary><p class="help">Administrateur : tout, toutes écoles. Référent PLAI et Direction : classes, élèves, AR/AU, fiches de leurs écoles. Agent accompagnant : comme eux, mais sans création de classe ni retrait d\'AU.</p></details>';
+ h+='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><input type="search" id="q" aria-label="Rechercher un compte" placeholder="Adresse ou nom, ex. dubois" style="flex:1;min-width:180px"><select id="rf" aria-label="Filtrer par rôle"><option value="">Tous les rôles</option>'+roles.map(function(x){return '<option>'+x+'</option>'}).join('')+'</select><span id="cnt" style="font-size:14px;color:var(--text-secondary)"></span></div>';
+ h+='<p class="help">Tapez une partie de l\'adresse ou du nom. Les groupes sans résultat disparaissent.</p><div id="liste"></div>';
+ return h;
+}
+function pDroits(){
+ var rows=[['Consulter les fiches de ses écoles','Oui','Oui','Oui','Oui'],['Saisir élèves et AR','Oui','Oui','Oui','Oui'],['Ajouter un AU à une classe','Oui','Oui','Oui','Oui'],['Retirer un AU déjà coché','Oui','Oui','Oui','Non'],['Créer ou supprimer une classe','Oui','Oui','Oui','Non'],['Reprise d\'année','Oui','Oui','Oui','Non'],['Gérer les liens enseignants','Oui','Oui','Oui','Non'],['Voir « Mon école »','Non','Oui','Oui','Oui'],['Administration (membres, écoles, années, catalogue)','Oui','Non','Non','Non'],['Renommer une classe · changer un élève de classe · archives','À confirmer','À confirmer','À confirmer','À confirmer']];
+ var h=tg('onglet entier, lecture seule','');
+ h+='<div class="card" style="background:var(--surface-1)">Ce tableau décrit les droits actuels. Il n\'est pas encore modifiable ici. <a href="#">Voir le document de référence</a></div>';
+ h+='<div style="overflow-x:auto" tabindex="0" role="region" aria-label="Tableau des droits, défilable horizontalement"><table style="min-width:520px"><thead><tr><th>Capacité</th><th>Admin.</th><th>Référent</th><th>Direction</th><th>Agent</th></tr></thead><tbody>';
+ rows.forEach(function(r){h+='<tr><td>'+r[0]+'</td>'+r.slice(1).map(function(c){return '<td'+(c==='À confirmer'?' style="color:#ba7517"':'')+'>'+c+'</td>'}).join('')+'</tr>'});
+ return h+'</tbody></table></div><p class="help">« À confirmer » : cellules à relever dans le code avant affichage. Aucun écart ne sera corrigé en silence.</p>';
+}
+function pEcoles(){
+ var h=tg('','déplacé tel quel ; seul le texte d\'aide change (« les implantations accompagnées », sans le chiffre 11)');
+ h+='<p class="help">Désactiver une école la retire des sélecteurs sans supprimer ses données ; réactivable à tout moment.</p>';
+ h+='<div class="card"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end"><label style="font-size:14px">Nom<br><input type="text" placeholder="Athénée Léonie de Waha"></label><label style="font-size:14px">Numéro FASE<br><input type="text" placeholder="12345" style="width:110px"></label><label style="font-size:14px">Nom de l\'implantation<br><input type="text" placeholder="Waha - secondaire"></label><button class="btn1">Ajouter</button></div></div>';
+ h+='<div style="border:1px solid var(--border);border-radius:8px">';
+ [['Athénée de démonstration','1234','Démo - secondaire',true],['Institut d\'exemple','5678','Exemple - secondaire',true],['École d\'essai','0000','Essai',false]].forEach(function(e,i){
+  h+='<div class="row" style="'+(i===0?'border-top:none;':'')+(e[3]?'':'background:var(--surface-1)')+'"><input type="text" value="'+e[0]+'" style="flex:1;min-width:160px" aria-label="Nom"><input type="text" value="'+e[1]+'" style="width:90px" aria-label="Numéro FASE"><input type="text" value="'+e[2]+'" style="width:160px" aria-label="Nom de l\'implantation"><span class="chip" style="'+(e[3]?'':'background:var(--border);color:var(--text-secondary)')+'">'+(e[3]?'active':'désactivée')+'</span><a href="#">'+(e[3]?'désactiver':'réactiver')+'</a></div>';
+ });
+ return h+'</div>';
+}
+function pAnnees(){
+ var h=tg('','déplacé tel quel');
+ h+='<div style="background:#fff3e6;border:1px solid #f97316;color:#9a3412;border-radius:8px;padding:6px 10px;font-size:14px;margin:6px 0">L\'année active est <b>2026-2027</b>. Créez et activez l\'année suivante dans <u>Administration</u>. <i>Ce bandeau mène désormais directement à cet onglet.</i></div>';
+ h+='<p class="help">L\'année « active » est celle présélectionnée dans la saisie et les fiches. Fin août, créez la nouvelle année puis <a href="#">reprenez les élèves de l\'année précédente</a>.</p>';
+ h+='<div style="display:flex;gap:10px;align-items:end;margin:8px 0"><label style="font-size:14px">Nouvelle année<br><input type="text" placeholder="2027-2028"></label><button class="btn1">Ajouter</button></div>';
+ h+='<div style="border:1px solid var(--border);border-radius:8px"><div class="row" style="border-top:none">2026-2027 <b style="color:#0f6e56">· active</b></div><div class="row">2025-2026 <a href="#" style="margin-left:auto">Rendre active</a></div></div>';
+ return h;
+}
+function pCatalogue(){
+ var h=tg('','déplacé tel quel (chapitres, ajout, renommage, suppression gardée, fenêtre d\'usage)');
+ h+='<p class="help"><b>AU</b> = universel (coché par classe). <b>AR</b> = raisonnable (coché par élève). Désactiver retire l\'aménagement des écrans sans le supprimer.</p>';
+ h+='<p><a href="#" id="lt" style="font-weight:700">Revoir la transmission aux autres apps (tout le catalogue, chapitre par chapitre)</a></p>';
+ [1,2,3].forEach(function(n){
+  h+='<details class="card" '+(n===1?'open':'')+'><summary style="font-weight:700">Chapitre '+n+' — titre du chapitre (exemple)</summary>'+
+  '<div class="row"><span class="chip">AR</span><span style="flex:1">Libellé d\'un aménagement (exemple)</span><a href="#">modifier</a><a href="#">supprimer</a></div>'+
+  '<div class="row"><span class="chip">AU</span><span style="flex:1">Libellé d\'un aménagement (exemple)</span><a href="#">modifier</a><a href="#">supprimer</a></div>'+
+  '<div class="row"><a href="#">Renommer le chapitre</a><a href="#">+ Ajouter un aménagement</a></div></details>';
+ });
+ return h+'<button>+ Ajouter un chapitre</button>';
+}
+function pTransmission(){
+ var h=tg('','page existante, affichée dans la même mise en page ; « Retour à l\'Administration » mène à l\'onglet Catalogue');
+ h+='<p class="help">Schéma indicatif : chaque chapitre propose « Tout transmettre » et « Tout ne pas transmettre », et chaque aménagement un interrupteur « Transmis / Non transmis ».</p>';
+ h+='<div style="border:1px solid var(--border);border-radius:8px">';
+ [1,2,3].forEach(function(n,i){h+='<div class="row" style="'+(i===0?'border-top:none':'')+'"><span style="flex:1">Chapitre '+n+' — titre du chapitre (exemple)</span><button>Tout transmettre</button><button>Tout ne pas transmettre</button></div>'});
+ return h+'</div>';
+}
+var T=[{id:'m',l:'Membres & accès',f:pMembres},{id:'d',l:'Droits',f:pDroits},{id:'e',l:'Écoles',f:pEcoles},{id:'a',l:'Années',f:pAnnees},{id:'c',l:'Catalogue',f:pCatalogue,a:function(){document.getElementById('lt').onclick=function(ev){ev.preventDefault();go('t')}}},{id:'t',l:'Transmission',f:pTransmission}];
+function go(id){
+ var t=T.filter(function(x){return x.id===id})[0];
+ document.getElementById('tabs').innerHTML=T.map(function(x){return '<button class="tab'+(x.id===id?' on':'')+'" data-id="'+x.id+'"'+(x.id===id?' aria-current="page"':'')+'>'+x.l+(x.id==='d'?' <span class="tag new" style="margin:0 0 0 4px">nouveau</span>':'')+'</button>'}).join('');
+ document.querySelectorAll('#tabs .tab').forEach(function(b){b.onclick=function(){go(b.dataset.id)}});
+ document.getElementById('panel').innerHTML='<h2>'+t.l+'</h2>'+t.f();
+ document.querySelectorAll('#panel a[href="#"]').forEach(function(a){a.onclick=function(e){e.preventDefault()}});
+ if(t.a)t.a();
+ if(id==='m'){document.getElementById('q').oninput=liste;document.getElementById('rf').onchange=liste;liste()}
+ if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);
+}
+document.getElementById('ph').onchange=function(){document.getElementById('frame').style.maxWidth=this.checked?'375px':'100%'};
+var h0=location.hash.replace('#','');go(T.some(function(x){return x.id===h0})?h0:'m');
+</script>
+</body>
+</html>
