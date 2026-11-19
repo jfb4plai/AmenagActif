@@ -20,11 +20,7 @@ import TransmissionProfil from './pages/TransmissionProfil.jsx';
 import MonEcole from './pages/MonEcole.jsx';
 import LiensEnseignants from './pages/LiensEnseignants.jsx';
 import NotFound from './pages/NotFound.jsx';
-
-const EDITEURS = ['admin', 'referent_plai', 'direction', 'agent_plai']; // accès à la saisie (agent : élèves/AR, création de classe, ajout d'AU ; ni suppression/renommage de classe ni retrait d'AU — géré en RLS)
-const GESTIONNAIRES_LIENS = ['admin', 'referent_plai', 'direction']; // reprise d'année : pas agent_plai
-const LIENS_ENSEIGNANTS = [...GESTIONNAIRES_LIENS, 'agent_plai']; // l'agent crée des liens et ne révoque / ne modifie que les siens (api/liens.js)
-const LECTEURS = EDITEURS; // fiches accessibles aux mêmes rôles
+import { EDITEURS, GESTIONNAIRES_LIENS, LIENS_ENSEIGNANTS, LECTEURS } from './domain/droits.js';
 
 function Shell({ children }) {
   return (
