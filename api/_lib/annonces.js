@@ -1,6 +1,9 @@
 // Messages de l'administrateur à tous les comptes (« Nouveautés », points d'attention), via Brevo.
 // Logique séparée du handler pour être testée sans réseau : l'envoi est injecté.
 import { envoyerEmail } from './email.js';
+import { texteVersHtml } from '../../src/domain/texteMessage.js';
+
+export { texteVersHtml }; // même conversion que l'aperçu affiché à l'administrateur
 
 export const ROLES = ['admin', 'referent_plai', 'direction', 'agent_plai'];
 export const LABEL_ROLE = { admin: 'Administrateur', referent_plai: 'Référent PLAI', direction: 'Direction', agent_plai: 'Agent accompagnant' };
@@ -12,29 +15,6 @@ const CONTACT = 'jeanfrancois.beguin@ens.ecl.be';
 
 export class ErreurAnnonce extends Error {
   constructor(statut, message) { super(message); this.name = 'ErreurAnnonce'; this.statut = statut; }
-}
-
-const echapper = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-/** Mise en forme d'une ligne déjà échappée : **gras** et adresses https://… cliquables. */
-function ligneVersHtml(ligneEchappee) {
-  return ligneEchappee
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/(https?:\/\/[^\s<]+)/g, (u) => `<a href="${u}">${u}</a>`);
-}
-
-/**
- * Texte simple → HTML. Jamais de HTML saisi : tout est échappé d'abord.
- * Paragraphes séparés par une ligne vide ; « ## Titre » = intertitre ; lignes « - ... » = liste ; **gras** ; adresses https.
- */
-export function texteVersHtml(texte) {
-  const blocs = String(texte ?? '').replace(/\r\n/g, '\n').trim().split(/\n{2,}/);
-  return blocs.map((bloc) => {
-    const lignes = bloc.split('\n').map((l) => l.trimEnd());
-    if (lignes.length === 1 && lignes[0].startsWith('## ')) return `<h3>${ligneVersHtml(echapper(lignes[0].slice(3)))}</h3>`;
-    if (lignes.every((l) => l.startsWith('- '))) return `<ul>${lignes.map((l) => `<li>${ligneVersHtml(echapper(l.slice(2)))}</li>`).join('')}</ul>`;
-    return `<p>${lignes.map((l) => ligneVersHtml(echapper(l))).join('<br>')}</p>`;
-  }).join('\n');
 }
 
 function habiller(corpsHtml, banniere = '') {

@@ -1,6 +1,7 @@
-import { useId, useState } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAnnonces, useEnvoyerAnnonce } from '../hooks/useAnnonces.js';
 import { MODELES_ANNONCES } from '../domain/modelesAnnonces.js';
+import { texteVersHtml, appliquerGras, appliquerTitre, appliquerPuce, insererLien } from '../domain/texteMessage.js';
 
 const FOCUS = 'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]';
 const ROLES = [
@@ -24,11 +25,32 @@ export default function AnnoncesAdmin() {
   const [sujet, setSujet] = useState('');
   const [corps, setCorps] = useState('');
   const [roles, setRoles] = useState(new Set(ROLES.map(([r]) => r)));
+  const zone = useRef(null);
+  const selectionSuivante = useRef(null);
   const [retour, setRetour] = useState(null); // { type: 'ok'|'erreur', texte, detail?, sansAdresse? }
 
   const effectifs = data?.effectifs ?? {};
   const nbCibles = ROLES.filter(([r]) => roles.has(r)).reduce((n, [r]) => n + (effectifs[r] ?? 0), 0);
   const complet = sujet.trim().length > 0 && corps.trim().length > 0 && roles.size > 0;
+
+  // Bouton de mise en forme : transforme le texte autour de la sélection, puis rend le curseur à la zone de saisie.
+  function appliquer(fn) {
+    const el = zone.current;
+    const r = fn(corps, el?.selectionStart ?? corps.length, el?.selectionEnd ?? corps.length);
+    if (r.texte.length > MAX_CORPS) return;
+    selectionSuivante.current = r;
+    setCorps(r.texte);
+    setRetour(null);
+  }
+  useLayoutEffect(() => {
+    const r = selectionSuivante.current;
+    if (r && zone.current) {
+      zone.current.focus();
+      zone.current.setSelectionRange(r.debut, r.fin);
+      selectionSuivante.current = null;
+    }
+  }, [corps]);
+  const apercu = useMemo(() => texteVersHtml(corps), [corps]);
 
   const basculer = (r) => setRoles((prev) => { const s = new Set(prev); if (s.has(r)) s.delete(r); else s.add(r); return s; });
 
@@ -86,16 +108,43 @@ export default function AnnoncesAdmin() {
 
       <div>
         <label htmlFor={`${id}-corps`} className="block font-medium" style={{ fontSize: 16 }}>Message</label>
+        <div role="toolbar" aria-label="Mise en forme du message" aria-controls={`${id}-corps`} className="flex flex-wrap gap-2 my-1">
+          {[
+            ['Gras', 'Mettre la sélection en gras', appliquerGras, { fontWeight: 700 }],
+            ['Titre', 'Faire de la ligne un intertitre', appliquerTitre, {}],
+            ['Puce', 'Transformer les lignes en puces', appliquerPuce, {}],
+            ['Lien', 'Insérer une adresse https://', insererLien, {}],
+          ].map(([nom, aide, fn, style]) => (
+            <button key={nom} type="button" title={aide} aria-label={aide} className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16, ...style }} onClick={() => appliquer(fn)}>
+              {nom}
+            </button>
+          ))}
+        </div>
         <textarea
-          id={`${id}-corps`} className="plai-input w-full" style={{ fontSize: 16, minHeight: 280 }} value={corps} maxLength={MAX_CORPS}
+          ref={zone} id={`${id}-corps`} className="plai-input w-full" style={{ fontSize: 16, minHeight: 280 }} value={corps} maxLength={MAX_CORPS}
           onChange={(e) => setCorps(e.target.value)} aria-describedby={`${id}-corps-aide`}
           placeholder={'Bonjour,\n\n## Ce qui change\n\n- Première information\n- Deuxième information\n\nUne question : jeanfrancois.beguin@ens.ecl.be'}
         />
         <p id={`${id}-corps-aide`} className="mt-1 text-[color:var(--text2)]" style={{ fontSize: 16 }}>
-          Texte simple, aucune mise en page à faire : une ligne vide sépare les paragraphes, « ## » devant une ligne en fait un intertitre,
-          « - » en début de ligne crée une puce, **mots** entre doubles astérisques passent en gras, une adresse https:// devient cliquable.
+          Écrivez simplement : une ligne vide sépare les paragraphes. Pour une mise en forme, sélectionnez du texte puis cliquez sur Gras, Titre, Puce ou Lien ;
+          l'aperçu ci-dessous montre le résultat tel qu'il sera lu. Une adresse commençant par https:// devient cliquable d'elle-même.
           Ajoutez ce que vous seul savez (une école, une date, une consigne) : un message générique est ignoré. {corps.length}/{MAX_CORPS} caractères.
         </p>
+      </div>
+
+      <div>
+        <h3 className="font-medium" style={{ fontSize: 16 }}>Aperçu (tel que l'e-mail sera lu)</h3>
+        {corps.trim() === ''
+          ? <p className="plai-empty" style={{ fontSize: 16 }}>L'aperçu apparaît ici dès que vous écrivez.</p>
+          : (
+            <div
+              data-testid="apercu-annonce"
+              className="border border-[color:var(--border)] rounded p-3 bg-white"
+              style={{ fontSize: 16, lineHeight: 1.5, fontFamily: 'Arial, Helvetica, sans-serif' }}
+              // Sûr : texteVersHtml échappe tout le texte saisi avant de produire ses propres balises.
+              dangerouslySetInnerHTML={{ __html: apercu }}
+            />
+          )}
       </div>
 
       <fieldset>

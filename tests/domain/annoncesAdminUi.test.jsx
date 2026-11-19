@@ -107,3 +107,67 @@ describe('AnnoncesAdmin : détail du test', () => {
     expect(screen.queryByText(/Administrateurs visés/)).toBeNull();
   });
 });
+
+describe('AnnoncesAdmin : boutons de mise en forme et aperçu', () => {
+  const champ = () => screen.getByLabelText('Message');
+  const choisir = (debut, fin) => { champ().focus(); champ().setSelectionRange(debut, fin); };
+
+  it('aperçu vide au départ, puis le rendu final du texte saisi (gras, titre, puce, lien)', () => {
+    etat.data = donnees();
+    render(<AnnoncesAdmin />);
+    expect(screen.getByText(/L'aperçu apparaît ici/)).toBeTruthy();
+    fireEvent.change(champ(), { target: { value: 'Bonjour **tous**\n\n## Titre\n\n- un\n- deux\n\nVoir https://exemple.be' } });
+    const apercu = screen.getByTestId('apercu-annonce');
+    expect(apercu.querySelector('strong').textContent).toBe('tous');
+    expect(apercu.querySelector('h3').textContent).toBe('Titre');
+    expect(apercu.querySelectorAll('li')).toHaveLength(2);
+    expect(apercu.querySelector('a').getAttribute('href')).toBe('https://exemple.be');
+  });
+
+  it('l\'aperçu n\'exécute jamais de HTML saisi', () => {
+    etat.data = donnees();
+    render(<AnnoncesAdmin />);
+    fireEvent.change(champ(), { target: { value: '<img src=x onerror=alert(1)> <script>alert(2)</script>' } });
+    const apercu = screen.getByTestId('apercu-annonce');
+    expect(apercu.querySelector('img')).toBeNull();
+    expect(apercu.querySelector('script')).toBeNull();
+    expect(apercu.textContent).toContain('<script>');
+  });
+
+  it('Gras sur la sélection ; Puce sur la ligne ; Titre ; Lien : le champ et l\'aperçu suivent', () => {
+    etat.data = donnees();
+    render(<AnnoncesAdmin />);
+    fireEvent.change(champ(), { target: { value: 'Bonjour tout le monde' } });
+    choisir(8, 12);
+    fireEvent.click(screen.getByRole('button', { name: 'Mettre la sélection en gras' }));
+    expect(champ().value).toBe('Bonjour **tout** le monde');
+    expect(screen.getByTestId('apercu-annonce').querySelector('strong').textContent).toBe('tout');
+
+    fireEvent.change(champ(), { target: { value: 'un\ndeux' } });
+    choisir(0, 7);
+    fireEvent.click(screen.getByRole('button', { name: 'Transformer les lignes en puces' }));
+    expect(champ().value).toBe('- un\n- deux');
+    expect(screen.getByTestId('apercu-annonce').querySelectorAll('li')).toHaveLength(2);
+
+    fireEvent.change(champ(), { target: { value: 'Ce qui change' } });
+    choisir(0, 0);
+    fireEvent.click(screen.getByRole('button', { name: 'Faire de la ligne un intertitre' }));
+    expect(champ().value).toBe('## Ce qui change');
+    expect(screen.getByTestId('apercu-annonce').querySelector('h3').textContent).toBe('Ce qui change');
+
+    fireEvent.change(champ(), { target: { value: 'Voir ' } });
+    choisir(5, 5);
+    fireEvent.click(screen.getByRole('button', { name: 'Insérer une adresse https://' }));
+    expect(champ().value).toBe('Voir https://');
+  });
+
+  it('la barre d\'outils est nommée ; un bouton qui dépasserait 5000 caractères n\'ajoute rien', () => {
+    etat.data = donnees();
+    render(<AnnoncesAdmin />);
+    expect(screen.getByRole('toolbar', { name: 'Mise en forme du message' })).toBeTruthy();
+    fireEvent.change(champ(), { target: { value: 'x'.repeat(5000) } });
+    choisir(5000, 5000);
+    fireEvent.click(screen.getByRole('button', { name: 'Mettre la sélection en gras' }));
+    expect(champ().value).toHaveLength(5000);
+  });
+});
