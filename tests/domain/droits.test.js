@@ -28,11 +28,25 @@ describe('droits centralisés', () => {
     }
   });
 
-  it('les treize capacités attendues sont présentes', () => {
+  it('les douze capacités attendues sont présentes', () => {
     expect(CAPACITES.map((c) => c.id)).toEqual([
       'consulter_fiches', 'saisir', 'ajouter_au', 'retirer_au', 'creer_classe', 'supprimer_renommer_classe',
-      'changer_classe', 'reprise', 'creer_liens', 'gerer_tous_liens', 'mon_ecole', 'administration', 'archives',
+      'changer_classe', 'reprise', 'creer_liens', 'gerer_tous_liens', 'mon_ecole', 'administration',
     ]);
+  });
+
+  it("cellules de l'agent accompagnant épinglées", () => {
+    const agent = (id) => CAPACITES.find((c) => c.id === id).roles.agent_plai;
+    for (const id of ['creer_classe', 'ajouter_au', 'creer_liens']) expect(agent(id)).toBe(true);
+    for (const id of ['retirer_au', 'supprimer_renommer_classe', 'changer_classe', 'reprise', 'gerer_tous_liens', 'administration']) expect(agent(id)).toBe(false);
+  });
+
+  it('admin est vrai pour toute capacité sauf mon_ecole (faux)', () => {
+    for (const c of CAPACITES) expect(c.roles.admin).toBe(c.id !== 'mon_ecole');
+  });
+
+  it('chaque capacité cite sa preuve (fichier:ligne)', () => {
+    for (const c of CAPACITES) expect(c.preuve).toMatch(/\S+:\d+/);
   });
 
   it("administration n'est vraie que pour admin", () => {
