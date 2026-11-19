@@ -106,11 +106,11 @@ export default function AnnoncesAdmin() {
         </p>
       </div>
 
-      {/* Saisie à gauche, aperçu à droite dès 1024 px ; l'un sous l'autre sur écran étroit. */}
-      <div className="grid gap-4 lg:grid-cols-2 items-start">
-      <div>
-        <label htmlFor={`${id}-corps`} className="block font-medium" style={{ fontSize: 16 }}>Message</label>
-        <div role="toolbar" aria-label="Mise en forme du message" aria-controls={`${id}-corps`} className="flex flex-wrap gap-2 my-1">
+      {/* Grille à lignes communes : le cadre d'aperçu démarre à la même hauteur que la zone de saisie (dès 1024 px) ;
+          sur écran étroit, tout s'empile dans l'ordre : saisie, aide, aperçu. */}
+      <div className="grid gap-x-4 gap-y-1 lg:grid-cols-2">
+        <label htmlFor={`${id}-corps`} className="block font-medium lg:col-start-1 lg:row-start-1" style={{ fontSize: 16 }}>Message</label>
+        <div role="toolbar" aria-label="Mise en forme du message" aria-controls={`${id}-corps`} className="flex flex-wrap gap-2 my-1 lg:col-start-1 lg:row-start-2">
           {[
             ['Gras', 'Mettre la sélection en gras', appliquerGras, { fontWeight: 700 }],
             ['Titre', 'Faire de la ligne un intertitre', appliquerTitre, {}],
@@ -123,31 +123,33 @@ export default function AnnoncesAdmin() {
           ))}
         </div>
         <textarea
-          ref={zone} id={`${id}-corps`} className="plai-input w-full" style={{ fontSize: 16, minHeight: 280 }} value={corps} maxLength={MAX_CORPS}
+          ref={zone} id={`${id}-corps`} className="plai-input w-full lg:col-start-1 lg:row-start-3 lg:h-[22rem]" style={{ fontSize: 16, minHeight: 280 }} value={corps} maxLength={MAX_CORPS}
           onChange={(e) => setCorps(e.target.value)} aria-describedby={`${id}-corps-aide`}
           placeholder={'Bonjour,\n\n## Ce qui change\n\n- Première information\n- Deuxième information\n\nUne question : jeanfrancois.beguin@ens.ecl.be'}
         />
-        <p id={`${id}-corps-aide`} className="mt-1 text-[color:var(--text2)]" style={{ fontSize: 16 }}>
+        <p id={`${id}-corps-aide`} className="mt-1 text-[color:var(--text2)] lg:col-start-1 lg:row-start-4" style={{ fontSize: 16 }}>
           Écrivez simplement : une ligne vide sépare les paragraphes. Pour une mise en forme, sélectionnez du texte puis cliquez sur Gras, Titre, Puce ou Lien ;
           l'aperçu à côté (ou en dessous sur un écran étroit) montre le résultat tel qu'il sera lu. Une adresse commençant par https:// devient cliquable d'elle-même.
           Ajoutez ce que vous seul savez (une école, une date, une consigne) : un message générique est ignoré. {corps.length}/{MAX_CORPS} caractères.
         </p>
-      </div>
 
-      <div className="lg:sticky lg:top-4">
-        <h3 className="font-medium" style={{ fontSize: 16 }}>Aperçu (tel que l'e-mail sera lu)</h3>
+        <h3 className="font-medium mt-3 lg:mt-0 lg:col-start-2 lg:row-start-2 lg:self-center" style={{ fontSize: 16 }}>Aperçu (tel que l'e-mail sera lu)</h3>
         {corps.trim() === ''
-          ? <p className="plai-empty" style={{ fontSize: 16 }}>L'aperçu apparaît ici dès que vous écrivez.</p>
+          ? (
+            <div className="border border-[color:var(--border)] rounded p-3 bg-white lg:col-start-2 lg:row-start-3 lg:h-[22rem]">
+              <p className="plai-empty" style={{ fontSize: 16 }}>L'aperçu apparaît ici dès que vous écrivez.</p>
+            </div>
+          )
           : (
             <div
               data-testid="apercu-annonce"
-              className="border border-[color:var(--border)] rounded p-3 bg-white overflow-auto lg:max-h-[70vh]"
+              // Le CSS de l'application supprime les marges et les puces : on les rétablit pour montrer ce que verra le lecteur d'un e-mail.
+              className="border border-[color:var(--border)] rounded p-3 bg-white overflow-auto min-h-[10rem] lg:col-start-2 lg:row-start-3 lg:h-[22rem] [&_p]:my-4 [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-10 [&_h3]:my-4 [&_h3]:text-[1.17em] [&_h3]:font-bold [&_strong]:font-bold [&_a]:text-[#0000ee] [&_a]:underline"
               style={{ fontSize: 16, lineHeight: 1.5, fontFamily: 'Arial, Helvetica, sans-serif' }}
               // Sûr : texteVersHtml échappe tout le texte saisi avant de produire ses propres balises.
               dangerouslySetInnerHTML={{ __html: apercu }}
             />
           )}
-      </div>
       </div>
 
       <fieldset>

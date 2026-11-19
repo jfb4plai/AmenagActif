@@ -70,3 +70,34 @@ describe('insererLien', () => {
     expect(deja.texte).toBe('https://a.be');
   });
 });
+
+describe('gras sur plusieurs lignes (cas signalé : trois puces sélectionnées puis Gras)', () => {
+  const t = "Voici les développements\n- la page 2\n- la page 3\n- la page 4";
+  it('chaque ligne est mise en gras après son « - » : les puces restent des puces', () => {
+    const r = appliquerGras(t, 25, t.length);
+    expect(r.texte).toBe("Voici les développements\n- **la page 2**\n- **la page 3**\n- **la page 4**");
+    const html = texteVersHtml(r.texte);
+    expect(html).toContain('<ul><li><strong>la page 2</strong></li><li><strong>la page 3</strong></li><li><strong>la page 4</strong></li></ul>');
+  });
+  it('recliquer retire le gras de toutes les lignes ; les lignes vides sont laissées telles quelles', () => {
+    const gras = "- **a**\n\n- **b**";
+    expect(appliquerGras(gras, 0, gras.length).texte).toBe("- a\n\n- b");
+    expect(appliquerGras("a\n\nb", 0, 4).texte).toBe("**a**\n\n**b**");
+  });
+  it('sélection partielle sur deux lignes : les deux lignes entières', () => {
+    expect(appliquerGras("un deux\ntrois quatre", 3, 12).texte).toBe("**un deux**\n**trois quatre**");
+  });
+  it('un gras qui couvre plusieurs lignes d\'un même paragraphe est rendu en gras (aperçu et e-mail)', () => {
+    expect(texteVersHtml('Voir **la page 2\nla page 3** ici')).toBe('<p>Voir <strong>la page 2<br>la page 3</strong> ici</p>');
+  });
+});
+
+describe('puces et intertitres sans ligne vide autour', () => {
+  it('des puces collées à une phrase forment quand même une liste ; le texte qui suit reste un paragraphe', () => {
+    const h = texteVersHtml('Voici les nouveautés\n- page 2\n- page 3\nMerci');
+    expect(h).toBe('<p>Voici les nouveautés</p>\n<ul><li>page 2</li><li>page 3</li></ul>\n<p>Merci</p>');
+  });
+  it('un intertitre collé à du texte est reconnu', () => {
+    expect(texteVersHtml('Avant\n## Titre\nAprès')).toBe('<p>Avant</p>\n<h3>Titre</h3>\n<p>Après</p>');
+  });
+});
