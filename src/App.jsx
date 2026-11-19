@@ -21,8 +21,9 @@ import MonEcole from './pages/MonEcole.jsx';
 import LiensEnseignants from './pages/LiensEnseignants.jsx';
 import NotFound from './pages/NotFound.jsx';
 
-const EDITEURS = ['admin', 'referent_plai', 'direction', 'agent_plai']; // accès à la saisie (agent : élèves/AR, pas de création de classe ni retrait d'AU — géré en RLS)
-const GESTIONNAIRES_LIENS = ['admin', 'referent_plai', 'direction']; // pas agent_plai (lecture seule sur les liens)
+const EDITEURS = ['admin', 'referent_plai', 'direction', 'agent_plai']; // accès à la saisie (agent : élèves/AR, création de classe, ajout d'AU ; ni suppression/renommage de classe ni retrait d'AU — géré en RLS)
+const GESTIONNAIRES_LIENS = ['admin', 'referent_plai', 'direction']; // reprise d'année : pas agent_plai
+const LIENS_ENSEIGNANTS = [...GESTIONNAIRES_LIENS, 'agent_plai']; // l'agent crée des liens et ne révoque / ne modifie que les siens (api/liens.js)
 const LECTEURS = EDITEURS; // fiches accessibles aux mêmes rôles
 
 function Shell({ children }) {
@@ -55,7 +56,7 @@ export default function App() {
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />
       <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />
       <Route path="/mon-ecole" element={<RequireAuth><Shell><RequireRole roles={LECTEURS}><MonEcole /></RequireRole></Shell></RequireAuth>} />
-      <Route path="/liens" element={<RequireAuth><Shell><RequireRole roles={GESTIONNAIRES_LIENS}><LiensEnseignants /></RequireRole></Shell></RequireAuth>} />
+      <Route path="/liens" element={<RequireAuth><Shell><RequireRole roles={LIENS_ENSEIGNANTS}><LiensEnseignants /></RequireRole></Shell></RequireAuth>} />
       <Route path="/administration" element={<RequireAuth><Shell><RequireRole roles={['admin']}><Administration /></RequireRole></Shell></RequireAuth>} />
       <Route path="/reprise" element={<RequireAuth><Shell><RequireRole roles={GESTIONNAIRES_LIENS}><Reprise /></RequireRole></Shell></RequireAuth>} />
       <Route path="/administration/transmission" element={<RequireAuth><Shell><RequireRole roles={['admin']}><TransmissionProfil /></RequireRole></Shell></RequireAuth>} />

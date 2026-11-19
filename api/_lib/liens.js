@@ -5,7 +5,7 @@ export const MAX_CLASSES_PAR_LIEN = 10;
 export const MAX_IDS_PAR_REQUETE = 100; // plafond d'un sommaire et de toute requête .in()
 export const MAX_DESTINATAIRE = 80;
 export const MAX_NOM_GROUPE = 60;
-export const ROLES_GESTION_LIENS = ['admin', 'referent_plai', 'direction']; // PAS agent_plai
+export const ROLES_GESTION_LIENS = ['admin', 'referent_plai', 'direction', 'agent_plai']; // l'agent n'agit que sur ses propres liens (peutAgirSurLien)
 export const MESSAGE_LIEN_INACTIF = "Ce lien n'est plus actif. Demandez un nouveau lien à votre référent.";
 
 /** Secret aléatoire de 32 octets, base64url (43 caractères, jamais de point). */
@@ -50,9 +50,15 @@ export function statutLien(lien, now = new Date()) {
 
 export const peutGererLiens = (role) => ROLES_GESTION_LIENS.includes(role);
 
+/** Révoquer / modifier un lien : l'agent accompagnant seulement les liens qu'il a créés ; les autres rôles, tous ceux de leurs écoles. */
+export function peutAgirSurLien(profil, userId, lien) {
+  if (!profil || !peutGererLiens(profil.role)) return false;
+  return profil.role !== 'agent_plai' || lien.cree_par === userId;
+}
+
 /**
  * Décision d'autorisation sur une école. profil = { role, ecole_id }, ecolesLiees = ids (ar_profils_acces_ecoles).
- * Admin : toutes les écoles ; referent_plai / direction : leurs écoles ; agent_plai et le reste : jamais.
+ * Admin : toutes les écoles ; referent_plai / direction / agent_plai : leurs écoles ; le reste : jamais.
  */
 export function peutGererEcole(profil, ecolesLiees, ecoleId) {
   if (!profil || !peutGererLiens(profil.role)) return false;
@@ -82,7 +88,7 @@ export function modeValide(v) {
 }
 
 /** Projection publique d'un lien : liste blanche de champs, token_hash n'en fait JAMAIS partie. */
-export function versLienPublic(row, { classes = [], classeIds = [], creePar = null, now = new Date() } = {}) {
+export function versLienPublic(row, { classes = [], classeIds = [], creePar = null, gerable = true, now = new Date() } = {}) {
   return {
     id: row.id,
     ecole_id: row.ecole_id,
@@ -95,6 +101,7 @@ export function versLienPublic(row, { classes = [], classeIds = [], creePar = nu
     classe_ids: classeIds,
     cree_le: row.cree_le,
     cree_par: creePar,
+    gerable, // faux : l'agent accompagnant voit ce lien (créé par un autre) mais ne peut ni le révoquer ni le modifier
     expire_le: row.expire_le,
     revoque_le: row.revoque_le ?? null,
     derniere_ouverture: row.derniere_ouverture ?? null,

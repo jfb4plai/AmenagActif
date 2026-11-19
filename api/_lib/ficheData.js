@@ -27,9 +27,7 @@ export async function verifierAccesClasses(db, userId, classeIds) {
   if (eProfil) throw eProfil; // panne base : le handler répond 500, pas un faux refus
   if (!profil) return false;
   if (profil.role === 'admin') return true;
-  // Génération de lien enseignant réservée à referent_plai/direction (comme le
-  // bouton "Copier le lien" côté écran, déjà masqué pour agent_plai).
-  if (!['referent_plai', 'direction'].includes(profil.role)) return false;
+  if (!['referent_plai', 'direction', 'agent_plai'].includes(profil.role)) return false;
 
   const { data: classes, error: ec } = await db.from('ar_classes').select('id, ecole_id').in('id', classeIds);
   if (ec) throw ec;

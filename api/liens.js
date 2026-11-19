@@ -1,6 +1,6 @@
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { authentifier } from './_lib/authUtilisateur.js';
-import { peutGererEcole, ecolesGerables, versLienPublic, statutLien, MAX_IDS_PAR_REQUETE } from './_lib/liens.js';
+import { peutGererEcole, peutAgirSurLien, ecolesGerables, versLienPublic, statutLien, MAX_IDS_PAR_REQUETE } from './_lib/liens.js';
 import { revoquerLien, purgerLiensExpires, definirClasses, ErreurLien } from './_lib/liensData.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -8,7 +8,8 @@ const LIMITE_LIENS = 1000;
 const COLONNES_PUBLIQUES = 'id, ecole_id, annee_id, mode, numero, destinataire, nom_groupe, cree_par, cree_le, expire_le, revoque_le, derniere_ouverture, nb_ouvertures'; // jamais token_hash
 
 /**
- * Gestion des liens enseignants (utilisateur connecté : admin, référent PLAI, direction ; jamais agent_plai).
+ * Gestion des liens enseignants (utilisateur connecté : admin, référent PLAI, direction, agent accompagnant).
+ * L'agent accompagnant voit les liens de ses écoles mais ne révoque / ne modifie que ceux qu'il a créés.
  * GET  ?ecole_id=<uuid> (optionnel) : supprime d'abord les liens expirés (purge après le 31 août), puis liste les
  *      liens des écoles gérables, sans token_hash. La purge est globale (toutes écoles) mais n'est lancée qu'après
  *      les contrôles d'accès.
@@ -32,7 +33,7 @@ export default async function handler(req, res) {
     if (eLia) throw eLia;
     const ecolesLiees = (liaisons ?? []).map((l) => l.ecole_id);
 
-    if (req.method === 'GET' && req.query?.lien_id !== undefined) { await classesDuLien(db, req, res, profil, ecolesLiees); return; }
+    if (req.method === 'GET' && req.query?.lien_id !== undefined) { await classesDuLien(db, req, res, profil, ecolesLiees, auth.user.id); return; }
 
     if (req.method === 'GET') {
       const gerables = ecolesGerables(profil, ecolesLiees); // null = toutes (admin), [] = aucune
@@ -73,20 +74,20 @@ export default async function handler(req, res) {
         createurs.set(uid, data?.user?.email ?? null);
       }
       const now = new Date();
-      const liens = (rows ?? []).map((r) => versLienPublic(r, { classes: (classesParLien.get(r.id) ?? []).sort(), classeIds: idsParLien.get(r.id) ?? [], creePar: createurs.get(r.cree_par) ?? null, now }));
+      const liens = (rows ?? []).map((r) => versLienPublic(r, { classes: (classesParLien.get(r.id) ?? []).sort(), classeIds: idsParLien.get(r.id) ?? [], creePar: createurs.get(r.cree_par) ?? null, gerable: peutAgirSurLien(profil, auth.user.id, r), now }));
       res.status(200).json({ ecoles: ecoles ?? [], liens });
       return;
     }
 
     if (req.method === 'POST') {
       const { action, lien_id: lienId } = req.body || {};
-      if (action === 'definir_classes') { await definirClassesAction(db, req, res, profil, ecolesLiees); return; }
+      if (action === 'definir_classes') { await definirClassesAction(db, req, res, profil, ecolesLiees, auth.user.id); return; }
       if (action !== 'revoke') { res.status(400).json({ error: 'Action inconnue.' }); return; }
       if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
-      const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id').eq('id', lienId).maybeSingle();
+      const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id, cree_par').eq('id', lienId).maybeSingle();
       if (error) throw error;
       if (!lien) { res.status(404).json({ error: 'Lien introuvable.' }); return; }
-      if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
+      if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id) || !peutAgirSurLien(profil, auth.user.id, lien)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
       const resultat = await revoquerLien(db, lienId, auth.user.id);
       res.status(200).json({ ok: true, deja_revoque: resultat === 'deja' });
       return;
@@ -109,19 +110,19 @@ async function lireClassesDuLien(db, lienId) {
   return (data ?? []).map((r) => r.classe_id);
 }
 
-/** GET ?lien_id= : mêmes contrôles d'accès que la modification (école gérable, jamais agent_plai). */
-async function classesDuLien(db, req, res, profil, ecolesLiees) {
+/** GET ?lien_id= : mêmes contrôles d'accès que la modification (école gérable ; agent : ses propres liens). */
+async function classesDuLien(db, req, res, profil, ecolesLiees, userId) {
   const lienId = req.query.lien_id;
   if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
-  const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id').eq('id', lienId).maybeSingle();
+  const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id, cree_par').eq('id', lienId).maybeSingle();
   if (error) throw error;
   if (!lien) { res.status(404).json({ error: 'Lien introuvable.' }); return; }
-  if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
+  if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id) || !peutAgirSurLien(profil, userId, lien)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
   res.status(200).json({ lien_id: lienId, classe_ids: await lireClassesDuLien(db, lienId) });
 }
 
 /** Remplace les classes d'un sommaire. Les contrôles JS précèdent la fonction SQL (le plafond n'y est pas appliqué). */
-async function definirClassesAction(db, req, res, profil, ecolesLiees) {
+async function definirClassesAction(db, req, res, profil, ecolesLiees, userId) {
   const { lien_id: lienId, classe_ids: brut, classe_ids_avant: avant } = req.body || {};
   if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
   if (!listeUuidValide(brut)) { res.status(400).json({ error: 'classe_ids invalide.' }); return; }
@@ -129,10 +130,10 @@ async function definirClassesAction(db, req, res, profil, ecolesLiees) {
   const ids = [...new Set(brut)];
   if (ids.length === 0 || ids.length > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Un sommaire regroupe de 1 à ${MAX_IDS_PAR_REQUETE} classes.` }); return; }
 
-  const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id, annee_id, mode, expire_le, revoque_le').eq('id', lienId).maybeSingle();
+  const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id, annee_id, mode, cree_par, expire_le, revoque_le').eq('id', lienId).maybeSingle();
   if (error) throw error;
   if (!lien) { res.status(404).json({ error: 'Lien introuvable.' }); return; }
-  if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
+  if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id) || !peutAgirSurLien(profil, userId, lien)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
   if (lien.mode !== 'sommaire') { res.status(400).json({ error: 'Seul un sommaire peut être modifié.' }); return; }
   if (statutLien(lien) !== 'actif') { res.status(400).json({ error: "Ce lien n'est plus actif." }); return; }
 

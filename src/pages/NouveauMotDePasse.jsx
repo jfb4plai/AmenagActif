@@ -36,6 +36,16 @@ export default function NouveauMotDePasse() {
     return () => { vivant = false; sub.subscription.unsubscribe(); clearTimeout(t); };
   }, []);
 
+  // Prévient les administrateurs (une fois par compte, décidé côté serveur). Un échec ne doit jamais gêner l'utilisateur.
+  async function prevenirAdmins() {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const jwt = data.session?.access_token;
+      if (!jwt) return;
+      await fetch('/api/notifier-activation', { method: 'POST', headers: { Authorization: `Bearer ${jwt}` } });
+    } catch { /* silencieux */ }
+  }
+
   async function soumettre(e) {
     e.preventDefault();
     setErreur(null);
@@ -46,6 +56,7 @@ export default function NouveauMotDePasse() {
     try {
       const { error } = await supabase.auth.updateUser({ password: mdp });
       if (error) throw error;
+      prevenirAdmins();
       setStatut('fait');
     } catch (err) {
       const { message, versConnexion } = messageErreurMotDePasse(err);

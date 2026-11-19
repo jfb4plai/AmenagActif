@@ -46,7 +46,7 @@ function SectionMembres() {
       <h2 className="font-semibold">Membres &amp; accès</h2>
       <p className="text-sm text-[color:var(--text3)]">
         <strong>Administrateur</strong> : tout, toutes écoles. <strong>Référent PLAI</strong> et <strong>Direction</strong> : mêmes droits, sur une ou plusieurs écoles (classes, élèves, AR/AU, fiches).
-        <strong>Agent accompagnant</strong> : sur une ou plusieurs écoles comme référent/direction, peut créer/modifier/supprimer des élèves et leurs AR, et ajouter (pas retirer) un AU — mais ne peut pas créer de classe.
+        <strong>Agent accompagnant</strong> : sur une ou plusieurs écoles comme référent/direction, peut créer/modifier/supprimer des élèves et leurs AR, créer une classe, ajouter (pas retirer) un AU, et créer des liens enseignants (il ne révoque et ne modifie que les siens) — mais ne peut ni supprimer ni renommer une classe, ni changer un élève de classe, ni faire la reprise d'année.
         Le <strong>nom</strong> figure sur les fiches (colonnes « Référent(s) PLAI » / « PAR »). Inviter envoie un e-mail avec un lien pour définir le mot de passe.
         Une école peut avoir plusieurs comptes <strong>Direction</strong> (par exemple un par degré) : le champ <strong>Niveaux</strong> limite l'apparition de chacun aux classes concernées — vide, il apparaît sur toutes.
         Ci-dessous, la liste est groupée par implantation — un référent, une direction ou un agent multi-écoles apparaît dans chacune des siennes.

@@ -424,15 +424,39 @@ describe('api/liens : liste et révocation', () => {
     lienB = 'lien-b';
   });
 
-  it('agent_plai : refusé en lecture et en révocation', async () => {
+  it('agent_plai : voit les liens de son école mais ne révoque pas ceux d\'un autre', async () => {
     connecte('agent');
-    expect((await liste()).statusCode).toBe(403);
+    const r = await liste();
+    expect(r.statusCode).toBe(200);
+    const vus = r.body.liens.map((l) => l.id);
+    expect(vus).toContain(ligneLien(lienA.token).id);
+    expect(vus).not.toContain('lien-b'); // autre école
+    expect(r.body.liens.find((l) => l.id === ligneLien(lienA.token).id).gerable).toBe(false);
     expect((await revoquer(ligneLien(lienA.token).id)).statusCode).toBe(403);
     expect(ligneLien(lienA.token).revoque_le).toBeFalsy();
-    const idReel = '99999999-9999-4999-8999-999999999999';
-    tables.ar_liens.push({ id: idReel, token_hash: 'h', ecole_id: 'ec1', annee_id: 'an1', destinataire: 'd', cree_par: U.ref1, cree_le: 'x', expire_le: '2099-08-31', revoque_le: null, nb_ouvertures: 0 });
-    expect((await revoquer(idReel)).statusCode).toBe(403);
-    expect(tables.ar_liens.find((l) => l.id === idReel).revoque_le).toBeNull();
+    const idAutreEcole = '99999999-9999-4999-8999-999999999999';
+    tables.ar_liens.push({ id: idAutreEcole, token_hash: 'h', ecole_id: 'ec2', annee_id: 'an1', destinataire: 'd', cree_par: U.ref2, cree_le: 'x', expire_le: '2099-08-31', revoque_le: null, nb_ouvertures: 0 });
+    expect((await revoquer(idAutreEcole)).statusCode).toBe(403);
+    expect(tables.ar_liens.find((l) => l.id === idAutreEcole).revoque_le).toBeNull();
+  });
+
+  it('agent_plai : crée un lien, le voit gérable et peut le révoquer', async () => {
+    connecte('agent');
+    const mien = await creerVia([C1]);
+    const id = ligneLien(mien.token).id;
+    const r = await liste();
+    expect(r.body.liens.find((l) => l.id === id).gerable).toBe(true);
+    expect((await revoquer(id)).statusCode).toBe(200);
+    expect(ligneLien(mien.token).revoque_le).toBeTruthy();
+  });
+
+  it('les référents gardent la main sur tous les liens de leur école, y compris ceux d\'un agent', async () => {
+    connecte('agent');
+    const mien = await creerVia([C1]);
+    connecte('ref1');
+    const r = await liste();
+    expect(r.body.liens.find((l) => l.id === ligneLien(mien.token).id).gerable).toBe(true);
+    expect((await revoquer(ligneLien(mien.token).id)).statusCode).toBe(200);
   });
 
   it('liste : jamais de token_hash, destinataire + classes + statut + compteur', async () => {
@@ -536,7 +560,8 @@ describe('api/liens : purge des liens expirés (après le 31 août)', () => {
     } finally { vi.useRealTimers(); }
   });
 
-  it('un rôle sans droit (agent_plai) ne déclenche pas la purge', async () => {
+  it('un rôle sans droit ne déclenche pas la purge', async () => {
+    tables.ar_profils_acces.find((p) => p.user_id === U.agent).role = 'enseignant';
     connecte('agent');
     expect((await liste()).statusCode).toBe(403);
     expect(ids()).toContain('expire-actif');

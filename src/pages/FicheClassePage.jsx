@@ -10,18 +10,16 @@ import ChoixModeLien from '../components/ChoixModeLien.jsx';
 import { useAConfirmerClasses } from '../hooks/useAConfirmer.js';
 import { messageAvantEnvoi } from '../domain/changementClasse.js';
 
-// Guide qui décrit le sommaire, selon le rôle (l'agent accompagnant ne crée pas de lien : pas de guide, un renvoi vers ses référents).
+// Guide qui décrit le sommaire, selon le rôle (l'agent accompagnant utilise le guide des référents PLAI).
 const GUIDE_SOMMAIRE = { direction: '/modes-emploi/directions.html#sommaire' };
 const GUIDE_SOMMAIRE_DEFAUT = '/modes-emploi/referents-plai.html#sommaire';
 
 /** Annonce permanente du sommaire (nouveauté) : sans elle, le choix n'apparaît qu'après avoir coché deux classes. */
 function NoteSommaire({ role }) {
-  const peutCreer = role !== 'agent_plai';
   return (
     <aside role="note" aria-label="Nouveauté : le sommaire de classes" className="plai-card p-3 space-y-1 max-w-3xl no-print">
       <p className="font-medium" style={{ fontSize: 16 }}>Nouveau : le sommaire, pour un enseignant qui a plusieurs classes</p>
-      {peutCreer ? (
-        <>
+      <>
           <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
             Un seul lien ouvre la liste de ses classes ; chacune garde sa propre fiche. Pour le créer, cochez au moins deux classes ci-dessous, puis choisissez « Un sommaire : une fiche par classe ».
           </p>
@@ -30,12 +28,7 @@ function NoteSommaire({ role }) {
               Mode d'emploi du sommaire
             </a>
           </p>
-        </>
-      ) : (
-        <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
-          Les référents PLAI, les directions et les administrateurs peuvent créer un sommaire : un seul lien qui ouvre la liste des classes d'un enseignant, chacune gardant sa propre fiche. Pour en savoir plus, adressez-vous à eux.
-        </p>
-      )}
+      </>
     </aside>
   );
 }
@@ -51,7 +44,7 @@ function Picker() {
   const [nomGroupe, setNomGroupe] = useState('');
   const [valide, setValide] = useState(null); // { classeIds, nomGroupe } une fois "Valider" cliqué
   const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction' || role === 'agent_plai';
-  const peutLier = role !== 'agent_plai'; // liens enseignants : référents et directions uniquement (cf. api/_lib/ficheData.js)
+  const peutLier = true; // tous les rôles éditeurs créent des liens (cf. api/_lib/ficheData.js) ; l'agent ne gère que les siens (api/liens.js)
   const [mode, setMode] = useState('fusion'); // 'fusion' | 'sommaire' (sommaire : rôles pouvant lier, 2 classes ou plus)
   const sommaire = peutLier && selection.size >= 2 && mode === 'sommaire';
   // En mode sommaire, l'aperçu fusionné n'est pas chargé (ids indéfinis : requête désactivée).
@@ -228,13 +221,13 @@ function FicheClasseContenu({ classeId }) {
     <div className="plai-section space-y-3">
       <div className="flex gap-3 no-print">
         <button className="plai-btn" onClick={() => imprimerFiche(piedFicheClasse(vm))}>Imprimer / Enregistrer en PDF</button>
-        {role !== 'agent_plai' && (
+        {(
           <button className="plai-btn" style={{ fontSize: 16 }} aria-expanded={lienOuvert} onClick={() => setLienOuvert((o) => !o)}>
             Copier le lien enseignant
           </button>
         )}
       </div>
-      {role !== 'agent_plai' && lienOuvert && (
+      {lienOuvert && (
         <GenerateurLien classeIds={[classeId]} libelle={`Aménagements à mettre en place — ${vm.classeNom} (${vm.ecoleNom})`}
           avertissement={messageAvantEnvoi(aConfirmer.data)} />
       )}

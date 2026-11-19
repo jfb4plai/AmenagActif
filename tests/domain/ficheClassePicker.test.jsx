@@ -113,15 +113,13 @@ describe('Mention du sommaire sur la page Fiches', () => {
     expect(lien.getAttribute('href')).toBe('/modes-emploi/directions.html#sommaire');
   });
 
-  it("agent accompagnant : il ne peut pas créer de sommaire, la note le renvoie vers les référents, directions et administrateurs", () => {
+  it('agent accompagnant : peut créer un sommaire, la note explique comment et renvoie au mode d\'emploi', () => {
     roleCourant.role = 'agent_plai';
     rendre();
     const note = screen.getByRole('note', { name: /sommaire/i });
-    expect(note.textContent).toMatch(/Nouveau/);
-    expect(note.textContent).toMatch(/référents PLAI, les directions et les administrateurs peuvent créer un sommaire/);
-    expect(note.textContent).toMatch(/adressez-vous à eux/);
-    expect(within(note).queryByRole('link')).toBeNull();
-    expect(note.textContent).not.toMatch(/cochez au moins deux classes/);
+    expect(note.textContent).toMatch(/cochez au moins deux classes/);
+    expect(within(note).getByRole('link', { name: /Mode d'emploi du sommaire/ })).toBeTruthy();
+    expect(note.textContent).not.toMatch(/adressez-vous à eux/);
   });
 
   it("la note ne s'imprime pas", () => {

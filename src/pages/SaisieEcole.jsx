@@ -117,7 +117,7 @@ export default function SaisieEcole() {
             classes={grid.classes}
             onSelect={setClasseId}
             onCreate={({ nom, niveau }) => mut.ensureClasse.mutateAsync({ nom, niveau })}
-            peutCreer={peutEditerStructure}
+            peutCreer
           />
         </>
       ) : (

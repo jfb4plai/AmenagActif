@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   genererSecret, hasherSecret, formeSecretValide, estFormeJwt, finAnneeScolaire, statutLien,
-  peutGererEcole, ecolesGerables, plafonnerExpirationProfil, versLienPublic,
+  peutGererEcole, peutAgirSurLien, ecolesGerables, plafonnerExpirationProfil, versLienPublic,
 } from '../../api/_lib/liens.js';
 
 describe('secret et empreinte', () => {
@@ -60,11 +60,25 @@ describe('autorisation par rôle', () => {
     expect(peutGererEcole({ role: 'direction', ecole_id: null }, [ECOLE_A], ECOLE_A)).toBe(true);
     expect(peutGererEcole({ role: 'referent_plai', ecole_id: ECOLE_A }, [], ECOLE_B)).toBe(false);
   });
-  it('agent_plai, rôle inconnu, absence de profil : refusés', () => {
-    expect(peutGererEcole({ role: 'agent_plai', ecole_id: ECOLE_A }, [ECOLE_A], ECOLE_A)).toBe(false);
+  it('agent_plai : ses écoles seulement, comme un référent', () => {
+    expect(peutGererEcole({ role: 'agent_plai', ecole_id: ECOLE_A }, [], ECOLE_A)).toBe(true);
+    expect(peutGererEcole({ role: 'agent_plai', ecole_id: null }, [ECOLE_A], ECOLE_A)).toBe(true);
+    expect(peutGererEcole({ role: 'agent_plai', ecole_id: ECOLE_A }, [], ECOLE_B)).toBe(false);
+    expect(ecolesGerables({ role: 'agent_plai', ecole_id: ECOLE_A }, [])).toEqual([ECOLE_A]);
+  });
+  it('rôle inconnu, absence de profil : refusés', () => {
     expect(peutGererEcole({ role: 'enseignant', ecole_id: ECOLE_A }, [], ECOLE_A)).toBe(false);
     expect(peutGererEcole(null, [], ECOLE_A)).toBe(false);
-    expect(ecolesGerables({ role: 'agent_plai', ecole_id: ECOLE_A }, [])).toEqual([]);
+    expect(ecolesGerables({ role: 'enseignant', ecole_id: ECOLE_A }, [])).toEqual([]);
+  });
+  it('révoquer / modifier : l\'agent seulement ses propres liens, les autres rôles tous', () => {
+    const lien = { cree_par: 'u1' };
+    expect(peutAgirSurLien({ role: 'agent_plai' }, 'u1', lien)).toBe(true);
+    expect(peutAgirSurLien({ role: 'agent_plai' }, 'u2', lien)).toBe(false);
+    expect(peutAgirSurLien({ role: 'referent_plai' }, 'u2', lien)).toBe(true);
+    expect(peutAgirSurLien({ role: 'direction' }, 'u2', lien)).toBe(true);
+    expect(peutAgirSurLien({ role: 'enseignant' }, 'u1', lien)).toBe(false);
+    expect(peutAgirSurLien(null, 'u1', lien)).toBe(false);
   });
 });
 

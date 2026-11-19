@@ -145,12 +145,12 @@ function TableLiens({ liens, onRevoquer, onModifierClasses, ecole, titre }) {
                       >
                         Détails<span className="sr-only"> du lien de {l.destinataire}</span>
                       </button>
-                      {l.mode === 'sommaire' && l.statut === 'actif' && (
+                      {l.gerable !== false && l.mode === 'sommaire' && l.statut === 'actif' && (
                         <button type="button" className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={() => onModifierClasses(l)}>
                           Modifier les classes<span className="sr-only"> du lien de {l.destinataire}</span>
                         </button>
                       )}
-                      {l.statut !== 'revoque' && (
+                      {l.gerable !== false && l.statut !== 'revoque' && (
                         <button type="button" className={`plai-btn-ghost px-3 py-1 border rounded ${FOCUS}`} style={{ fontSize: 16 }} onClick={() => onRevoquer(l)}>
                           Révoquer<span className="sr-only"> le lien de {l.destinataire}</span>
                         </button>
