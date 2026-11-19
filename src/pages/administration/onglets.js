@@ -6,4 +6,5 @@ export const ONGLETS_ADMIN = [
   { chemin: 'annees', libelle: 'Années', roles: ['admin'] },
   { chemin: 'catalogue', libelle: 'Catalogue', roles: ['admin'] },
   { chemin: 'transmission', libelle: 'Transmission', roles: ['admin'] },
+  { chemin: 'messages', libelle: 'Messages', roles: ['admin'] },
 ];

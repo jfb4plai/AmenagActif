@@ -4,13 +4,14 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 
 afterEach(cleanup);
 
-// Les six onglets sont remplacés par des stubs : seul le routage et la mise en page sont testés ici.
+// Les sept onglets sont remplacés par des stubs : seul le routage et la mise en page sont testés ici.
 vi.mock('../../src/pages/administration/MembresTab.jsx', () => ({ default: () => <h2>Stub membres</h2> }));
 vi.mock('../../src/pages/administration/EcolesTab.jsx', () => ({ default: () => <h2>Stub écoles</h2> }));
 vi.mock('../../src/pages/administration/AnneesTab.jsx', () => ({ default: () => <h2>Stub années</h2> }));
 vi.mock('../../src/pages/administration/DroitsTab.jsx', () => ({ default: () => <h2>Stub droits</h2> }));
 vi.mock('../../src/pages/administration/CatalogueTab.jsx', () => ({ default: () => <h2>Stub catalogue</h2> }));
 vi.mock('../../src/pages/TransmissionProfil.jsx', () => ({ default: () => <h2>Stub transmission</h2> }));
+vi.mock('../../src/components/AnnoncesAdmin.jsx', () => ({ default: () => <h2>Stub messages</h2> }));
 
 const { default: AdministrationRoutes } = await import('../../src/pages/administration/AdministrationRoutes.jsx');
 
@@ -40,16 +41,17 @@ describe('Administration : onglets par adresse', () => {
     ['annees', 'Stub années'],
     ['catalogue', 'Stub catalogue'],
     ['transmission', 'Stub transmission'],
+    ['messages', 'Stub messages'],
   ])('adresse directe /administration/%s', (chemin, texte) => {
     rendre(`/administration/${chemin}`);
     expect(screen.getByText(texte)).toBeTruthy();
   });
 
-  it('la navigation expose six liens et marque l\'actif seul', () => {
+  it('la navigation expose sept liens et marque l\'actif seul', () => {
     rendre('/administration/annees');
     const nav = screen.getByRole('navigation', { name: "Sections de l'administration" });
     const liens = within(nav).getAllByRole('link');
-    expect(liens.map((l) => l.textContent)).toEqual(['Membres & accès', 'Droits', 'Écoles', 'Années', 'Catalogue', 'Transmission']);
+    expect(liens.map((l) => l.textContent)).toEqual(['Membres & accès', 'Droits', 'Écoles', 'Années', 'Catalogue', 'Transmission', 'Messages']);
     const actifs = liens.filter((l) => l.getAttribute('aria-current') === 'page');
     expect(actifs.map((l) => l.textContent)).toEqual(['Années']);
   });
