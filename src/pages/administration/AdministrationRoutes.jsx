@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './AdminLayout.jsx';
 import MembresTab from './MembresTab.jsx';
+import DroitsTab from './DroitsTab.jsx';
 import EcolesTab from './EcolesTab.jsx';
 import AnneesTab from './AnneesTab.jsx';
 import CatalogueTab from './CatalogueTab.jsx';
@@ -14,6 +15,7 @@ export default function AdministrationRoutes() {
       <Route element={<AdminLayout />}>
         <Route index element={<Navigate to="membres" replace />} />
         <Route path="membres" element={<MembresTab />} />
+        <Route path="droits" element={<DroitsTab />} />
         <Route path="ecoles" element={<EcolesTab />} />
         <Route path="annees" element={<AnneesTab />} />
         <Route path="catalogue" element={<CatalogueTab />} />

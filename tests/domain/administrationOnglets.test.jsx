@@ -4,10 +4,11 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 
 afterEach(cleanup);
 
-// Les cinq onglets sont remplacés par des stubs : seul le routage et la mise en page sont testés ici.
+// Les six onglets sont remplacés par des stubs : seul le routage et la mise en page sont testés ici.
 vi.mock('../../src/pages/administration/MembresTab.jsx', () => ({ default: () => <h2>Stub membres</h2> }));
 vi.mock('../../src/pages/administration/EcolesTab.jsx', () => ({ default: () => <h2>Stub écoles</h2> }));
 vi.mock('../../src/pages/administration/AnneesTab.jsx', () => ({ default: () => <h2>Stub années</h2> }));
+vi.mock('../../src/pages/administration/DroitsTab.jsx', () => ({ default: () => <h2>Stub droits</h2> }));
 vi.mock('../../src/pages/administration/CatalogueTab.jsx', () => ({ default: () => <h2>Stub catalogue</h2> }));
 vi.mock('../../src/pages/TransmissionProfil.jsx', () => ({ default: () => <h2>Stub transmission</h2> }));
 
@@ -34,6 +35,7 @@ describe('Administration : onglets par adresse', () => {
 
   it.each([
     ['membres', 'Stub membres'],
+    ['droits', 'Stub droits'],
     ['ecoles', 'Stub écoles'],
     ['annees', 'Stub années'],
     ['catalogue', 'Stub catalogue'],
@@ -43,13 +45,13 @@ describe('Administration : onglets par adresse', () => {
     expect(screen.getByText(texte)).toBeTruthy();
   });
 
-  it('la navigation expose cinq liens et marque l\'actif seul', () => {
+  it('la navigation expose six liens et marque l\'actif seul', () => {
     rendre('/administration/annees');
     const nav = screen.getByRole('navigation', { name: "Sections de l'administration" });
     const liens = within(nav).getAllByRole('link');
-    expect(liens.map((l) => l.textContent)).toEqual(['Membres', 'Écoles', 'Années scolaires', 'Catalogue', 'Transmission']);
+    expect(liens.map((l) => l.textContent)).toEqual(['Membres & accès', 'Droits', 'Écoles', 'Années', 'Catalogue', 'Transmission']);
     const actifs = liens.filter((l) => l.getAttribute('aria-current') === 'page');
-    expect(actifs.map((l) => l.textContent)).toEqual(['Années scolaires']);
+    expect(actifs.map((l) => l.textContent)).toEqual(['Années']);
   });
 
   it('une adresse inconnue affiche « introuvable »', () => {
