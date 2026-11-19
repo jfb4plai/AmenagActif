@@ -106,6 +106,8 @@ export default function AnnoncesAdmin() {
         </p>
       </div>
 
+      {/* Saisie à gauche, aperçu à droite dès 1024 px ; l'un sous l'autre sur écran étroit. */}
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
       <div>
         <label htmlFor={`${id}-corps`} className="block font-medium" style={{ fontSize: 16 }}>Message</label>
         <div role="toolbar" aria-label="Mise en forme du message" aria-controls={`${id}-corps`} className="flex flex-wrap gap-2 my-1">
@@ -127,24 +129,25 @@ export default function AnnoncesAdmin() {
         />
         <p id={`${id}-corps-aide`} className="mt-1 text-[color:var(--text2)]" style={{ fontSize: 16 }}>
           Écrivez simplement : une ligne vide sépare les paragraphes. Pour une mise en forme, sélectionnez du texte puis cliquez sur Gras, Titre, Puce ou Lien ;
-          l'aperçu ci-dessous montre le résultat tel qu'il sera lu. Une adresse commençant par https:// devient cliquable d'elle-même.
+          l'aperçu à côté (ou en dessous sur un écran étroit) montre le résultat tel qu'il sera lu. Une adresse commençant par https:// devient cliquable d'elle-même.
           Ajoutez ce que vous seul savez (une école, une date, une consigne) : un message générique est ignoré. {corps.length}/{MAX_CORPS} caractères.
         </p>
       </div>
 
-      <div>
+      <div className="lg:sticky lg:top-4">
         <h3 className="font-medium" style={{ fontSize: 16 }}>Aperçu (tel que l'e-mail sera lu)</h3>
         {corps.trim() === ''
           ? <p className="plai-empty" style={{ fontSize: 16 }}>L'aperçu apparaît ici dès que vous écrivez.</p>
           : (
             <div
               data-testid="apercu-annonce"
-              className="border border-[color:var(--border)] rounded p-3 bg-white"
+              className="border border-[color:var(--border)] rounded p-3 bg-white overflow-auto lg:max-h-[70vh]"
               style={{ fontSize: 16, lineHeight: 1.5, fontFamily: 'Arial, Helvetica, sans-serif' }}
               // Sûr : texteVersHtml échappe tout le texte saisi avant de produire ses propres balises.
               dangerouslySetInnerHTML={{ __html: apercu }}
             />
           )}
+      </div>
       </div>
 
       <fieldset>
