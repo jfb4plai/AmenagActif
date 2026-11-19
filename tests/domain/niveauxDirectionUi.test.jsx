@@ -104,4 +104,37 @@ describe('NiveauxDirection', () => {
     rendre(membre({ ecoleId: 'e1', ecoleIds: ['e1', 'e2'] }));
     expect(appels[0]).toEqual([['e1', 'e2'], 'a1']);
   });
+
+  it('pendant l enregistrement : cases désactivées, Enregistrement… en status, second clic sans onChange', () => {
+    classes = { data: ['3e', '4e'] };
+    const onChange = rendre(membre(), 'enCours');
+    const cases = screen.getAllByRole('checkbox');
+    expect(cases.every((c) => c.disabled)).toBe(true);
+    expect(screen.getByRole('status').textContent).toBe('Enregistrement…');
+    fireEvent.click(cases[0]);
+    fireEvent.click(cases[1]);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('chargement des classes : message en status, aucun libellé « absent », aucune case éditable', () => {
+    classes = { data: undefined, isLoading: true };
+    rendre(membre({ niveaux: ['3e'] }));
+    expect(screen.getByRole('status').textContent).toBe('Chargement des niveaux…');
+    expect(screen.queryByText(/absent des classes actuelles/)).toBeNull();
+    expect(screen.queryAllByRole('checkbox').filter((c) => !c.disabled)).toHaveLength(0);
+  });
+
+  it('erreur de chargement : alert avec niveaux enregistrés conservés, pas de libellé « absent », pas de case', () => {
+    classes = { data: undefined, isError: true };
+    rendre(membre({ niveaux: ['3e', '4e'] }));
+    expect(screen.getByRole('alert').textContent).toBe('Impossible de charger les classes. Les niveaux déjà enregistrés sont conservés : 3e, 4e.');
+    expect(screen.queryByText(/absent des classes actuelles/)).toBeNull();
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+  });
+
+  it('erreur de chargement sans niveau enregistré : « aucun »', () => {
+    classes = { data: undefined, isError: true };
+    rendre(membre());
+    expect(screen.getByRole('alert').textContent).toBe('Impossible de charger les classes. Les niveaux déjà enregistrés sont conservés : aucun.');
+  });
 });
