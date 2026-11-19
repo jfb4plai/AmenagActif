@@ -33,8 +33,31 @@ export async function verifierAccesClasses(db, userId, classeIds) {
   if (ec) throw ec;
   if (!classes || classes.length !== new Set(classeIds).size) return false;
 
+  return ecolesAccessibles(db, userId, profil, classes.map((c) => c.ecole_id));
+}
+
+/**
+ * Même contrôle pour des fiches groupées enregistrées (leur école doit être celle de l'utilisateur).
+ * Liste vide : true (rien à vérifier).
+ * @returns {Promise<boolean>}
+ */
+export async function verifierAccesFichesGroupees(db, userId, ficheGroupeeIds) {
+  const ids = [...new Set(ficheGroupeeIds)];
+  if (ids.length === 0) return true;
+  const { data: profil, error: eProfil } = await db.from('ar_profils_acces').select('role, ecole_id').eq('user_id', userId).maybeSingle();
+  if (eProfil) throw eProfil;
+  if (!profil) return false;
+  const { data: fgs, error } = await db.from('ar_fiches_groupees').select('id, ecole_id').in('id', ids);
+  if (error) throw error;
+  if (!fgs || fgs.length !== ids.length) return false;
+  if (profil.role === 'admin') return true;
+  if (!['referent_plai', 'direction', 'agent_plai'].includes(profil.role)) return false;
+  return ecolesAccessibles(db, userId, profil, fgs.map((f) => f.ecole_id));
+}
+
+async function ecolesAccessibles(db, userId, profil, ecoleIds) {
   const { data: liens, error: eLiens } = await db.from('ar_profils_acces_ecoles').select('ecole_id').eq('user_id', userId);
   if (eLiens) throw eLiens;
   const mesEcoles = new Set([profil.ecole_id, ...(liens ?? []).map((l) => l.ecole_id)].filter(Boolean));
-  return classes.every((c) => mesEcoles.has(c.ecole_id));
+  return ecoleIds.every((id) => mesEcoles.has(id));
 }

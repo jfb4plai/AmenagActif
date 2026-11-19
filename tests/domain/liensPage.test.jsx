@@ -29,6 +29,9 @@ vi.mock('../../src/hooks/useLiens.js', () => ({
   useDefinirClasses: () => ({ mutateAsync: definirMutate, reset: vi.fn(), isPending: false, error: null }),
   useClassesDuLien: () => classesDuLien.etat,
 }));
+vi.mock('../../src/hooks/useFichesGroupees.js', () => ({
+  useFichesGroupees: () => ({ data: [], isLoading: false, error: null }),
+}));
 const grille = { classes: [{ id: 'c1', nom: '1A', niveau: '1re' }, { id: 'c2', nom: '1B', niveau: '1re' }] };
 vi.mock('../../src/hooks/useEcoleGrid.js', () => ({
   useEcoleGrid: () => ({ data: { classes: grille.classes }, isLoading: false }),

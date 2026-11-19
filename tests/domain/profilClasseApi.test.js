@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../api/_lib/supabaseAdmin.js', () => ({ supabaseAdmin: () => mocks.db }));
 vi.mock('../../api/_lib/ficheData.js', () => ({
   verifierAccesClasses: mocks.verifierAccesClasses,
+  verifierAccesFichesGroupees: async () => true,
   loadClasseData: mocks.loadClasseData,
   loadClassesData: vi.fn(),
 }));

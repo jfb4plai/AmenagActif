@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiens, useRevoquerLien, useDefinirClasses, useClassesDuLien } from '../hooks/useLiens.js';
 import { useEcoleGrid } from '../hooks/useEcoleGrid.js';
+import { useFichesGroupees } from '../hooks/useFichesGroupees.js';
 import DialogueClasses from '../components/DialogueClasses.jsx';
 import { filtrerLiens, grouperParEcole, titreEcole, dateFR, nomSommaire, LIBELLE_STATUT, JOURS_INACTIF_DEFAUT } from '../domain/liens.js';
 
@@ -23,7 +24,7 @@ function DialogueRevocation({ lien, enCours, erreur, onConfirmer, onAnnuler }) {
     >
       <h2 id="dlg-titre" className="text-lg font-semibold mb-2">Révoquer ce lien ?</h2>
       <p id="dlg-desc" className="mb-2">
-        Destinataire : <strong>{lien.destinataire}</strong> ({lien.classes.join(', ') || 'classes'}).
+        Destinataire : <strong>{lien.destinataire}</strong> ({[...lien.classes, ...(lien.fiches_groupees ?? []).map((n) => `fiche groupée « ${n} »`)].join(', ') || 'classes'}).
       </p>
       <p className="mb-4">
         L'enseignant ne pourra plus ouvrir la fiche et les accès de profil déjà émis depuis ce lien seront coupés. Cette action est définitive :
@@ -68,11 +69,13 @@ function MessageClasses({ erreur, children, onFermer }) {
 function DialogueClassesConnecte({ lien, onFermer }) {
   const grille = useEcoleGrid(lien.ecole_id, lien.annee_id);
   const actuelles = useClassesDuLien(lien.id);
+  const fiches = useFichesGroupees(lien.ecole_id, lien.annee_id);
   const definir = useDefinirClasses();
   const classeIdsAvant = actuelles.data?.classe_ids;
-  async function enregistrer(classeIds) {
+  const fgIdsAvant = actuelles.data?.fiche_groupee_ids ?? [];
+  async function enregistrer(classeIds, ficheGroupeeIds) {
     try {
-      await definir.mutateAsync({ lienId: lien.id, classeIds, classeIdsAvant });
+      await definir.mutateAsync({ lienId: lien.id, classeIds, classeIdsAvant, ...(ficheGroupeeIds ? { ficheGroupeeIds, ficheGroupeeIdsAvant: fgIdsAvant } : {}) });
       onFermer();
     } catch {
       // l'erreur reste affichée dans la boîte de dialogue (definir.error)
@@ -80,7 +83,8 @@ function DialogueClassesConnecte({ lien, onFermer }) {
   }
   if (grille.error) return <MessageClasses erreur onFermer={onFermer}>Impossible de charger les classes : {grille.error.message}</MessageClasses>;
   if (actuelles.error) return <MessageClasses erreur onFermer={onFermer}>Impossible de charger les classes de ce sommaire : {actuelles.error.message}</MessageClasses>;
-  if (grille.isLoading || !grille.data || actuelles.isLoading || !Array.isArray(classeIdsAvant)) {
+  if (fiches.error) return <MessageClasses erreur onFermer={onFermer}>Impossible de charger les fiches groupées : {fiches.error.message}</MessageClasses>;
+  if (grille.isLoading || !grille.data || actuelles.isLoading || fiches.isLoading || !Array.isArray(classeIdsAvant)) {
     return <MessageClasses onFermer={onFermer}>Chargement des classes…</MessageClasses>;
   }
   if (grille.data.classes.length === 0) {
@@ -89,6 +93,7 @@ function DialogueClassesConnecte({ lien, onFermer }) {
   return (
     <DialogueClasses
       lien={lien} classes={grille.data.classes} classeIdsInitiales={classeIdsAvant}
+      fichesGroupees={fiches.data ?? []} fgIdsInitiales={fgIdsAvant}
       enCours={definir.isPending} erreur={definir.error?.message}
       onEnregistrer={enregistrer} onAnnuler={onFermer}
     />
@@ -126,11 +131,11 @@ function TableLiens({ liens, onRevoquer, onModifierClasses, ecole, titre }) {
                 <tr className="border-b border-[color:var(--border)] align-top">
                   <th scope="row" className="py-2 pr-3 font-medium">
                     {l.mode === 'sommaire'
-                      ? nomSommaire({ numero: l.numero, cree_le: l.cree_le, ecole, destinataire: l.destinataire, nbClasses: l.classes.length })
+                      ? nomSommaire({ numero: l.numero, cree_le: l.cree_le, ecole, destinataire: l.destinataire, nbClasses: l.classes.length, nbFichesGroupees: (l.fiches_groupees ?? []).length })
                       : l.destinataire}
                     {l.cree_par && <span className="block font-normal text-[color:var(--text2)]">créé par {l.cree_par}</span>}
                   </th>
-                  <td className="py-2 pr-3">{l.classes.join(', ') || 'Non disponible'}</td>
+                  <td className="py-2 pr-3">{[...l.classes, ...(l.fiches_groupees ?? []).map((n) => `fiche groupée « ${n} »`)].join(', ') || 'Non disponible'}</td>
                   <td className="py-2 pr-3">{dateFR(l.cree_le)}</td>
                   <td className="py-2 pr-3">{dateFR(l.expire_le)}</td>
                   <td className="py-2 pr-3">

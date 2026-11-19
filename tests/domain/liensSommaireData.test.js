@@ -101,6 +101,7 @@ describe('chargerSommaire', () => {
       numero: 7,
       ecole: { nom: 'Athénée A', implantation: '4012', implantation_nom: 'Site Centre' },
       classes: [{ id: 'k1', nom: 'A', niveau: '3e' }, { id: 'k2', nom: 'B', niveau: '4e' }],
+      fichesGroupees: [],
     });
   });
 

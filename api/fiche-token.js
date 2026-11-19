@@ -1,8 +1,8 @@
 import { verifyFicheToken } from './_lib/jwt.js';
 import { authentifier } from './_lib/authUtilisateur.js';
 import { genererSecret, formeSecretValide, estFormeJwt, modeValide, MAX_CLASSES_PAR_LIEN, MAX_IDS_PAR_REQUETE, MAX_DESTINATAIRE, MAX_NOM_GROUPE, MESSAGE_LIEN_INACTIF } from './_lib/liens.js';
-import { creerLien, chargerSommaire, trouverLienParSecret, lienActif, compterOuverture, ErreurLien } from './_lib/liensData.js';
-import { loadClasseData, loadClassesData, verifierAccesClasses } from './_lib/ficheData.js';
+import { creerLien, chargerSommaire, chargerFicheGroupee, trouverLienParSecret, lienActif, compterOuverture, ErreurLien } from './_lib/liensData.js';
+import { loadClasseData, loadClassesData, verifierAccesClasses, verifierAccesFichesGroupees } from './_lib/ficheData.js';
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { computeFicheClasse } from '../src/domain/projections/ficheClasse.js';
 import { fusionnerDonneesClasses } from '../src/domain/projections/fusionClasses.js';
@@ -16,17 +16,21 @@ export default async function handler(req, res) {
       const auth = await authentifier(db, req, 'fiche-token');
       if (!auth.user) { res.status(auth.statut).json({ error: auth.erreur }); return; }
 
-      const { classeId, classeIds, nomGroupe, destinataire: destinataireBrut, mode: modeBrut } = req.body || {};
+      const { classeId, classeIds, ficheGroupeeIds, nomGroupe, destinataire: destinataireBrut, mode: modeBrut } = req.body || {};
       const mode = modeBrut === undefined || modeBrut === null ? 'fusion' : modeValide(modeBrut);
       if (!mode) { res.status(400).json({ error: 'Mode inconnu.' }); return; }
       if (classeIds !== undefined && !Array.isArray(classeIds)) { res.status(400).json({ error: 'classeIds doit être une liste.' }); return; }
       const idsGroupe = Array.isArray(classeIds) ? classeIds.filter(Boolean) : [];
+      if (ficheGroupeeIds !== undefined && !Array.isArray(ficheGroupeeIds)) { res.status(400).json({ error: 'ficheGroupeeIds doit être une liste.' }); return; }
+      const fgs = Array.isArray(ficheGroupeeIds) ? ficheGroupeeIds.filter(Boolean) : [];
+      if (fgs.length > 0 && mode !== 'sommaire') { res.status(400).json({ error: 'Seul un sommaire peut contenir des fiches groupées.' }); return; }
+      if (fgs.length > MAX_IDS_PAR_REQUETE || !fgs.every((id) => typeof id === 'string' && UUID_RE.test(id))) { res.status(400).json({ error: 'Identifiant de fiche groupée invalide.' }); return; }
       // Plafond par mode, appliqué ici (la couche SQL ne limite pas à MAX_IDS_PAR_REQUETE).
       if (mode === 'sommaire') {
-        if (idsGroupe.length > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Au plus ${MAX_IDS_PAR_REQUETE} classes par sommaire.` }); return; }
+        if (idsGroupe.length + fgs.length > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Au plus ${MAX_IDS_PAR_REQUETE} classes par sommaire.` }); return; }
       } else if (idsGroupe.length > MAX_CLASSES_PAR_LIEN) { res.status(400).json({ error: `Au plus ${MAX_CLASSES_PAR_LIEN} classes par fiche groupée.` }); return; }
       const cibles = idsGroupe.length > 0 ? idsGroupe : (classeId ? [classeId] : []);
-      if (cibles.length === 0) { res.status(400).json({ error: 'classeId ou classeIds requis' }); return; }
+      if (cibles.length === 0 && fgs.length === 0) { res.status(400).json({ error: 'classeId ou classeIds requis' }); return; }
       if (!cibles.every((id) => typeof id === 'string' && UUID_RE.test(id))) { res.status(400).json({ error: 'Identifiant de classe invalide.' }); return; }
       if (nomGroupe !== undefined && nomGroupe !== null && (typeof nomGroupe !== 'string' || nomGroupe.length > MAX_NOM_GROUPE)) {
         res.status(400).json({ error: `Nom de groupe : ${MAX_NOM_GROUPE} caractères au plus.` }); return;
@@ -37,12 +41,13 @@ export default async function handler(req, res) {
         res.status(400).json({ error: `Destinataire requis (1 à ${MAX_DESTINATAIRE} caractères).` }); return;
       }
 
-      const autorise = await verifierAccesClasses(db, auth.user.id, cibles);
+      const autorise = (cibles.length === 0 || await verifierAccesClasses(db, auth.user.id, cibles))
+        && await verifierAccesFichesGroupees(db, auth.user.id, fgs);
       if (!autorise) { res.status(403).json({ error: 'Accès refusé à une ou plusieurs de ces classes.' }); return; }
 
       // Lien opaque : seul le hash est stocké ; le secret n'est renvoyé qu'ici, une seule fois.
       const secret = genererSecret();
-      const { expire_le, numero } = await creerLien(db, { userId: auth.user.id, classeIds: cibles, destinataire, nomGroupe: mode === 'fusion' && idsGroupe.length > 0 ? nomGroupe : null, secret, mode });
+      const { expire_le, numero } = await creerLien(db, { userId: auth.user.id, classeIds: cibles, ficheGroupeeIds: fgs, destinataire, nomGroupe: mode === 'fusion' && idsGroupe.length > 0 ? nomGroupe : null, secret, mode });
       const origin = req.headers.origin || `https://${req.headers.host || ''}`;
       res.setHeader('Cache-Control', 'private, no-store');
       res.status(200).json({ token: secret, url: `${origin}/fiche/${secret}`, expire_le, ...(mode === 'sommaire' ? { numero } : {}) });
@@ -54,6 +59,7 @@ export default async function handler(req, res) {
 
     // `classe` n'a de sens que pour un sommaire ; présent (même vide ou répété) il est contrôlé strictement.
     const classeDemandee = req.query.classe;
+    const groupeDemande = req.query.groupe; // fiche groupée d'un sommaire : même logique que `classe`
     let opaque = false;
     let depuisSommaire = false;
     let cible; // { classeId } | { classeIds, nomGroupe }
@@ -67,17 +73,26 @@ export default async function handler(req, res) {
       const refuser = () => { res.setHeader('Cache-Control', 'private, no-store'); res.status(410).json({ error: MESSAGE_LIEN_INACTIF }); };
       if (!lienActif(lien)) { refuser(); return; }
       if (lien.mode === 'sommaire') {
-        if (classeDemandee === undefined) {
+        if (classeDemandee !== undefined && groupeDemande !== undefined) { refuser(); return; }
+        if (classeDemandee === undefined && groupeDemande === undefined) {
           await compterOuverture(supabaseAdmin(), lien.id);
           const sommaire = await chargerSommaire(supabaseAdmin(), lien);
           res.setHeader('Cache-Control', 'private, no-store');
           res.status(200).json({ sommaire });
           return;
         }
-        if (typeof classeDemandee !== 'string' || !UUID_RE.test(classeDemandee) || !lien.classeIds.includes(classeDemandee)) { refuser(); return; }
-        depuisSommaire = true;
-        cible = { classeId: classeDemandee };
-      } else if (classeDemandee !== undefined) {
+        if (groupeDemande !== undefined) {
+          if (typeof groupeDemande !== 'string' || !UUID_RE.test(groupeDemande) || !(lien.ficheGroupeeIds ?? []).includes(groupeDemande)) { refuser(); return; }
+          const fg = await chargerFicheGroupee(supabaseAdmin(), groupeDemande);
+          if (!fg || fg.classeIds.length === 0) { refuser(); return; }
+          depuisSommaire = true;
+          cible = { classeIds: fg.classeIds, nomGroupe: fg.nom };
+        } else {
+          if (typeof classeDemandee !== 'string' || !UUID_RE.test(classeDemandee) || !lien.classeIds.includes(classeDemandee)) { refuser(); return; }
+          depuisSommaire = true;
+          cible = { classeId: classeDemandee };
+        }
+      } else if (classeDemandee !== undefined || groupeDemande !== undefined) {
         refuser(); return;
       }
       opaque = true;

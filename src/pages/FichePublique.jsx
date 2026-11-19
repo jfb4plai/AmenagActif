@@ -7,12 +7,12 @@ import FicheClasseView from '../components/fiche/FicheClasseView.jsx';
 import { imprimerFiche, piedFicheClasse } from '../lib/imprimerFiche.js';
 
 export default function FichePublique() {
-  const { token, classeId } = useParams();
+  const { token, classeId, groupeId } = useParams();
   const { data, isLoading, error } = useQuery({
-    queryKey: ['fiche-publique', token, classeId ?? null],
+    queryKey: ['fiche-publique', token, classeId ?? null, groupeId ?? null],
     retry: false,
     queryFn: async () => {
-      const suffixe = classeId ? `&classe=${encodeURIComponent(classeId)}` : '';
+      const suffixe = classeId ? `&classe=${encodeURIComponent(classeId)}` : (groupeId ? `&groupe=${encodeURIComponent(groupeId)}` : '');
       const res = await fetch(`/api/fiche-token?token=${encodeURIComponent(token)}${suffixe}`);
       if (!res.ok) throw new Error(res.status >= 500 ? 'panne' : 'lien inactif');
       return res.json();

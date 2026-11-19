@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({ db: null, verifier: vi.fn(), loadClasseData: v
 vi.mock('../../api/_lib/supabaseAdmin.js', () => ({ supabaseAdmin: () => mocks.db }));
 vi.mock('../../api/_lib/ficheData.js', () => ({
   verifierAccesClasses: mocks.verifier,
+  verifierAccesFichesGroupees: async () => true,
   loadClasseData: mocks.loadClasseData,
   loadClassesData: mocks.loadClassesData,
 }));
@@ -734,7 +735,7 @@ describe('gestion des sommaires', () => {
         connecte(qui);
         const r = await liste({ lien_id: lienId });
         expect(r.statusCode).toBe(200);
-        expect(Object.keys(r.body).sort()).toEqual(['classe_ids', 'lien_id']);
+        expect(Object.keys(r.body).sort()).toEqual(['classe_ids', 'fiche_groupee_ids', 'lien_id']);
         expect(r.body.lien_id).toBe(lienId);
         expect([...r.body.classe_ids].sort()).toEqual([C1, C2].sort());
       }
@@ -770,5 +771,124 @@ describe('gestion des sommaires', () => {
     const r2 = await definir({ lien_id: lienId, classe_ids: [C5] });
     expect(r2.statusCode).toBe(500);
     expect(r2.body).toEqual({ error: 'Erreur serveur.' });
+  });
+});
+
+describe('sommaire contenant des fiches groupées enregistrées', () => {
+  const FG1 = '33333333-3333-4333-8333-111111111111';
+  const FG2 = '33333333-3333-4333-8333-222222222222';
+  const FG_AUTRE = '33333333-3333-4333-8333-333333333333'; // autre école
+  const postFiche = async (body) => {
+    const r = reponse();
+    await ficheHandler({ method: 'POST', headers: auth, body: { destinataire: 'A., cuisine', ...body } }, r);
+    return r;
+  };
+  const get = async (token, query = {}) => {
+    const r = reponse();
+    await ficheHandler({ method: 'GET', headers: {}, query: { token, ...query } }, r);
+    return r;
+  };
+
+  beforeEach(() => {
+    tables.ar_fiches_groupees = [
+      { id: FG1, ecole_id: 'ec1', annee_id: 'an1', nom: 'Atelier 3LA+3LB' },
+      { id: FG2, ecole_id: 'ec1', annee_id: 'an1', nom: 'Salle de classe' },
+      { id: FG_AUTRE, ecole_id: 'ec2', annee_id: 'an1', nom: 'Autre école' },
+    ];
+    tables.ar_fiches_groupees_classes = [
+      { fiche_groupee_id: FG1, classe_id: C1 }, { fiche_groupee_id: FG1, classe_id: C2 },
+      { fiche_groupee_id: FG2, classe_id: C1 }, { fiche_groupee_id: FG2, classe_id: C2 },
+    ];
+    tables.ar_liens_fiches_groupees = [];
+    mocks.db = fakeDb(tables, { autoIncrement: { ar_liens: 'numero' }, users: { [U.ref1]: 'ref1@ecole.be' } });
+    mocks.db.auth.getUser = async () => ({ data: { user: { id: courant } }, error: null });
+    courant = U.ref1;
+  });
+
+  it('crée un sommaire de classes + fiches groupées ; une classe peut aussi être dans une fiche groupée', async () => {
+    const r = await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: [FG1, FG2] });
+    expect(r.statusCode).toBe(200);
+    const lien = ligneLien(r.body.token);
+    expect(tables.ar_liens_classes.filter((x) => x.lien_id === lien.id)).toHaveLength(1);
+    expect(tables.ar_liens_fiches_groupees.filter((x) => x.lien_id === lien.id).map((x) => x.fiche_groupee_id).sort()).toEqual([FG1, FG2]);
+  });
+
+  it('un sommaire peut ne contenir que des fiches groupées', async () => {
+    const r = await postFiche({ mode: 'sommaire', classeIds: [], ficheGroupeeIds: [FG1] });
+    expect(r.statusCode).toBe(200);
+    expect(ligneLien(r.body.token).mode).toBe('sommaire');
+  });
+
+  it('refusé : fiches groupées hors sommaire, id invalide, fiche inconnue, autre école que les classes', async () => {
+    expect((await postFiche({ mode: 'fusion', classeIds: [C1, C2], ficheGroupeeIds: [FG1] })).statusCode).toBe(400);
+    expect((await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: ['pas-un-uuid'] })).statusCode).toBe(400);
+    expect((await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: ['33333333-3333-4333-8333-999999999999'] })).statusCode).toBe(400);
+    expect((await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: [FG_AUTRE] })).statusCode).toBe(400);
+    expect(tables.ar_liens).toHaveLength(0);
+  });
+
+  it('GET sommaire : fichesGroupees avec leurs classes ; GET ?groupe= : fiche fusionnée de ses classes, depuisSommaire', async () => {
+    const { body } = await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: [FG1] });
+    const s = await get(body.token);
+    expect(s.statusCode).toBe(200);
+    expect(s.body.sommaire.fichesGroupees).toEqual([{ id: FG1, nom: 'Atelier 3LA+3LB', classes: ['3LA', '3LB'] }]);
+    const g = await get(body.token, { groupe: FG1 });
+    expect(g.statusCode).toBe(200);
+    expect(g.body.depuisSommaire).toBe(true);
+    expect(g.body.vm).toBeTruthy();
+    expect(mocks.loadClassesData).toHaveBeenCalledWith([C1, C2]);
+    expect(g.headers['Cache-Control']).toBe('private, no-store');
+  });
+
+  it('?groupe= refusé (410, même corps) : fiche hors sommaire, id invalide, classe+groupe ensemble, lien « fusion »', async () => {
+    const { body } = await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: [FG1] });
+    for (const q of [{ groupe: FG2 }, { groupe: 'xyz' }, { groupe: FG1, classe: C1 }]) {
+      const r = await get(body.token, q);
+      expect(r.statusCode).toBe(410);
+      expect(r.body).toEqual({ error: MESSAGE_LIEN_INACTIF });
+    }
+    const fus = await postFiche({ mode: 'fusion', classeIds: [C1, C2] });
+    expect((await get(fus.body.token, { groupe: FG1 })).statusCode).toBe(410);
+  });
+
+  it('fiche groupée dont les classes ont disparu : 410', async () => {
+    const { body } = await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: [FG1] });
+    tables.ar_fiches_groupees_classes = [];
+    expect((await get(body.token, { groupe: FG1 })).statusCode).toBe(410);
+  });
+
+  it('liens : liste avec noms des fiches groupées, définir_classes remplace classes ET fiches groupées (409 si périmé)', async () => {
+    const { body } = await postFiche({ mode: 'sommaire', classeIds: [C1], ficheGroupeeIds: [FG1] });
+    const id = ligneLien(body.token).id;
+    const liste = reponse();
+    await liensHandler({ method: 'GET', headers: auth, query: {} }, liste);
+    const l = liste.body.liens.find((x) => x.id === id);
+    expect(l.fiches_groupees).toEqual(['Atelier 3LA+3LB']);
+    expect(l.fiche_groupee_ids).toEqual([FG1]);
+
+    const lecture = reponse();
+    await liensHandler({ method: 'GET', headers: auth, query: { lien_id: id } }, lecture);
+    expect(lecture.body.fiche_groupee_ids).toEqual([FG1]);
+
+    mocks.db.rpc = (fn, args) => {
+      mocks.db.journal.rpc.push({ fn, args });
+      return Promise.resolve({ data: 2, error: null });
+    };
+    const ok = reponse();
+    await liensHandler({ method: 'POST', headers: auth, body: { action: 'definir_classes', lien_id: id, classe_ids: [C1, C2], fiche_groupee_ids: [FG2], fiche_groupee_ids_avant: [FG1] } }, ok);
+    expect(ok.statusCode).toBe(200);
+    expect(mocks.db.journal.rpc.at(-1)).toEqual({ fn: 'ar_lien_definir_contenu', args: { p_lien: id, p_classes: [C1, C2], p_fiches_groupees: [FG2] } });
+
+    const perime = reponse();
+    await liensHandler({ method: 'POST', headers: auth, body: { action: 'definir_classes', lien_id: id, classe_ids: [C1], fiche_groupee_ids: [], fiche_groupee_ids_avant: [FG2] } }, perime);
+    expect(perime.statusCode).toBe(409);
+
+    const autreEcole = reponse();
+    await liensHandler({ method: 'POST', headers: auth, body: { action: 'definir_classes', lien_id: id, classe_ids: [C1], fiche_groupee_ids: [FG_AUTRE] } }, autreEcole);
+    expect(autreEcole.statusCode).toBe(400);
+
+    const vide = reponse();
+    await liensHandler({ method: 'POST', headers: auth, body: { action: 'definir_classes', lien_id: id, classe_ids: [], fiche_groupee_ids: [] } }, vide);
+    expect(vide.statusCode).toBe(400);
   });
 });

@@ -5,7 +5,7 @@ const FOCUS = 'focus-visible:outline focus-visible:outline-[3px] focus-visible:o
 
 // Page d'accueil d'un super lien : une entrée par classe rattachée.
 export default function SommairePublic({ sommaire, token }) {
-  const { numero, ecole, classes } = sommaire;
+  const { numero, ecole, classes, fichesGroupees = [] } = sommaire;
   const nomEcole = ecole?.implantation_nom || ecole?.nom || '';
   const t = encodeURIComponent(token);
 
@@ -15,10 +15,21 @@ export default function SommairePublic({ sommaire, token }) {
         <h1 className="text-xl font-semibold">Vos classes — {nomEcole}</h1>
         <p style={{ fontSize: 16 }}>Référence : {referenceLien(numero)}</p>
 
-        {classes.length === 0 ? (
+        {classes.length === 0 && fichesGroupees.length === 0 ? (
           <p style={{ fontSize: 16 }}>Aucune classe n'est rattachée pour le moment. Contactez votre référent.</p>
         ) : (
           <ul className="space-y-2 list-none p-0">
+            {fichesGroupees.map((f) => (
+              <li key={`g-${f.id}`}>
+                <Link
+                  to={`/fiche/${t}/groupe/${encodeURIComponent(f.id)}`}
+                  className={`plai-btn block w-full text-left ${FOCUS}`}
+                  style={{ fontSize: 16 }}
+                >
+                  Fiche groupée : {f.nom}{f.classes?.length ? ` (${f.classes.join(' + ')})` : ''}
+                </Link>
+              </li>
+            ))}
             {classes.map((c) => (
               <li key={c.id}>
                 <Link

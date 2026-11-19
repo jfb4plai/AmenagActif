@@ -52,6 +52,7 @@ export default function App() {
       <Route path="/activer" element={<Activer />} />
       <Route path="/fiche/:token" element={<FichePublique />} />
       <Route path="/fiche/:token/classe/:classeId" element={<FichePublique />} />
+      <Route path="/fiche/:token/groupe/:groupeId" element={<FichePublique />} />
       <Route path="/catalogue-amenagements" element={<CatalogueAmenagements />} />
       <Route path="/" element={<RequireAuth><Shell><Accueil /></Shell></RequireAuth>} />
       <Route path="/saisie" element={<RequireAuth><Shell><RequireRole roles={EDITEURS}><SaisieEcole /></RequireRole></Shell></RequireAuth>} />

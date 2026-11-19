@@ -7,11 +7,11 @@ const MAX_DESTINATAIRE = 80;
 
 /**
  * Génère un lien enseignant opaque. Le destinataire est obligatoire : il sert à retrouver et révoquer le lien.
- * Props : classeIds (1 à 10), nomGroupe (fiche groupée), libelle (texte cliquable collé dans le courriel),
+ * Props : classeIds (1 à 10), nomGroupe (fiche groupée), ficheGroupeeIds (sommaire seulement : fiches groupées enregistrées), libelle (texte cliquable collé dans le courriel),
  * mode ('fusion' par défaut, ou 'sommaire' : une fiche par classe, sans nomGroupe, numéro SL-xxxx affiché),
  * avertissement (texte facultatif affiché avant le bouton, ex. aménagements « à confirmer » : non bloquant).
  */
-export default function GenerateurLien({ classeIds, nomGroupe, libelle, avertissement = null, mode = 'fusion' }) {
+export default function GenerateurLien({ classeIds, ficheGroupeeIds = [], nomGroupe, libelle, avertissement = null, mode = 'fusion' }) {
   const id = useId();
   const [destinataire, setDestinataire] = useState('');
   const [enCours, setEnCours] = useState(false);
@@ -31,6 +31,7 @@ export default function GenerateurLien({ classeIds, nomGroupe, libelle, avertiss
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token ?? ''}` },
         body: JSON.stringify({
           classeIds,
+          ...(mode === 'sommaire' && ficheGroupeeIds.length > 0 ? { ficheGroupeeIds } : {}),
           nomGroupe: mode === 'sommaire' ? undefined : (nomGroupe || undefined),
           destinataire: destinataire.trim(),
           mode,

@@ -1,7 +1,7 @@
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { authentifier } from './_lib/authUtilisateur.js';
 import { peutGererEcole, peutAgirSurLien, ecolesGerables, versLienPublic, statutLien, MAX_IDS_PAR_REQUETE } from './_lib/liens.js';
-import { revoquerLien, purgerLiensExpires, definirClasses, ErreurLien } from './_lib/liensData.js';
+import { revoquerLien, purgerLiensExpires, definirClasses, fichesGroupeesDuLien, ErreurLien } from './_lib/liensData.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LIMITE_LIENS = 1000;
@@ -57,6 +57,19 @@ export default async function handler(req, res) {
       ]);
       if (eC) throw eC;
       if (eE) throw eE;
+      let liaisonsFg = [];
+      let nomsFg = new Map();
+      if (ids.length) {
+        const { data: lf, error: eLf } = await db.from('ar_liens_fiches_groupees').select('lien_id, fiche_groupee_id').in('lien_id', ids);
+        if (eLf) throw eLf;
+        liaisonsFg = lf ?? [];
+        const fgIds = [...new Set(liaisonsFg.map((x) => x.fiche_groupee_id))];
+        if (fgIds.length) {
+          const { data: fgs, error: eFg } = await db.from('ar_fiches_groupees').select('id, nom').in('id', fgIds);
+          if (eFg) throw eFg;
+          nomsFg = new Map((fgs ?? []).map((f) => [f.id, f.nom]));
+        }
+      }
       const classesParLien = new Map();
       const idsParLien = new Map();
       for (const lc of liensClasses ?? []) {
@@ -74,7 +87,10 @@ export default async function handler(req, res) {
         createurs.set(uid, data?.user?.email ?? null);
       }
       const now = new Date();
-      const liens = (rows ?? []).map((r) => versLienPublic(r, { classes: (classesParLien.get(r.id) ?? []).sort(), classeIds: idsParLien.get(r.id) ?? [], creePar: createurs.get(r.cree_par) ?? null, gerable: peutAgirSurLien(profil, auth.user.id, r), now }));
+      const liens = (rows ?? []).map((r) => versLienPublic(r, { classes: (classesParLien.get(r.id) ?? []).sort(), classeIds: idsParLien.get(r.id) ?? [],
+        fichesGroupees: liaisonsFg.filter((x) => x.lien_id === r.id).map((x) => nomsFg.get(x.fiche_groupee_id)).filter(Boolean).sort(),
+        ficheGroupeeIds: liaisonsFg.filter((x) => x.lien_id === r.id).map((x) => x.fiche_groupee_id),
+        creePar: createurs.get(r.cree_par) ?? null, gerable: peutAgirSurLien(profil, auth.user.id, r), now }));
       res.status(200).json({ ecoles: ecoles ?? [], liens });
       return;
     }
@@ -118,17 +134,21 @@ async function classesDuLien(db, req, res, profil, ecolesLiees, userId) {
   if (error) throw error;
   if (!lien) { res.status(404).json({ error: 'Lien introuvable.' }); return; }
   if (!peutGererEcole(profil, ecolesLiees, lien.ecole_id) || !peutAgirSurLien(profil, userId, lien)) { res.status(403).json({ error: 'Accès refusé.' }); return; }
-  res.status(200).json({ lien_id: lienId, classe_ids: await lireClassesDuLien(db, lienId) });
+  res.status(200).json({ lien_id: lienId, classe_ids: await lireClassesDuLien(db, lienId), fiche_groupee_ids: await fichesGroupeesDuLien(db, lienId) });
 }
 
 /** Remplace les classes d'un sommaire. Les contrôles JS précèdent la fonction SQL (le plafond n'y est pas appliqué). */
 async function definirClassesAction(db, req, res, profil, ecolesLiees, userId) {
-  const { lien_id: lienId, classe_ids: brut, classe_ids_avant: avant } = req.body || {};
+  const { lien_id: lienId, classe_ids: brut, classe_ids_avant: avant, fiche_groupee_ids: fgBrut, fiche_groupee_ids_avant: fgAvant } = req.body || {};
   if (typeof lienId !== 'string' || !UUID_RE.test(lienId)) { res.status(400).json({ error: 'lien_id invalide.' }); return; }
   if (!listeUuidValide(brut)) { res.status(400).json({ error: 'classe_ids invalide.' }); return; }
   if (avant !== undefined && !listeUuidValide(avant)) { res.status(400).json({ error: 'classe_ids_avant invalide.' }); return; }
+  if (fgBrut !== undefined && !listeUuidValide(fgBrut)) { res.status(400).json({ error: 'fiche_groupee_ids invalide.' }); return; }
+  if (fgAvant !== undefined && !listeUuidValide(fgAvant)) { res.status(400).json({ error: 'fiche_groupee_ids_avant invalide.' }); return; }
   const ids = [...new Set(brut)];
-  if (ids.length === 0 || ids.length > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Un sommaire regroupe de 1 à ${MAX_IDS_PAR_REQUETE} classes.` }); return; }
+  const fgIds = fgBrut === undefined ? undefined : [...new Set(fgBrut)];
+  const total = ids.length + (fgIds?.length ?? 0);
+  if (total === 0 || total > MAX_IDS_PAR_REQUETE) { res.status(400).json({ error: `Un sommaire regroupe de 1 à ${MAX_IDS_PAR_REQUETE} éléments.` }); return; }
 
   const { data: lien, error } = await db.from('ar_liens').select('id, ecole_id, annee_id, mode, cree_par, expire_le, revoque_le').eq('id', lienId).maybeSingle();
   if (error) throw error;
@@ -147,12 +167,29 @@ async function definirClassesAction(db, req, res, profil, ecolesLiees, userId) {
     }
   }
 
-  const { data: classes, error: eCl } = await db.from('ar_classes').select('id, ecole_id, annee_id').in('id', ids);
+  if (fgAvant !== undefined && fgIds !== undefined) {
+    const actuelles = new Set(await fichesGroupeesDuLien(db, lienId));
+    const attendues = new Set(fgAvant);
+    if (actuelles.size !== attendues.size || [...attendues].some((c) => !actuelles.has(c))) {
+      res.status(409).json({ error: 'Ce sommaire a été modifié entre-temps. Fermez la fenêtre et rouvrez-la.' });
+      return;
+    }
+  }
+
+  const { data: classes, error: eCl } = ids.length ? await db.from('ar_classes').select('id, ecole_id, annee_id').in('id', ids) : { data: [], error: null };
   if (eCl) throw eCl;
   if (!classes || classes.length !== ids.length || classes.some((c) => c.ecole_id !== lien.ecole_id || c.annee_id !== lien.annee_id)) {
     res.status(400).json({ error: "Toutes les classes doivent appartenir à l'école et à l'année scolaire du lien." });
     return;
   }
-  await definirClasses(db, lienId, ids);
-  res.status(200).json({ ok: true, nb: ids.length });
+  if (fgIds?.length) {
+    const { data: fgs, error: eF } = await db.from('ar_fiches_groupees').select('id, ecole_id, annee_id').in('id', fgIds);
+    if (eF) throw eF;
+    if (!fgs || fgs.length !== fgIds.length || fgs.some((f) => f.ecole_id !== lien.ecole_id || f.annee_id !== lien.annee_id)) {
+      res.status(400).json({ error: "Toutes les fiches groupées doivent appartenir à l'école et à l'année scolaire du lien." });
+      return;
+    }
+  }
+  await definirClasses(db, lienId, ids, fgIds);
+  res.status(200).json({ ok: true, nb: total });
 }

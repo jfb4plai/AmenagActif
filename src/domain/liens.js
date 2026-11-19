@@ -61,7 +61,7 @@ export function trierClasses(classes) {
 }
 
 /** Nom lisible d'un sommaire de classes. */
-export function nomSommaire({ numero, cree_le, ecole, destinataire, nbClasses }) {
-  const nb = `${nbClasses} classe${nbClasses > 1 ? 's' : ''}`;
+export function nomSommaire({ numero, cree_le, ecole, destinataire, nbClasses, nbFichesGroupees = 0 }) {
+  const nb = `${nbClasses} classe${nbClasses > 1 ? 's' : ''}${nbFichesGroupees > 0 ? ` + ${nbFichesGroupees} fiche${nbFichesGroupees > 1 ? 's' : ''} groupée${nbFichesGroupees > 1 ? 's' : ''}` : ''}`;
   return `Super lien ${referenceLien(numero)} (créé le ${dateFR(cree_le)}) · ${titreEcole(ecole)} · ${destinataire} · ${nb}`;
 }

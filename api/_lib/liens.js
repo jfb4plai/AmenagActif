@@ -88,7 +88,7 @@ export function modeValide(v) {
 }
 
 /** Projection publique d'un lien : liste blanche de champs, token_hash n'en fait JAMAIS partie. */
-export function versLienPublic(row, { classes = [], classeIds = [], creePar = null, gerable = true, now = new Date() } = {}) {
+export function versLienPublic(row, { classes = [], classeIds = [], fichesGroupees = [], ficheGroupeeIds = [], creePar = null, gerable = true, now = new Date() } = {}) {
   return {
     id: row.id,
     ecole_id: row.ecole_id,
@@ -99,6 +99,8 @@ export function versLienPublic(row, { classes = [], classeIds = [], creePar = nu
     nom_groupe: row.nom_groupe ?? null,
     classes,
     classe_ids: classeIds,
+    fiches_groupees: fichesGroupees,
+    fiche_groupee_ids: ficheGroupeeIds,
     cree_le: row.cree_le,
     cree_par: creePar,
     gerable, // faux : l'agent accompagnant voit ce lien (créé par un autre) mais ne peut ni le révoquer ni le modifier

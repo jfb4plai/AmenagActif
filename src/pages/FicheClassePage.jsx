@@ -7,6 +7,8 @@ import { imprimerFiche, piedFicheClasse } from '../lib/imprimerFiche.js';
 import { useRole } from '../lib/auth.jsx';
 import GenerateurLien from '../components/GenerateurLien.jsx';
 import ChoixModeLien from '../components/ChoixModeLien.jsx';
+import FicheGroupeeForm from '../components/FicheGroupeeForm.jsx';
+import { useFichesGroupees, useEnregistrerFicheGroupee, useSupprimerFicheGroupee } from '../hooks/useFichesGroupees.js';
 import { useAConfirmerClasses } from '../hooks/useAConfirmer.js';
 import { messageAvantEnvoi } from '../domain/changementClasse.js';
 
@@ -21,7 +23,7 @@ function NoteSommaire({ role }) {
       <p className="font-medium" style={{ fontSize: 16 }}>Nouveau : le sommaire, pour un enseignant qui a plusieurs classes</p>
       <>
           <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
-            Un seul lien ouvre la liste de ses classes ; chacune garde sa propre fiche. Pour le créer, cochez au moins deux classes ci-dessous, puis choisissez « Un sommaire : une fiche par classe ».
+            Un seul lien ouvre la liste de ses classes ; chacune garde sa propre fiche. Pour le créer, cochez au moins deux classes ci-dessous, puis choisissez « Un sommaire : une fiche par classe ». Pour y mettre aussi un cours commun à plusieurs classes, enregistrez d'abord une fiche groupée (section « Fiches groupées »), puis cochez-la comme une classe.
           </p>
           <p style={{ fontSize: 16 }}>
             <a className="text-teal underline" href={GUIDE_SOMMAIRE[role] ?? GUIDE_SOMMAIRE_DEFAUT} target="_blank" rel="noopener noreferrer">
@@ -43,10 +45,14 @@ function Picker() {
   const [selection, setSelection] = useState(new Set());
   const [nomGroupe, setNomGroupe] = useState('');
   const [valide, setValide] = useState(null); // { classeIds, nomGroupe } une fois "Valider" cliqué
+  const [selectionFg, setSelectionFg] = useState(new Set()); // fiches groupées enregistrées cochées (pour un sommaire)
+  const [formFg, setFormFg] = useState(null); // null | { initial } : formulaire de création / modification
   const peutGrouper = role === 'admin' || role === 'referent_plai' || role === 'direction' || role === 'agent_plai';
   const peutLier = true; // tous les rôles éditeurs créent des liens (cf. api/_lib/ficheData.js) ; l'agent ne gère que les siens (api/liens.js)
   const [mode, setMode] = useState('fusion'); // 'fusion' | 'sommaire' (sommaire : rôles pouvant lier, 2 classes ou plus)
-  const sommaire = peutLier && selection.size >= 2 && mode === 'sommaire';
+  const nbElements = selection.size + selectionFg.size; // une fiche groupée cochée compte comme une classe
+  // Une fiche groupée cochée impose le sommaire : une fiche fusionnée ne contient que des classes.
+  const sommaire = peutLier && nbElements >= 2 && (selectionFg.size > 0 || mode === 'sommaire');
   // En mode sommaire, l'aperçu fusionné n'est pas chargé (ids indéfinis : requête désactivée).
   const apercu = useFicheGroupe(sommaire ? undefined : valide?.classeIds, valide?.nomGroupe);
   const aConfirmer = useAConfirmerClasses(valide?.classeIds);
@@ -61,6 +67,9 @@ function Picker() {
     }
   }, [annees, anneeId]);
   const { data: grid } = useEcoleGrid(ecoleId || null, anneeId || null);
+  const fiches = useFichesGroupees(ecoleId || null, anneeId || null).data ?? [];
+  const enregistrerFg = useEnregistrerFicheGroupee(ecoleId, anneeId);
+  const supprimerFg = useSupprimerFicheGroupee(ecoleId, anneeId);
 
   function basculer(classeId) {
     setSelection((s) => {
@@ -69,6 +78,30 @@ function Picker() {
       return n;
     });
     setValide(null); // toute modification de la sélection invalide l'aperçu déjà confirmé
+  }
+
+  function basculerFg(id) {
+    setSelectionFg((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+    setValide(null);
+  }
+
+  async function enregistrerFiche({ id, nom, classeIds }) {
+    try {
+      await enregistrerFg.mutateAsync({ id, nom, classeIds });
+      setFormFg(null);
+    } catch {
+      // le message reste affiché dans le formulaire (enregistrerFg.error)
+    }
+  }
+
+  function supprimerFiche(f) {
+    if (!confirm(`Supprimer la fiche groupée « ${f.nom} » ? Elle disparaîtra aussi des sommaires qui la contiennent. Les classes ne sont pas touchées.`)) return;
+    setSelectionFg((s) => { const n = new Set(s); n.delete(f.id); return n; });
+    supprimerFg.mutate(f.id);
   }
 
   function changerMode(m) {
@@ -80,12 +113,16 @@ function Picker() {
   function changerEcole(id) {
     setEcoleId(id);
     setSelection(new Set());
+    setSelectionFg(new Set());
+    setFormFg(null);
     setValide(null);
   }
 
   function changerAnnee(id) {
     setAnneeId(id);
     setSelection(new Set());
+    setSelectionFg(new Set());
+    setFormFg(null);
     setValide(null);
   }
 
@@ -125,18 +162,71 @@ function Picker() {
         ))}
       </ul>
 
-      {peutGrouper && selection.size >= 2 && (
+      {(grid?.classes ?? []).length > 0 && (
+        <section className="space-y-2 no-print" aria-label="Fiches groupées">
+          <h2 className="font-medium" style={{ fontSize: 16 }}>Fiches groupées</h2>
+          {fiches.length === 0 && (
+            <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
+              Aucune pour l'instant. Une fiche groupée réunit plusieurs classes en une seule fiche (cours commun) ; une fois enregistrée, elle se coche comme une classe pour composer un sommaire.
+            </p>
+          )}
+          <ul className="space-y-1">
+            {fiches.map((f) => (
+              <li key={f.id} className="flex flex-wrap items-center gap-2" style={{ fontSize: 16 }}>
+                {peutGrouper && (
+                  <input type="checkbox" className="w-5 h-5" checked={selectionFg.has(f.id)} onChange={() => basculerFg(f.id)}
+                    aria-label={`Sélectionner la fiche groupée ${f.nom} pour un sommaire`} />
+                )}
+                <strong>{f.nom}</strong>
+                <span className="text-[color:var(--text2)]">({f.classeIds.map((cid) => (grid?.classes ?? []).find((c) => c.id === cid)?.nom).filter(Boolean).join(' + ')})</span>
+                <button type="button" className="underline text-teal" onClick={() => { setSelection(new Set()); setSelectionFg(new Set()); setFormFg(null); setValide({ classeIds: f.classeIds, nomGroupe: f.nom }); }}>
+                  Aperçu{peutLier ? ' et lien' : ''}<span className="sr-only"> de {f.nom}</span>
+                </button>
+                {peutGrouper && (
+                  <>
+                    <button type="button" className="underline text-teal" onClick={() => { enregistrerFg.reset(); setFormFg({ initial: f }); }}>Modifier<span className="sr-only"> {f.nom}</span></button>
+                    <button type="button" className="underline text-red-600" onClick={() => supprimerFiche(f)}>Supprimer<span className="sr-only"> {f.nom}</span></button>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+          {supprimerFg.isError && <p role="alert" className="plai-error" style={{ fontSize: 16 }}>{supprimerFg.error.message}</p>}
+          {fiches.length > 0 && peutGrouper && !sommaire && selectionFg.size === 1 && nbElements === 1 && (
+            <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>Cochez aussi une classe ou une autre fiche groupée pour composer un sommaire.</p>
+          )}
+          {peutGrouper && !formFg && (
+            <button type="button" className="plai-btn" style={{ fontSize: 16 }} onClick={() => { enregistrerFg.reset(); setFormFg({ initial: null }); }}>
+              + Nouvelle fiche groupée
+            </button>
+          )}
+          {formFg && (
+            <FicheGroupeeForm
+              key={formFg.initial?.id ?? 'nouvelle'}
+              classes={grid?.classes ?? []} initial={formFg.initial} classeIdsPreselection={[...selection]}
+              enCours={enregistrerFg.isPending} erreur={enregistrerFg.error?.message}
+              onEnregistrer={enregistrerFiche} onAnnuler={() => setFormFg(null)}
+            />
+          )}
+        </section>
+      )}
+
+      {peutGrouper && nbElements >= 2 && (
         <div className="plai-card p-3 space-y-2 max-w-md no-print">
           <p className="font-medium" style={{ fontSize: 16 }}>
-            {sommaire ? 'Sommaire' : 'Fiche groupée'} — {selection.size} classes sélectionnées
+            {sommaire ? 'Sommaire' : 'Fiche groupée'} — {selectionFg.size > 0
+              ? `${selection.size} classe${selection.size > 1 ? 's' : ''} et ${selectionFg.size} fiche${selectionFg.size > 1 ? 's' : ''} groupée${selectionFg.size > 1 ? 's' : ''} sélectionnée${nbElements > 1 ? 's' : ''}`
+              : `${selection.size} classes sélectionnées`}
           </p>
           <p className="text-[color:var(--text2)]" style={{ fontSize: 16 }}>
             {sommaire
-              ? "Un seul lien pour l'enseignant : chaque classe garde sa propre fiche, il choisit celle qu'il veut ouvrir."
+              ? (selectionFg.size > 0
+                ? "Un seul lien pour l'enseignant : chaque classe ou fiche groupée garde sa propre fiche, il choisit celle qu'il veut ouvrir."
+                : "Un seul lien pour l'enseignant : chaque classe garde sa propre fiche, il choisit celle qu'il veut ouvrir.")
               : 'Pour un cours pratique réunissant plusieurs classes (atelier, groupe transversal…) : une seule fiche, AU et AR fusionnés, sans doublon.'}
             {peutLier && " L'envoi du lien à l'enseignant reste à faire vous-même, comme pour une classe seule."}
           </p>
-          {peutLier && <ChoixModeLien mode={mode} onChange={changerMode} nbClasses={selection.size} />}
+          {peutLier && selectionFg.size === 0 && <ChoixModeLien mode={mode} onChange={changerMode} nbClasses={selection.size} />}
           {!sommaire && (
           <label className="text-sm block">Nom du groupe (optionnel)
             <input className="plai-input w-full" placeholder="Atelier cuisine 3e" value={nomGroupe} onChange={(e) => changerNomGroupe(e.target.value)} />
@@ -154,15 +244,17 @@ function Picker() {
       {sommaire && (
         <div className="space-y-3 max-w-xl no-print">
           <div className="plai-card p-3 space-y-1" style={{ fontSize: 16 }}>
-            <p className="font-medium">Classes du sommaire ({selection.size})</p>
+            <p className="font-medium">{selectionFg.size > 0 ? 'Contenu du sommaire' : 'Classes du sommaire'} ({nbElements})</p>
             <ul className="list-disc pl-5">
               {(grid?.classes ?? []).filter((c) => selection.has(c.id)).map((c) => <li key={c.id}>{c.nom}</li>)}
+              {fiches.filter((f) => selectionFg.has(f.id)).map((f) => <li key={f.id}>Fiche groupée : {f.nom}</li>)}
             </ul>
           </div>
           <GenerateurLien
-            key={`sommaire:${[...selection].sort().join(',')}`}
+            key={`sommaire:${[...selection].sort().join(',')}|${[...selectionFg].sort().join(',')}`}
             mode="sommaire"
             classeIds={[...selection]}
+            ficheGroupeeIds={[...selectionFg]}
             libelle={`Aménagements à mettre en place — Vos classes (${ecoleUnique?.nom ?? ecoles.find((e) => e.id === ecoleId)?.nom ?? ''})`}
             avertissement="Ce lien ouvre toutes les classes listées. Ne le transmettez qu'à l'enseignant concerné."
           />

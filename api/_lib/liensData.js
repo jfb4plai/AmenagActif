@@ -14,29 +14,54 @@ export class ErreurLien extends Error {
 
 /**
  * Crée un lien pour des classes de la MÊME école et de la MÊME année. Ne stocke que le hash.
- * mode 'fusion' : 1 à 10 classes ; mode 'sommaire' : 1 à MAX_IDS_PAR_REQUETE classes, sans nom de groupe.
+ * mode 'fusion' : 1 à 10 classes ; mode 'sommaire' : 1 à MAX_IDS_PAR_REQUETE éléments (classes et/ou fiches groupées
+ * enregistrées), sans nom de groupe.
  * @returns {Promise<{ id: string, expire_le: string, numero: number }>}
  */
-export async function creerLien(db, { userId, classeIds, destinataire, nomGroupe, secret, mode = 'fusion', now = new Date() }) {
+export async function creerLien(db, { userId, classeIds, ficheGroupeeIds = [], destinataire, nomGroupe, secret, mode = 'fusion', now = new Date() }) {
   const ids = [...new Set(classeIds)];
+  const fgIds = [...new Set(ficheGroupeeIds)];
+  if (fgIds.length > 0 && mode !== 'sommaire') throw new ErreurLien(400, 'Seul un sommaire peut contenir des fiches groupées.');
   const plafond = mode === 'sommaire' ? MAX_IDS_PAR_REQUETE : MAX_CLASSES_PAR_LIEN;
-  if (ids.length === 0 || ids.length > plafond) throw new ErreurLien(400, `Un lien regroupe de 1 à ${plafond} classes.`);
+  if (fgIds.length > 0) {
+    if (ids.length + fgIds.length > plafond) throw new ErreurLien(400, `Un sommaire regroupe de 1 à ${plafond} éléments.`);
+  } else if (ids.length === 0 || ids.length > plafond) {
+    throw new ErreurLien(400, `Un lien regroupe de 1 à ${plafond} classes.`);
+  }
 
-  const { data: classes, error } = await db.from('ar_classes').select('id, ecole_id, annee_id, ar_annees(libelle)').in('id', ids);
-  if (error) throw error;
-  if (!classes || classes.length !== ids.length) throw new ErreurLien(400, 'Classe introuvable.');
-  const ecoles = new Set(classes.map((c) => c.ecole_id));
-  const annees = new Set(classes.map((c) => c.annee_id));
+  let classes = [];
+  if (ids.length > 0) {
+    const { data, error } = await db.from('ar_classes').select('id, ecole_id, annee_id, ar_annees(libelle)').in('id', ids);
+    if (error) throw error;
+    if (!data || data.length !== ids.length) throw new ErreurLien(400, 'Classe introuvable.');
+    classes = data;
+  }
+  let fiches = [];
+  if (fgIds.length > 0) {
+    const { data, error } = await db.from('ar_fiches_groupees').select('id, ecole_id, annee_id').in('id', fgIds);
+    if (error) throw error;
+    if (!data || data.length !== fgIds.length) throw new ErreurLien(400, 'Fiche groupée introuvable.');
+    fiches = data;
+  }
+  const ecoles = new Set([...classes, ...fiches].map((c) => c.ecole_id));
+  const annees = new Set([...classes, ...fiches].map((c) => c.annee_id));
   if (ecoles.size !== 1 || annees.size !== 1) throw new ErreurLien(400, "Toutes les classes d'un lien doivent appartenir à la même école et à la même année scolaire.");
+  const ref = classes[0] ?? fiches[0];
+  let libelleAnnee = classes[0]?.ar_annees?.libelle;
+  if (libelleAnnee === undefined) {
+    const { data: an, error: eAn } = await db.from('ar_annees').select('libelle').eq('id', ref.annee_id).maybeSingle();
+    if (eAn) throw eAn;
+    libelleAnnee = an?.libelle;
+  }
 
-  const expire_le = finAnneeScolaire(classes[0].ar_annees?.libelle);
+  const expire_le = finAnneeScolaire(libelleAnnee);
   if (!expire_le) throw new ErreurLien(400, "Impossible de déterminer la fin de l'année scolaire de cette classe.");
   if (expire_le < now.toISOString().slice(0, 10)) throw new ErreurLien(400, 'Cette année scolaire est terminée : aucun lien ne peut être créé.');
 
   const { data: lien, error: eIns } = await db.from('ar_liens').insert({
     token_hash: hasherSecret(secret),
-    ecole_id: classes[0].ecole_id,
-    annee_id: classes[0].annee_id,
+    ecole_id: ref.ecole_id,
+    annee_id: ref.annee_id,
     destinataire,
     mode,
     nom_groupe: mode === 'sommaire' ? null : (nomGroupe || null),
@@ -45,10 +70,19 @@ export async function creerLien(db, { userId, classeIds, destinataire, nomGroupe
   }).select('id, numero').single();
   if (eIns) throw eIns;
 
-  const { error: eCl } = await db.from('ar_liens_classes').insert(ids.map((classe_id) => ({ lien_id: lien.id, classe_id })));
-  if (eCl) {
-    await db.from('ar_liens').delete().eq('id', lien.id); // pas de lien orphelin sans classes
-    throw eCl;
+  if (ids.length > 0) {
+    const { error: eCl } = await db.from('ar_liens_classes').insert(ids.map((classe_id) => ({ lien_id: lien.id, classe_id })));
+    if (eCl) {
+      await db.from('ar_liens').delete().eq('id', lien.id); // pas de lien orphelin sans classes
+      throw eCl;
+    }
+  }
+  if (fgIds.length > 0) {
+    const { error: eFg } = await db.from('ar_liens_fiches_groupees').insert(fgIds.map((fiche_groupee_id) => ({ lien_id: lien.id, fiche_groupee_id })));
+    if (eFg) {
+      await db.from('ar_liens').delete().eq('id', lien.id);
+      throw eFg;
+    }
   }
   return { id: lien.id, expire_le, numero: lien.numero };
 }
@@ -61,8 +95,16 @@ async function classesDuLien(db, lienId) {
   return (data ?? []).map((r) => r.classe_id);
 }
 
+/** Ids des fiches groupées d'un sommaire (toujours vide pour un lien « fusion »). */
+export async function fichesGroupeesDuLien(db, lienId) {
+  const { data, error } = await db.from('ar_liens_fiches_groupees').select('fiche_groupee_id').eq('lien_id', lienId);
+  if (error) throw error;
+  return (data ?? []).map((r) => r.fiche_groupee_id);
+}
+
 async function enrichir(db, lien) {
-  return { ...lien, classeIds: await classesDuLien(db, lien.id) };
+  const classeIds = await classesDuLien(db, lien.id);
+  return { ...lien, classeIds, ficheGroupeeIds: lien.mode === 'sommaire' ? await fichesGroupeesDuLien(db, lien.id) : [] };
 }
 
 /** Retrouve un lien par son secret en clair (hash calculé ici). null si inconnu. */
@@ -122,8 +164,11 @@ export async function revoquerLien(db, lienId, userId) {
  * Remplace les classes d'un lien (fonction SQL atomique). Les erreurs métier (P0001) deviennent des
  * ErreurLien 400 au message français ; toute autre erreur est relancée.
  */
-export async function definirClasses(db, lienId, classeIds) {
-  const { error } = await db.rpc('ar_lien_definir_classes', { p_lien: lienId, p_classes: classeIds });
+export async function definirClasses(db, lienId, classeIds, ficheGroupeeIds) {
+  // ficheGroupeeIds absent : on ne touche qu'aux classes (fonction historique). Présent : classes ET fiches groupées.
+  const { error } = ficheGroupeeIds === undefined
+    ? await db.rpc('ar_lien_definir_classes', { p_lien: lienId, p_classes: classeIds })
+    : await db.rpc('ar_lien_definir_contenu', { p_lien: lienId, p_classes: classeIds, p_fiches_groupees: ficheGroupeeIds });
   if (error) {
     if (error.code === 'P0001') throw new ErreurLien(400, error.message);
     throw error;
@@ -141,9 +186,35 @@ export async function chargerSommaire(db, lien) {
     if (error) throw error;
     classes = trierClasses(data ?? []);
   }
+  const fgIds = lien.ficheGroupeeIds ?? await fichesGroupeesDuLien(db, lien.id);
+  let fichesGroupees = [];
+  if (fgIds.length > 0) {
+    const { data: fgs, error: eFg } = await db.from('ar_fiches_groupees').select('id, nom').in('id', fgIds);
+    if (eFg) throw eFg;
+    const { data: liaisons, error: eL } = await db.from('ar_fiches_groupees_classes').select('fiche_groupee_id, classe_id').in('fiche_groupee_id', fgIds);
+    if (eL) throw eL;
+    const idsClasses = [...new Set((liaisons ?? []).map((l) => l.classe_id))];
+    const { data: nomsCl, error: eC } = idsClasses.length ? await db.from('ar_classes').select('id, nom').in('id', idsClasses) : { data: [], error: null };
+    if (eC) throw eC;
+    const nomClasse = new Map((nomsCl ?? []).map((c) => [c.id, c.nom]));
+    fichesGroupees = (fgs ?? [])
+      .map((f) => ({ id: f.id, nom: f.nom, classes: (liaisons ?? []).filter((l) => l.fiche_groupee_id === f.id).map((l) => nomClasse.get(l.classe_id)).filter(Boolean).sort() }))
+      .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  }
   return {
     numero: lien.numero,
     ecole: { nom: ecole?.nom ?? '', implantation: ecole?.implantation ?? null, implantation_nom: ecole?.implantation_nom ?? null },
     classes,
+    fichesGroupees,
   };
+}
+
+/** Une fiche groupée vue par un sommaire : nom et ids de ses classes (client service role). */
+export async function chargerFicheGroupee(db, ficheGroupeeId) {
+  const { data: fg, error } = await db.from('ar_fiches_groupees').select('id, nom, ecole_id, annee_id').eq('id', ficheGroupeeId).maybeSingle();
+  if (error) throw error;
+  if (!fg) return null;
+  const { data: liaisons, error: eL } = await db.from('ar_fiches_groupees_classes').select('classe_id').eq('fiche_groupee_id', ficheGroupeeId);
+  if (eL) throw eL;
+  return { id: fg.id, nom: fg.nom, ecole_id: fg.ecole_id, annee_id: fg.annee_id, classeIds: (liaisons ?? []).map((l) => l.classe_id) };
 }

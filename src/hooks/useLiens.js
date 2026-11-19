@@ -27,7 +27,7 @@ export function useRevoquerLien() {
 }
 
 /**
- * Toutes les classes d'un lien ({ lien_id, classe_ids }), lues par le serveur (mêmes contrôles d'accès que la
+ * Toutes les classes et fiches groupées d'un lien ({ lien_id, classe_ids, fiche_groupee_ids }), lues par le serveur (mêmes contrôles d'accès que la
  * modification). Source de référence du dialogue « Modifier les classes » : la liste globale peut être tronquée.
  * gcTime 0 : chaque ouverture du dialogue relit la base ; pas de relecture en arrière-plan pendant qu'il est ouvert.
  */
@@ -51,9 +51,11 @@ export function useClassesDuLien(lienId) {
 export function useDefinirClasses() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ lienId, classeIds, classeIdsAvant }) => apiLiens({
+    mutationFn: ({ lienId, classeIds, classeIdsAvant, ficheGroupeeIds, ficheGroupeeIdsAvant }) => apiLiens({
       action: 'definir_classes', lien_id: lienId, classe_ids: classeIds,
       ...(classeIdsAvant ? { classe_ids_avant: classeIdsAvant } : {}),
+      ...(ficheGroupeeIds ? { fiche_groupee_ids: ficheGroupeeIds } : {}),
+      ...(ficheGroupeeIds && ficheGroupeeIdsAvant ? { fiche_groupee_ids_avant: ficheGroupeeIdsAvant } : {}),
     }),
     onSuccess: (_r, { lienId }) => {
       qc.invalidateQueries({ queryKey: ['liens'] });
