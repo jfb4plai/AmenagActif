@@ -58,10 +58,11 @@ export async function destinataires(db, roles) {
   const { data: profils, error } = await db.from('ar_profils_acces').select('user_id, role').in('role', roles);
   if (error) throw error;
   const trouves = [];
+  let sansAdresse = 0;
   for (let i = 0; i < (profils ?? []).length; i += PARALLELE) {
     const lot = profils.slice(i, i + PARALLELE);
     const reponses = await Promise.all(lot.map((p) => db.auth.admin.getUserById(p.user_id)));
-    reponses.forEach((r, k) => { const mail = r.data?.user?.email?.trim().toLowerCase(); if (mail) trouves.push({ mail, role: lot[k].role }); });
+    reponses.forEach((r, k) => { const mail = r.data?.user?.email?.trim().toLowerCase(); if (mail) trouves.push({ mail, role: lot[k].role }); else sansAdresse += 1; });
   }
   const vus = new Set();
   const adresses = [];
@@ -72,7 +73,7 @@ export async function destinataires(db, roles) {
     adresses.push(t.mail);
     parRole[t.role] = (parRole[t.role] ?? 0) + 1;
   }
-  return { adresses, parRole };
+  return { adresses, parRole, sansAdresse };
 }
 
 /** Nombre de comptes par rôle (sans lire d'adresse) : pour afficher les effectifs avant l'envoi. */
@@ -87,20 +88,25 @@ export async function effectifs(db) {
 async function envoyerParLots(adresses, sujet, html, envoyer) {
   let ok = 0;
   let ko = 0;
+  const detail = []; // { adresse, ok } dans l'ordre d'envoi
   for (let i = 0; i < adresses.length; i += PARALLELE) {
-    const resultats = await Promise.allSettled(adresses.slice(i, i + PARALLELE).map((to) => envoyer({ to, subject: sujet, html })));
-    for (const r of resultats) {
+    const lot = adresses.slice(i, i + PARALLELE);
+    const resultats = await Promise.allSettled(lot.map((to) => envoyer({ to, subject: sujet, html })));
+    resultats.forEach((r, k) => {
       if (r.status === 'fulfilled') ok += 1;
       else { ko += 1; console.error('annonces : envoi échoué', r.reason?.status ?? ''); }
-    }
+      detail.push({ adresse: lot[k], ok: r.status === 'fulfilled' });
+    });
   }
-  return { ok, ko };
+  return { ok, ko, detail };
 }
 
 /**
  * mode 'test' : exemplaire à TOUS les administrateurs (objet préfixé [TEST], bandeau), rien n'est journalisé.
  * mode 'envoyer' : envoi réel aux rôles choisis, journalisé ; refusé si le même message est parti il y a moins de 10 minutes.
- * @returns {Promise<{ envoyes: number, echecs: number, parRole: object }>}
+ * Pour 'test', la réponse porte aussi `detail` (une ligne par administrateur : adresse, accepté ou non par Brevo) et
+ * `sansAdresse` (administrateurs dont le compte n'a pas d'adresse lisible). Jamais pour l'envoi réel : aucune adresse n'est renvoyée.
+ * @returns {Promise<{ envoyes: number, echecs: number, parRole: object, detail?: Array, sansAdresse?: number }>}
  */
 export async function envoyerAnnonce(db, { mode, sujet, corps, roles, userId }, envoyer = envoyerEmail, now = new Date()) {
   const v = validerAnnonce({ sujet, corps, roles });
@@ -108,11 +114,11 @@ export async function envoyerAnnonce(db, { mode, sujet, corps, roles, userId }, 
 
   if (mode === 'test') {
     const reels = await destinataires(db, v.roles);
-    const { adresses, parRole } = await destinataires(db, ['admin']);
+    const { adresses, parRole, sansAdresse } = await destinataires(db, ['admin']);
     if (adresses.length === 0) throw new ErreurAnnonce(400, 'Aucun administrateur joignable.');
     const banniere = `<p style="background:#fff3e6;border:1px solid #f97316;padding:8px"><strong>Exemplaire de test.</strong> Le message réel partira à ${reels.adresses.length} personne${reels.adresses.length > 1 ? 's' : ''} après votre envoi.</p>`;
-    const { ok, ko } = await envoyerParLots(adresses, `[TEST] ${v.sujet}`, habiller(corpsHtml, banniere), envoyer);
-    return { envoyes: ok, echecs: ko, parRole };
+    const { ok, ko, detail } = await envoyerParLots(adresses, `[TEST] ${v.sujet}`, habiller(corpsHtml, banniere), envoyer);
+    return { envoyes: ok, echecs: ko, parRole, detail, sansAdresse };
   }
 
   if (mode !== 'envoyer') throw new ErreurAnnonce(400, 'Action inconnue.');

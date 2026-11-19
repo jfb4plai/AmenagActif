@@ -131,3 +131,22 @@ describe('envoyerAnnonce', () => {
     expect(e2.statut).toBe(400);
   });
 });
+
+describe('test : détail par administrateur', () => {
+  it('renvoie une ligne par admin (adresse, accepté ou non) et compte les admins sans adresse ; l\'envoi réel ne renvoie aucune adresse', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const db = faux({
+      profils: [{ user_id: 'a1', role: 'admin' }, { user_id: 'a2', role: 'admin' }, { user_id: 'a3', role: 'admin' }, { user_id: 'r1', role: 'referent_plai' }],
+      emails: { a1: 'jf@x.be', a2: 'helene@x.be', r1: 'r1@x.be' }, // a3 : aucune adresse lisible
+    });
+    const envoyer = vi.fn().mockImplementation(async ({ to }) => { if (to === 'helene@x.be') throw Object.assign(new Error('x'), { status: 400 }); });
+    const t = await envoyerAnnonce(db, { ...base, mode: 'test' }, envoyer, NOW);
+    expect(t.envoyes).toBe(1);
+    expect(t.echecs).toBe(1);
+    expect(t.sansAdresse).toBe(1);
+    expect([...t.detail].sort((x, y) => x.adresse.localeCompare(y.adresse))).toEqual([{ adresse: 'helene@x.be', ok: false }, { adresse: 'jf@x.be', ok: true }]);
+    const r = await envoyerAnnonce(db, { ...base, mode: 'envoyer' }, vi.fn().mockResolvedValue(), NOW);
+    expect(r.detail).toBeUndefined();
+    expect(JSON.stringify(r)).not.toContain('@');
+  });
+});

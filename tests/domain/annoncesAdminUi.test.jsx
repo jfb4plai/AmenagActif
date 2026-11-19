@@ -80,3 +80,30 @@ describe('AnnoncesAdmin', () => {
     expect(await screen.findByText('Ce message vient déjà de partir.')).toBeTruthy();
   });
 });
+
+describe('AnnoncesAdmin : détail du test', () => {
+  it('liste les administrateurs visés, accepté ou refusé, et signale les comptes sans adresse', async () => {
+    etat.data = donnees();
+    etat.mutateAsync.mockResolvedValue({
+      envoyes: 1, echecs: 1, sansAdresse: 1,
+      detail: [{ adresse: 'jf@x.be', ok: true }, { adresse: 'helene@x.be', ok: false }],
+    });
+    render(<AnnoncesAdmin />);
+    remplir();
+    fireEvent.click(screen.getByRole('button', { name: /exemplaire de test/ }));
+    expect(await screen.findByText(/jf@x\.be : accepté par Brevo/)).toBeTruthy();
+    expect(screen.getByText('helene@x.be : refusé, non envoyé')).toBeTruthy();
+    expect(screen.getByText(/1 compte administrateur sans adresse lisible : non joint\./)).toBeTruthy();
+  });
+
+  it('envoi réel : aucune liste d\'adresses affichée', async () => {
+    etat.data = donnees();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    etat.mutateAsync.mockResolvedValue({ envoyes: 14, echecs: 0 });
+    render(<AnnoncesAdmin />);
+    remplir();
+    fireEvent.click(screen.getByRole('button', { name: 'Envoyer à 14 comptes' }));
+    await screen.findByText('Message envoyé à 14 personnes.');
+    expect(screen.queryByText(/Administrateurs visés/)).toBeNull();
+  });
+});

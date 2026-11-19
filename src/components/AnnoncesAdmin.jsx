@@ -24,7 +24,7 @@ export default function AnnoncesAdmin() {
   const [sujet, setSujet] = useState('');
   const [corps, setCorps] = useState('');
   const [roles, setRoles] = useState(new Set(ROLES.map(([r]) => r)));
-  const [retour, setRetour] = useState(null); // { type: 'ok'|'erreur', texte }
+  const [retour, setRetour] = useState(null); // { type: 'ok'|'erreur', texte, detail?, sansAdresse? }
 
   const effectifs = data?.effectifs ?? {};
   const nbCibles = ROLES.filter(([r]) => roles.has(r)).reduce((n, [r]) => n + (effectifs[r] ?? 0), 0);
@@ -39,6 +39,8 @@ export default function AnnoncesAdmin() {
       const r = await envoi.mutateAsync({ action, sujet, corps, roles: [...roles] });
       setRetour({
         type: r.echecs > 0 ? 'erreur' : 'ok',
+        detail: action === 'test' ? r.detail : undefined,
+        sansAdresse: action === 'test' ? r.sansAdresse : undefined,
         texte: action === 'test'
           ? `Exemplaire de test envoyé à ${r.envoyes} administrateur${r.envoyes > 1 ? 's' : ''}${r.echecs ? ` (${r.echecs} échec${r.echecs > 1 ? 's' : ''})` : ''}. Vérifiez votre boîte de réception, puis les indésirables.`
           : `Message envoyé à ${r.envoyes} personne${r.envoyes > 1 ? 's' : ''}${r.echecs ? `, ${r.echecs} échec${r.echecs > 1 ? 's' : ''} : ces personnes n'ont pas reçu le message` : ''}.`,
@@ -124,6 +126,20 @@ export default function AnnoncesAdmin() {
       </p>
       <div role="status" aria-live="polite">
         {retour && <p className={retour.type === 'ok' ? 'plai-success' : 'plai-error'} style={{ fontSize: 16 }}>{retour.texte}</p>}
+        {retour?.detail && (
+          <div style={{ fontSize: 16 }}>
+            <p className="font-medium">Administrateurs visés par le test :</p>
+            <ul className="list-disc pl-5">
+              {retour.detail.map((d) => (
+                <li key={d.adresse}>{d.adresse} : {d.ok ? 'accepté par Brevo (à vérifier dans la boîte de réception et les indésirables)' : 'refusé, non envoyé'}</li>
+              ))}
+            </ul>
+            {retour.sansAdresse > 0 && (
+              <p className="plai-error">{retour.sansAdresse} compte{retour.sansAdresse > 1 ? 's' : ''} administrateur{retour.sansAdresse > 1 ? 's' : ''} sans adresse lisible : non joint{retour.sansAdresse > 1 ? 's' : ''}.</p>
+            )}
+            <p className="text-[color:var(--text2)]">« Accepté » signifie que Brevo a pris le message en charge ; la remise dans la boîte de la personne se vérifie dans Brevo, Transactional, Logs. Un administrateur absent de cette liste n'est pas dans Membres avec le rôle Administrateur, ou partage l'adresse d'un autre.</p>
+          </div>
+        )}
       </div>
 
       <h3 className="font-medium">Messages déjà envoyés</h3>
