@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useCatalogueAdmin, useCatalogueMutations } from '../hooks/useAdmin.js';
 
 const FOCUS = 'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f97316]';
@@ -99,9 +98,8 @@ export default function TransmissionProfil() {
   const basculeChapitre = (id) => setOuverts((o) => { const n = new Set(o); if (n.has(id)) n.delete(id); else n.add(id); return n; });
 
   return (
-    <div className="plai-section space-y-4 max-w-4xl px-4 text-base">
-      <p><Link className="underline text-teal" to="/administration">Retour à l'Administration</Link></p>
-      <h1 className="text-xl font-semibold">Transmission aux autres apps</h1>
+    <div className="space-y-4 text-base">
+      <h2 className="text-xl font-semibold">Transmission aux autres apps</h2>
 
       <p>
         <strong>Transmettre</strong> un aménagement, c'est l'inclure dans le profil d'une classe que AménagActif envoie aux autres apps PLAI

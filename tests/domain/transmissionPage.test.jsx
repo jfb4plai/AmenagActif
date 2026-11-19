@@ -27,6 +27,13 @@ const { default: TransmissionProfil } = await import('../../src/pages/Transmissi
 const rendu = () => render(<MemoryRouter><TransmissionProfil /></MemoryRouter>);
 
 describe('écran Transmission aux autres apps', () => {
+  it('titre en h2 (le h1 est dans la mise en page), plus de lien de retour vers l\'Administration', () => {
+    rendu();
+    expect(screen.getByRole('heading', { level: 2, name: 'Transmission aux autres apps' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull();
+    expect(screen.queryByText(/Retour à l'Administration/)).toBeNull();
+  });
+
   it('compteur en toutes lettres et explication en tête', () => {
     rendu();
     expect(screen.getByTestId('compteur').textContent).toBe('1 transmis, 2 non transmis');

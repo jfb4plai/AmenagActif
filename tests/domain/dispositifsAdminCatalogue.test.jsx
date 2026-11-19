@@ -29,7 +29,7 @@ vi.mock('../../src/hooks/useMembres.js', () => ({
 }));
 vi.mock('../../src/lib/auth.jsx', () => ({ useAuth: () => ({ session: null }) }));
 
-import Administration from '../../src/pages/Administration.jsx';
+import CatalogueTab from '../../src/pages/administration/CatalogueTab.jsx';
 import CatalogueAmenagements from '../../src/pages/CatalogueAmenagements.jsx';
 
 const chapitres = [
@@ -85,7 +85,7 @@ describe('Administration : catalogue et dispositifs', () => {
     h.usage = undefined;
   });
 
-  const rendre = () => render(<MemoryRouter><Administration /></MemoryRouter>);
+  const rendre = () => render(<MemoryRouter><CatalogueTab /></MemoryRouter>);
 
   const usageUtilise = { vide: false, nbEleves: 1, nbClassesAU: 0, nbEcoles: 1, ecoles: [{ ecoleId: 'e1', ecole: 'Pitteurs', referents: [], classes: [{ annee: '2026-2027', classe: '5LA', au: [], eleves: [{ nom: 'Emilie D.', libelles: ['x'] }] }] }] };
 
@@ -240,7 +240,7 @@ describe('Administration : où un aménagement est utilisé', () => {
   afterEach(() => { h.usage = undefined; });
 
   it('ouvre une fenêtre avec implantation, référents, classe et élèves ; Fermer la ferme', () => {
-    render(<MemoryRouter><Administration /></MemoryRouter>);
+    render(<MemoryRouter><CatalogueTab /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: /Consignes/ }));
     fireEvent.click(screen.getAllByRole('button', { name: "Voir où c'est utilisé" })[0]);
     const fenetre = screen.getByRole('dialog');
@@ -254,7 +254,7 @@ describe('Administration : où un aménagement est utilisé', () => {
 
   it('jamais utilisé : message explicite', () => {
     h.usage = { vide: true, ecoles: [], nbEleves: 0, nbClassesAU: 0, nbEcoles: 0 };
-    render(<MemoryRouter><Administration /></MemoryRouter>);
+    render(<MemoryRouter><CatalogueTab /></MemoryRouter>);
     fireEvent.click(screen.getAllByRole('button', { name: "Voir où c'est utilisé" })[0]);
     expect(screen.getByText(/Jamais coché/)).toBeTruthy();
   });
