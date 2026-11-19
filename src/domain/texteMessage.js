@@ -80,9 +80,12 @@ function bornesLignes(texte, debut, fin) {
   return { d, f: finLigne === -1 ? texte.length : finLigne };
 }
 
-/** Intertitre : la ligne courante devient un paragraphe à elle seule, précédée de « ## » ; recliquer retire le « ## ». */
-export function appliquerTitre(texte, debut, fin) {
-  const { d, f } = bornesLignes(texte, debut, fin);
+/**
+ * Intertitre : la ligne courante devient un paragraphe à elle seule, précédée de « ## » ; recliquer retire le « ## ».
+ * Un seul titre à la fois : si la sélection couvre plusieurs lignes, seule la PREMIÈRE ligne devient un titre.
+ */
+export function appliquerTitre(texte, debut) {
+  const { d, f } = bornesLignes(texte, debut, debut);
   const ligne = texte.slice(d, f);
   const avant = texte.slice(0, d);
   const apres = texte.slice(f);

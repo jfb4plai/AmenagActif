@@ -121,6 +121,7 @@ export default function AnnoncesAdmin() {
               {nom}
             </button>
           ))}
+          <span className="self-center text-[color:var(--text2)]" style={{ fontSize: 16 }}>Titre : une seule ligne à la fois.</span>
         </div>
         <textarea
           ref={zone} id={`${id}-corps`} className="plai-input w-full lg:col-start-1 lg:row-start-3 lg:h-[22rem]" style={{ fontSize: 16, minHeight: 280 }} value={corps} maxLength={MAX_CORPS}
@@ -128,7 +129,7 @@ export default function AnnoncesAdmin() {
           placeholder={'Bonjour,\n\n## Ce qui change\n\n- Première information\n- Deuxième information\n\nUne question : jeanfrancois.beguin@ens.ecl.be'}
         />
         <p id={`${id}-corps-aide`} className="mt-1 text-[color:var(--text2)] lg:col-start-1 lg:row-start-4" style={{ fontSize: 16 }}>
-          Écrivez simplement : une ligne vide sépare les paragraphes. Pour une mise en forme, sélectionnez du texte puis cliquez sur Gras, Titre, Puce ou Lien ;
+          Écrivez simplement : une ligne vide sépare les paragraphes. Pour une mise en forme, sélectionnez du texte puis cliquez sur Gras, Titre, Puce ou Lien (un seul titre à la fois : placez le curseur sur la ligne voulue ; si vous sélectionnez plusieurs lignes, seule la première devient un titre) ;
           l'aperçu à côté (ou en dessous sur un écran étroit) montre le résultat tel qu'il sera lu. Une adresse commençant par https:// devient cliquable d'elle-même.
           Ajoutez ce que vous seul savez (une école, une date, une consigne) : un message générique est ignoré. {corps.length}/{MAX_CORPS} caractères.
         </p>

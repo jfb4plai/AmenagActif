@@ -101,3 +101,13 @@ describe('puces et intertitres sans ligne vide autour', () => {
     expect(texteVersHtml('Avant\n## Titre\nAprès')).toBe('<p>Avant</p>\n<h3>Titre</h3>\n<p>Après</p>');
   });
 });
+
+describe('Titre : un seul titre à la fois', () => {
+  it('sélection sur plusieurs lignes : seule la première ligne devient un titre, le reste est inchangé', () => {
+    const t = 'Bonjour,\n\nPremière idée\nDeuxième idée\nTroisième idée';
+    const r = appliquerTitre(t, 10, t.length); // du début de « Première idée » à la fin du texte
+    expect(r.texte).toBe('Bonjour,\n\n## Première idée\n\nDeuxième idée\nTroisième idée');
+    expect(sel(r)).toBe('Première idée');
+    expect(texteVersHtml(r.texte)).toContain('<h3>Première idée</h3>');
+  });
+});
